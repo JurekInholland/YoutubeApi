@@ -1,0 +1,10 @@
+﻿version: "3.9"
+services:
+  youtube_app:
+    build:
+      context: .
+      dockerfile: App/Dockerfile
+    container_name: youtube_app
+    restart: always
+    ports:
+      - "8080:8080"
