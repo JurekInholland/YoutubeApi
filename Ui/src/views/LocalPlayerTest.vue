@@ -25,5 +25,5 @@ const toggle = () => {
     <h1>vidtest</h1>
     <VideoPlayer color="red" src="./vid.webm" />
     <PlayPauseButton :isPaused="playState" @click="toggle" />
-    <!-- <MorphButton :default="playBtnPath" morphed="" @click="togglePlay" /> -->
+    <!-- <MorphButton :path="playBtnPath" @click="togglePlay" /> -->
 </template>

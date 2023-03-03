@@ -4,15 +4,15 @@ import TopBar from './components/TopBar.vue';
 </script>
 
 <template>
-  <!-- <TopBar /> -->
+  <TopBar />
 
-  <!-- <div class="wrapper">
+  <div class="wrapper">
 
     <nav>
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/about">About</RouterLink>
     </nav>
-  </div> -->
+  </div>
 
   <RouterView />
 </template>
