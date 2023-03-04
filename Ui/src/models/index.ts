@@ -17,8 +17,10 @@ const playerOptions: IPlayerOptions = {
 
 export interface IPlayerState {
   isPlaying: boolean
-  volume: number
+  volume: string
   currentTime: number
   duration: number
-  isFullscreen: boolean
+  isFullscreen: boolean,
+  storedVolume: number,
+  settings: boolean
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import gsap from 'gsap'
 
 const props = defineProps({
@@ -27,9 +27,7 @@ watch(() => props.path, (newVal: any) => {
 </script>
 
 <template>
-    <button class="ytp-play-button ytp-button" aria-keyshortcuts="k" data-title-no-tooltip="Play"
-        aria-label="Play keyboard shortcut k" title="Play (k)"><svg height="100%" version="1.1" viewBox="0 0 36 36"
-            width="100%">
+    <button aria-keyshortcuts="k" title="Play (k)"><svg height="100%" version="1.1" viewBox="0 0 36 36" >
             <use class="ytp-svg-shadow" xlink:href="#ytp-id-98"></use>
             <path class="ytp-svg-fill" :d="pathStr" id="ytp-id-98">
             </path>
@@ -38,7 +36,10 @@ watch(() => props.path, (newVal: any) => {
 </template>
 
 <style scoped>
-body {
+/* body {
     background-color: #333;
+} */
+svg {
+    fill: white;
 }
 </style>

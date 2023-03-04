@@ -14,10 +14,13 @@ public class YoutubeService : IYoutubeService
 
     private readonly string _youtubeDlPath;
 
+    private string DownloadCommand => $@"{_youtubeDlPath} -j -N 5 --buffer-size 16k --write-subs --add-chapters --simulate";
+    private string OutputFormat => $@"--output $(id) $(title) $(ext)";
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
+        WriteIndented = true,
         PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        // PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
@@ -49,7 +52,10 @@ public class YoutubeService : IYoutubeService
 
     public async Task<bool> DownloadVideo(string id)
     {
-        throw new NotImplementedException();
+        if (!await IsValidId(id)) return false;
+        var cmd = $@"{_youtubeDlPath} -j {id}";
+        var res = await CliCommand.CallCommand(cmd);
+        return true;
     }
 
     public async Task<YoutubeVideo?> GetVideoInfo(string id)
@@ -61,6 +67,16 @@ public class YoutubeService : IYoutubeService
         var video = JsonSerializer.Deserialize<YoutubeVideo>(res, _serializerOptions);
         return video;
     }
+
+    public async Task<dynamic?> GetFullInfo(string id)
+    {
+        if (!await IsValidId(id)) throw new InvalidDataException("Invalid videoId");
+        var cmd = $@"{_youtubeDlPath} -j {id}";
+        var res = await CliCommand.CallCommand(cmd);
+        dynamic? json = JsonSerializer.Deserialize<dynamic>(res, _serializerOptions);
+        return json;
+    }
+
 
     public async Task<string> GetChannelInfo(string id)
     {

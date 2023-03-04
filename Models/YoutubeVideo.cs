@@ -1,4 +1,6 @@
-﻿namespace Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Models;
 
 public class YoutubeVideo : BaseEntity
 {
@@ -6,6 +8,8 @@ public class YoutubeVideo : BaseEntity
     public string Thumbnail { get; set; } = "";
     public string Description { get; set; } = "";
     public string Uploader { get; set; } = "";
+
+    [JsonPropertyName("uploader_id")]
     public string UploaderId { get; set; } = "";
     public int Duration { get; set; }
     public string DurationString { get; set; } = "";
@@ -17,7 +21,9 @@ public class YoutubeVideo : BaseEntity
     public int Width { get; set; }
     public int Height { get; set; }
     public int Fps { get; set; }
-    public int FileSizeApprox { get; set; }
+
+    [JsonPropertyName("filesize_approx")]
+    public int FileSize { get; set; }
     public float Vbr { get; set; }
     public float Abr { get; set; }
 }

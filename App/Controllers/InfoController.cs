@@ -17,6 +17,17 @@ public class InfoController : BaseController
         _youtubeService = youtubeService;
     }
 
+
+    /// <summary>
+    /// Check if a youtube video id is valid
+    /// </summary>
+    [HttpGet(nameof(CheckId))]
+    public async Task<IActionResult> CheckId(string id)
+    {
+        var valid = await _youtubeService.IsValidId(id);
+        return Ok(valid ? "Valid" : "Invalid");
+    }
+
     /// <summary>
     /// Get json info of a youtube video
     /// </summary>
@@ -34,6 +45,18 @@ public class InfoController : BaseController
         // var videoInfo = await YoutubeDownloader.GetVideoInfo(videoId);
         return Ok(info);
     }
+
+
+    /// <summary>
+    /// Get full yt-dlp json info of a youtube video
+    /// </summary>
+    [HttpGet(nameof(GetFullInfo))]
+    public async Task<IActionResult> GetFullInfo(string videoId)
+    {
+        var info = await _youtubeService.GetFullInfo(videoId);
+        return Ok(info);
+    }
+
 
     /// <summary>
     /// Ping pong
