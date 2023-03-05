@@ -1,9 +1,9 @@
 using System.Reflection;
 using App;
-using App.Middleware;
 using Microsoft.OpenApi.Models;
 using Models;
 using Services.DownloadService;
+using Services.YoutubeApiService;
 using Services.YoutubeService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,8 +35,8 @@ builder.Services.Configure<AppConfig>(cfg =>
     cfg.YoutubeApiKey = builder.Configuration.GetValue<string>("YoutubeApiKey") ?? string.Empty;
 });
 
-
 builder.Services.AddTransient<IYoutubeService, YoutubeService>();
+builder.Services.AddTransient<IYoutubeApiService, YoutubeApiService>();
 builder.Services.AddTransient<IDownloadService, DownloadService>();
 
 builder.Services.AddHttpClient();

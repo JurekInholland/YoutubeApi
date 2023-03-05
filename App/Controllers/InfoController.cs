@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Services.YoutubeApiService;
 using Services.YoutubeService;
 
 namespace App.Controllers;
@@ -10,11 +11,13 @@ public class InfoController : BaseController
 {
     private readonly ILogger<InfoController> _logger;
     private readonly IYoutubeService _youtubeService;
+    private readonly IYoutubeApiService _youtubeApiService;
 
-    public InfoController(ILogger<InfoController> logger, IYoutubeService youtubeService)
+    public InfoController(ILogger<InfoController> logger, IYoutubeService youtubeService, IYoutubeApiService youtubeApiService)
     {
         _logger = logger;
         _youtubeService = youtubeService;
+        _youtubeApiService = youtubeApiService;
     }
 
 
@@ -65,5 +68,15 @@ public class InfoController : BaseController
     public IActionResult GetPing()
     {
         return Ok("pong");
+    }
+
+    /// <summary>
+    /// Use youtube api to get related videos
+    /// </summary>
+    [HttpGet(nameof(GetRelatedYoutubeVideos))]
+    public async Task<IActionResult> GetRelatedYoutubeVideos(string videoId)
+    {
+        var related = await _youtubeApiService.GetRelatedVideos(videoId);
+        return Ok(related);
     }
 }

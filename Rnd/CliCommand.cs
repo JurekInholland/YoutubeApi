@@ -66,10 +66,24 @@ public class CliCommand
         process.Start();
         // process.BeginOutputReadLine();
         string output = await process.StandardOutput.ReadToEndAsync();
+
         await process.WaitForExitAsync();
+
+        if (process.ExitCode != 0)
+        {
+            throw new CliException($"Command failed with exit code {process.ExitCode} - {await process.StandardError.ReadToEndAsync()}");
+        }
+
         return output;
         // Console.WriteLine(Directory.GetCurrentDirectory());
         // Console.WriteLine(process.StandardOutput.ReadToEnd());
         // Console.WriteLine(process.StandardError.ReadToEnd());
+    }
+}
+
+public class CliException : Exception
+{
+    public CliException(string s) : base(s)
+    {
     }
 }

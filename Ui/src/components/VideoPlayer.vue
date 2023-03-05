@@ -24,13 +24,21 @@ const playerState: Ref<IPlayerState> = ref<IPlayerState>({
     settings: false
 });
 
-const paused = ref(true);
+// const paused = ref(true);
 
 const previewPos = ref(0);
+
+const startTime: Ref<number | undefined> = ref(0);
+const startDate: Ref<number> = ref(0);
+const animationId = ref(0);
+
 
 const video = ref<HTMLVideoElement>();
 const video_container = ref<HTMLDivElement>();
 const timeline_container = ref<HTMLDivElement>();
+const timeline = ref<HTMLDivElement>();
+
+const thumb = ref<HTMLDivElement>();
 // const settings = ref(false)
 
 const duration: Ref<number> = ref(0);
@@ -51,37 +59,71 @@ const volume = computed(() => {
     return video.value?.volume ? video.value.volume : 0;
 });
 
+const handleBuffer = (e: Event) => {
+    if (video.value == null) return;
+    // if (video.value.buffered.length == 0) return;
+    // console.log(video.value.buffered.length)
+    let duration = Math.round((video.value.buffered.end(0) / video.value.duration) * 100) + 1;
+    // console.log("handleBuffer", video.value.buffered.end(0), video.value.duration, duration, "buffered")
+    timeline_container.value?.style.setProperty('--buffered', duration.toString() + "%");
+
+}
+
 onMounted(() => {
     window.addEventListener('keyup', handleKeyUp);
     if (video.value != null) {
         video.value.volume = parseFloat(playerState.value.volume);
-        video.value.onplaying = () => {
-            console.log("playing")
+
+        // video.value.onplaying = () => {
+        //     console.log("playing")
+        // }
+        video.value.onplay = () => {
             playerState.value.isPlaying = true;
+            // console.log("play", this)
+            startTime.value = video.value?.currentTime
+            startDate.value = Date.now()
+            smoothUpdate();
+            // this.lastUpdate = Date.now();
         }
         video.value.onpause = () => {
+            console.log("onpause")
             playerState.value.isPlaying = false;
+            cancelAnimationFrame(animationId.value);
         }
-        video.value.onloadeddata = () => {
-            if (video.value?.duration)
-                playerState.value.duration = video.value.duration;
-        }
-        video.value.ontimeupdate = () => {
-            if (video.value?.currentTime)
-                playerState.value.currentTime = video.value.currentTime;
-        }
+        // video.value.onloadeddata = () => {
+        //     if (video.value?.duration)
+        //         playerState.value.duration = video.value.duration;
+        // }
+
+
         video.value.onfullscreenchange = () => {
             playerState.value.isFullscreen = document.fullscreenElement != null;
         }
-        video.value.onwaiting = () => {
-            console.log("waiting")
+        video.value.ontimeupdate = (e: Event) => {
+            handleBuffer(e)
+            if (!video.value?.currentTime) return
+            playerState.value.currentTime = video.value.currentTime;
+            const perecent = Math.round(video.value.currentTime / video.value.duration * 100000) / 1000;
+            timeline_container.value?.style.setProperty('--progress', perecent.toString() + "%");
         }
 
-        video.value.onstalled = (e: Event) => {
-            console.log("stalled")
+        video.value.onloadeddata = (e: Event) => {
+            console.log("onloadeddata", e)
+            console.log(video.value)
+            // handleBuffer(e)
+            // if (video.value?.currentTime) {
+            //     console.log("onloadeddata", e)
+
+            //     playerState.value.currentTime = video.value.currentTime;
+            //     const perecent = Math.round(video.value.currentTime / video.value.duration);
+            //     timeline_container.value?.style.setProperty('--progress', perecent.toString());
+            // }
+            if (video.value?.duration)
+                playerState.value.duration = video.value.duration;
         }
-        video.value.onplaying = (e: any) => {
-            console.log("playing", e)
+        video.value.onprogress = (e: any) => {
+            console.log("onprogress", e)
+            handleBuffer(e)
         }
         video.value.onvolumechange = (e) => {
             let target = e.target as HTMLVideoElement;
@@ -130,12 +172,12 @@ const onDoubleClick = (e: Event) => {
 
 const onPlayPause = (e: Event) => {
     console.log("e", e)
-    if (paused.value) {
+    if (!playerState.value.isPlaying) {
         video.value?.play();
     } else {
         video.value?.pause();
     }
-    paused.value = !paused.value;
+    playerState.value.isPlaying = !playerState.value.isPlaying;
 }
 
 const onVolumeChange = (e: Event) => {
@@ -161,31 +203,64 @@ const onMouseMove = (e: MouseEvent) => {
 const formatTime = (duration: number) => {
     return Math.floor(duration / 60) + ':' + ('0' + Math.floor(duration % 60)).slice(-2);
 }
+
+const progress = computed(() => {
+    const prog = (playerState.value.currentTime / playerState.value.duration) * 100;
+    console.log("progress", Math.round(prog * 100) / 100)
+    return Math.round(prog / 100) * 100;
+})
+
+const smoothUpdate = () => {
+    const elapsed = (Date.now() - startDate.value!) / 1000;
+    const currentTime = startTime.value! + elapsed;
+    // console.log("elapsed", elapsed, "currentTime", currentTime)
+    if (currentTime < playerState.value.duration) {
+        // playerState.value.currentTime = currentTime;
+        // startTime.value = Date.now();
+        // console.log("WIDTH", timeline.value!.getBoundingClientRect().width)
+        // console.log("elapsed:", elapsed, "total", playerState.value.duration, "current", currentTime)
+        // console.log("percent", (playerState.value.currentTime / playerState.value.duration))
+        const barWidth = timeline.value!.getBoundingClientRect().width * (currentTime / playerState.value.duration);
+        // const barPercent = Math.round(currentTime / playerState.value.duration * 100 * 100) / 100;
+        // console.log("smoothUpdate", barWidth)
+        if (!thumb.value) {
+            console.log("no thumb ref");
+            return;
+        }
+        // thumb.value.style.transform = `translateX(${barWidth}px)`;
+        timeline_container.value?.style.setProperty('--bar', barWidth.toString() + "px");
+
+        animationId.value = requestAnimationFrame(smoothUpdate);
+    }
+
+}
+
 </script>
 
 <template>
     <div ref="video_container" class="video-container"
-        :class="[paused ? 'paused' : '', playerState.settings ? 'settings' : '']" @dblclick.stop="onDoubleClick"
-        @click="onPlayPause">
+        :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '']"
+        @dblclick.stop="onDoubleClick" @click="onPlayPause">
         <div class="video-controls-container">
             <div ref="timeline_container" class="timeline-container" @mousemove="onMouseMove" @mousedown="">
-                <div class="timeline">
-                    <div class="thumb-indicator"></div>
+                <div ref="timeline" class="timeline">
+                    <div class="buffered"></div>
                 </div>
+                <div ref="thumb" class="thumb-indicator"></div>
             </div>
             <div class="controls">
                 <!-- <button class="play-pause-btn" @click.stop="onPlayPause">
-                                                                                                                        <Icon style="font-size: 1rem;" :icon="paused ? 'mdi:play' : 'mdi:pause'" />
-                                                                                                                    </button> -->
-                <PlayPauseButton @click.stop="onPlayPause" :is-paused="paused" />
+                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" :icon="paused ? 'mdi:play' : 'mdi:pause'" />
+                                                                                                                                                                                                                                                        </button> -->
+                <PlayPauseButton @click.stop="onPlayPause" :is-paused="!playerState.isPlaying" />
                 <SvgButton path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z" />
                 <!-- <button>
-                                                                                <Icon style="font-size: 1rem;" icon="mdi:skip-next" @click.stop="" />
-                                                                            </button> -->
+                                                                                                                                                                                                                    <Icon style="font-size: 1rem;" icon="mdi:skip-next" @click.stop="" />
+                                                                                                                                                                                                                </button> -->
                 <div class="volume-container">
                     <!-- <button>
-                                                                                                                                                                <Icon style="font-size: 1rem;" icon="mdi:volume-high" />
-                                                                                                                                                            </button> -->
+                                                                                                                                                                                                                                                                                                    <Icon style="font-size: 1rem;" icon="mdi:volume-high" />
+                                                                                                                                                                                                                                                                                                </button> -->
                     <!-- <div class="volume-input"> -->
                     <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="parseFloat(playerState.volume)" />
                     <input class="volume-input" @click.stop="" @input="onVolumeChange"
@@ -198,7 +273,7 @@ const formatTime = (duration: number) => {
 
 
                 <div class="duration-container">
-                    {{ formatTime(playerState.currentTime) }}/{{ formatTime(playerState.duration) }} •
+                    {{ formatTime(playerState.currentTime) }} / {{ formatTime(playerState.duration) }}
 
                 </div>
                 <SettingsButton :toggled="playerState.settings"
@@ -219,20 +294,20 @@ const formatTime = (duration: number) => {
                 </div>
 
                 <!-- <button>
-                                                                                                        <Icon @click.stop="onDoubleClick" style="font-size: 1rem;" icon="mdi:fullscreen" />
-                                                                                                    </button> -->
+                                                                                                                                                                                                                                            <Icon @click.stop="onDoubleClick" style="font-size: 1rem;" icon="mdi:fullscreen" />
+                                                                                                                                                                                                                                        </button> -->
                 <!-- <button>
-                                                                                        <Icon style="font-size: 1rem;" icon="mdi:settings" />
-                                                                                    </button>
-                                                                                    <button>
-                                                                                        <Icon style="font-size: 1rem;" icon="mdi:download" />
-                                                                                    </button>
-                                                                                    <button>
-                                                                                        <Icon style="font-size: 1rem;" icon="mdi:share" />
-                                                                                    </button>
-                                                                                    <button>
-                                                                                        <Icon style="font-size: 1rem;" icon="mdi:playlist-plus" />
-                                                                                    </button> -->
+                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:settings" />
+                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                        <button>
+                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:download" />
+                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                        <button>
+                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:share" />
+                                                                                                                                                                                                                        </button>
+                                                                                                                                                                                                                        <button>
+                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:playlist-plus" />
+                                                                                                                                                                                                                        </button> -->
 
             </div>
         </div>
@@ -242,14 +317,14 @@ const formatTime = (duration: number) => {
 
 
     <!-- <ExitFullscreenButton :is-hovered="settings" @click="settings = !settings" /> -->
-
+<!-- 
     <p>
         {{ playerState.currentTime }}<br />
         {{ playerState.duration }}<br />
         {{ playerState.isPlaying }}<br />
         {{ playerState.isFullscreen }}<br />
         {{ playerState.volume }}<br />
-    </p>
+    </p> -->
 </template>
 
 <style scoped>
@@ -259,7 +334,7 @@ const formatTime = (duration: number) => {
     box-sizing: border-box;
 }
 
-button::before {
+/* button::before {
     content: "";
     display: block;
     width: 12px;
@@ -267,15 +342,19 @@ button::before {
     top: 5px;
     bottom: 0;
     left: -12px;
-}
+} */
 
 .video-container {
     position: relative;
-    width: 90%;
-    max-width: 1280px;
+    /* width: 100%; */
+    
     display: flex;
     justify-content: center;
     margin-inline: auto;
+    /* margin: 0 24px; */
+    /* margin-left: 24px;
+    margin-right: 24px; */
+    /* padding-right: 24px; */
     background-color: black;
     overflow: hidden;
 }
@@ -373,7 +452,8 @@ button {
 }
 
 .duration-container {
-    font-size: 14px;
+    font-size: 13px;
+    color: rgb(211, 207, 201);
     display: flex;
     justify-content: center;
     /* align-items: center; */
@@ -394,6 +474,7 @@ input[type="range"] {
     background-image: linear-gradient(#fff, #fff);
     background-size: 75% 100%;
     background-repeat: no-repeat;
+    cursor: pointer;
 
 }
 
@@ -463,6 +544,8 @@ input[type=range]::-webkit-slider-runnable-track {
 
 
 .timeline {
+    overflow: hidden;
+
     top: 4px;
     height: 3px;
     /* transform: scaleY(.6); */
@@ -470,12 +553,34 @@ input[type=range]::-webkit-slider-runnable-track {
     width: 100%;
     position: relative;
     background-color: rgba(255, 255, 255, 0.2);
+    /* background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
+    background-size: 50% 100%;
+    background-repeat: no-repeat; */
+
+
     transition: transform .15s cubic-bezier(0, 0, 0.2, 1), top .15s cubic-bezier(0, 0, 0.2, 1), height .1s cubic-bezier(0, 0, .2, 1);
 }
 
+.buffered {
+    height: 100%;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3));
+    background-size: var(--buffered) 100%;
+    background-repeat: no-repeat;
+}
+
 .timeline-container:hover>.timeline {
-    height: 8px;
+    height: 7px;
     /* transform: scaleY(1.4); */
+}
+
+.timeline-container:hover>.timeline::before {
+    height: 100%;
+}
+
+.timeline-container:hover .thumb-indicator {
+    --scale: 1;
+    opacity: 1;
+
 }
 
 .timeline::before {
@@ -483,38 +588,57 @@ input[type=range]::-webkit-slider-runnable-track {
     position: absolute;
     top: 0;
     left: 0;
-    height: 100%;
-    right: calc(100% - var(--preview, .25) * 100%);
-    background-color: rgba(255, 255, 255, 0.4);
-    transition: width 150ms ease-in-out;
+    height: 0%;
+    right: calc(100% - var(--preview) * 100%);
+    background-color: rgba(255, 255, 255, 0.5);
+    transition: width 150ms ease-in-out, height 100ms ease-in-out;
 }
 
 .timeline::after {
     content: "";
+    transform: translateX(var(--bar));
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: -100%;
+    /* background-color: lime; */
+    background-color: red;
+    /* content: "";
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
-    right: calc(100% - var(--progress, .2) * 100%);
-    background-color: red;
-    transition: width 150ms ease-in-out;
+    right: calc(100% - var(--progress));
+    
+    transition: width 150ms ease-in-out, right 100ms ease; */
 }
 
-.timeline-container:hover .thumb-indicator {
-    --scale: 1;
-}
 
-.timeline .thumb-indicator {
+
+.thumb-indicator {
     --scale: 0;
+    opacity: 0;
+    scale: var(--scale);
     position: absolute;
-    transform: translateX(-50%) scale(var(--scale));
-    height: 200%;
-    top: -50%;
-    left: calc(var(--progress-position) * 100%);
+    left: -2px;
+    top: 8px;
+    /* transform: translateX(-50%) scale(var(--scale)); */
+    height: 13px;
+    /* top: -50%; */
+    /* left: -.3rem; */
+    /* left: var(--progress);
+    transition: left 100ms ease; */
+    /* transition: none; */
+    transition: opacity 150ms ease;
+    transform: translateX(var(--bar));
+
     background-color: red;
     border-radius: 50%;
-    transition: transform 150ms ease;
+    /* transition: transform 150ms ease; */
     aspect-ratio: 1 / 1 !important;
+    z-index: 2;
+    pointer-events: none;
 }
 
 .settings-container {

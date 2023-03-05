@@ -26,4 +26,6 @@ public class YoutubeVideo : BaseEntity
     public int FileSize { get; set; }
     public float Vbr { get; set; }
     public float Abr { get; set; }
+
+    public List<YoutubeComment> Comments { get; set; }
 }

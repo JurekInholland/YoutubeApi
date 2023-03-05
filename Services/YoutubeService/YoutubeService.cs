@@ -62,7 +62,7 @@ public class YoutubeService : IYoutubeService
     {
         if (!await IsValidId(id)) return null;
 
-        var cmd = $@"{_youtubeDlPath} -j {id}";
+        var cmd = $@"{_youtubeDlPath} -j  {id}";
         var res = await CliCommand.CallCommand(cmd);
         var video = JsonSerializer.Deserialize<YoutubeVideo>(res, _serializerOptions);
         return video;
@@ -71,7 +71,7 @@ public class YoutubeService : IYoutubeService
     public async Task<dynamic?> GetFullInfo(string id)
     {
         if (!await IsValidId(id)) throw new InvalidDataException("Invalid videoId");
-        var cmd = $@"{_youtubeDlPath} -j {id}";
+        var cmd = $@"{_youtubeDlPath} -j --get-comments --extractor-args youtube:max_comments=100,10,10 {id}";
         var res = await CliCommand.CallCommand(cmd);
         dynamic? json = JsonSerializer.Deserialize<dynamic>(res, _serializerOptions);
         return json;

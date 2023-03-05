@@ -13,7 +13,7 @@ const router = createRouter({
     {
       path: '/:ytQuery',
       name: 'home2',
-      component: HomeView,
+      component: () => import('../views/VideoPage.vue'),
       meta: { layout: DefaultLayout }
     },
     {

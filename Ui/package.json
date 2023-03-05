@@ -12,6 +12,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@fontsource/roboto": "^4.5.8",
     "@vue-youtube/component": "^0.0.4",
     "@vue-youtube/core": "^0.0.4",
     "click-outside-vue3": "^4.0.1",

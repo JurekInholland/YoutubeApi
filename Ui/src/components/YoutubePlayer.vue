@@ -11,7 +11,7 @@ const props = defineProps<{
 
 
 <template>
-    <h1>route: {{ route }}</h1>
+    <div class="yotube-wrapper">
     <youtube-iframe :preserveAspectRatio="true" :video-id="props.videoId" :player-vars="
         {
             // https://developers.google.com/youtube/player_parameters#Parameters
@@ -20,15 +20,24 @@ const props = defineProps<{
             start: props.startTime,
             modestbranding: 1,
             enablejsapi: 1,
-            
 
 
 
-        }"></youtube-iframe>
+
+        }">
+        </youtube-iframe>
+    </div>
 </template>
+
+<style >
+.yotube-wrapper {
+    aspect-ratio: 16/9;
+}
 iframe {
     width: 100%;
-    max-width: 100%;
+    /* height: auto; */
+    height: 100%;
+    max-width: unset;
+    aspect-ratio: 16/9;
 }
-<style scoped>
 </style>
