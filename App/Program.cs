@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using Models;
 using Services.DownloadService;
 using Services.YoutubeApiService;
+using Services.YoutubeExploseService;
 using Services.YoutubeService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +39,7 @@ builder.Services.Configure<AppConfig>(cfg =>
 builder.Services.AddTransient<IYoutubeService, YoutubeService>();
 builder.Services.AddTransient<IYoutubeApiService, YoutubeApiService>();
 builder.Services.AddTransient<IDownloadService, DownloadService>();
+builder.Services.AddTransient<IYoutubeExplodeService, YoutubeExplodeService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR();

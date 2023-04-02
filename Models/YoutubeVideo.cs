@@ -16,7 +16,8 @@ public class YoutubeVideo : BaseEntity
     public string ChannelId { get; set; } = "";
     public string ChannelUrl { get; set; } = "";
     public string WebpageUrl { get; set; } = "";
-    public int ViewCount { get; set; }
+    public long ViewCount { get; set; }
+    public long LikeCount { get; set; }
     public List<string> Categories { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }

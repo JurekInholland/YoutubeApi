@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models;
@@ -11,6 +13,7 @@ public class YoutubeService : IYoutubeService
 {
     private readonly ILogger<YoutubeService> _logger;
     private readonly AppConfig _config;
+    private readonly IUnitOfWork _unitOfWork;
 
     private readonly string _youtubeDlPath;
 
@@ -24,11 +27,43 @@ public class YoutubeService : IYoutubeService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public YoutubeService(ILogger<YoutubeService> logger, IOptions<AppConfig> config)
+    public YoutubeService(ILogger<YoutubeService> logger, IOptions<AppConfig> config, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _config = config.Value;
         _youtubeDlPath = _config.YtDlPath;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task EnqueueVideo(string videoId)
+    {
+        var video = await GetVideoInfo(videoId);
+
+        QueuedDownload queuedDownload = new()
+        {
+            Id = videoId,
+            Status = Enums.DownloadStatus.Queued,
+            QueuedAt = DateTime.Now,
+            Video = video
+        };
+
+        _unitOfWork.QueuedDownloads.Create(queuedDownload);
+        await _unitOfWork.Save();
+    }
+
+    public async Task DownloadQueuedVideos()
+    {
+        var queuedDownloads = await _unitOfWork.QueuedDownloads.All().OrderBy(x => x.QueuedAt).ToListAsync();
+
+        _logger.LogInformation("Found {QueuedDownloadsCount} queued downloads", queuedDownloads.Count);
+
+        foreach (var queuedDownload in queuedDownloads.Where(queuedDownload => queuedDownload.Status == Enums.DownloadStatus.Queued))
+        {
+            queuedDownload.Status = Enums.DownloadStatus.Downloading;
+            await DownloadVideo(queuedDownload.Id);
+            _unitOfWork.QueuedDownloads.Update(queuedDownload);
+            await _unitOfWork.Save();
+        }
     }
 
     /// <summary>
@@ -56,6 +91,15 @@ public class YoutubeService : IYoutubeService
         var cmd = $@"{_youtubeDlPath} -j {id}";
         var res = await CliCommand.CallCommand(cmd);
         return true;
+    }
+
+    public async Task<Stream> GetLocalVideo(string id)
+    {
+        var video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+        var path = Path.Combine("Downloads", $"{video.Id}");
+
+        return new FileStream(path, FileMode.Open);
     }
 
     public async Task<YoutubeVideo?> GetVideoInfo(string id)
