@@ -12,6 +12,11 @@ public static class YoutubeVideoFactory
             Title = video.Title,
             ChannelId = video.Author.ChannelId.Value,
             ChannelUrl = video.Author.ChannelUrl,
+
+            DateAdded = DateTime.Now,
+            LastUpdated = DateTime.Now,
+            UploadDate = video.UploadDate.DateTime,
+
             Description = video.Description,
             Duration = video.Duration!.Value.Seconds,
             DurationString = video.Duration!.Value.ToString(),
@@ -20,7 +25,7 @@ public static class YoutubeVideoFactory
             UploaderId = video.Author.ChannelId,
             ViewCount = video.Engagement.ViewCount,
             LikeCount = video.Engagement.LikeCount,
-            Categories = video.Keywords.ToList(),
+            Categories = video.Keywords.ToArray(),
             Width = 0,
             Height = 0,
             Fps = 0,

@@ -53,7 +53,7 @@ public class CliCommand
     {
         using var process = new Process();
         process.StartInfo.FileName = shell[0];
-        process.StartInfo.Arguments = $"{shell[1]} {cmd}";
+        process.StartInfo.Arguments = $"{shell[1]} \"{cmd}\"";
 
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.RedirectStandardOutput = true;

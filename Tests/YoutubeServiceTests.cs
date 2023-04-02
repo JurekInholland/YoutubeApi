@@ -22,7 +22,7 @@ public class YoutubeServiceTests
             YtDlPath = "yt-dlp"
         });
 
-        _youtubeService = new YoutubeService(_loggerMock.Object, _configMock.Object);
+        // _youtubeService = new YoutubeService(_loggerMock.Object, _configMock.Object);
     }
 
 

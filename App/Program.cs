@@ -1,13 +1,19 @@
 using System.Reflection;
 using App;
+using App.Middleware;
+using Domain.Context;
+using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Models;
 using Services.DownloadService;
+using Services.QueueService;
 using Services.YoutubeApiService;
 using Services.YoutubeExploseService;
 using Services.YoutubeService;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseQueryStrings = true);
 // Add services to the container.
@@ -20,7 +26,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo {Title = "youtube.juri.lol", Version = "v1"});
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
 });
 
@@ -36,10 +42,21 @@ builder.Services.Configure<AppConfig>(cfg =>
     cfg.YoutubeApiKey = builder.Configuration.GetValue<string>("YoutubeApiKey") ?? string.Empty;
 });
 
+builder.Services.AddDbContext<YoutubeAppContext>(options =>
+{
+    options.UseSqlite("Data Source=youtube.db");
+
+});
+
+
 builder.Services.AddTransient<IYoutubeService, YoutubeService>();
 builder.Services.AddTransient<IYoutubeApiService, YoutubeApiService>();
 builder.Services.AddTransient<IDownloadService, DownloadService>();
 builder.Services.AddTransient<IYoutubeExplodeService, YoutubeExplodeService>();
+builder.Services.AddTransient<IQueueService, QueueService>();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR();
@@ -47,8 +64,9 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<YoutubeHub>();
 
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
+app.UseMiddleware<RequestDurationMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

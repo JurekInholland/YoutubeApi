@@ -9,6 +9,10 @@ public class YoutubeVideo : BaseEntity
     public string Description { get; set; } = "";
     public string Uploader { get; set; } = "";
 
+    public DateTime DateAdded { get; set; }
+    public DateTime LastUpdated { get; set; }
+    public DateTime UploadDate { get; set; }
+
     [JsonPropertyName("uploader_id")]
     public string UploaderId { get; set; } = "";
     public int Duration { get; set; }
@@ -18,7 +22,7 @@ public class YoutubeVideo : BaseEntity
     public string WebpageUrl { get; set; } = "";
     public long ViewCount { get; set; }
     public long LikeCount { get; set; }
-    public List<string> Categories { get; set; }
+    public string[] Categories { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
     public int Fps { get; set; }

@@ -35,21 +35,6 @@ public class YoutubeService : IYoutubeService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task EnqueueVideo(string videoId)
-    {
-        var video = await GetVideoInfo(videoId);
-
-        QueuedDownload queuedDownload = new()
-        {
-            Id = videoId,
-            Status = Enums.DownloadStatus.Queued,
-            QueuedAt = DateTime.Now,
-            Video = video
-        };
-
-        _unitOfWork.QueuedDownloads.Create(queuedDownload);
-        await _unitOfWork.Save();
-    }
 
     public async Task DownloadQueuedVideos()
     {
@@ -57,7 +42,7 @@ public class YoutubeService : IYoutubeService
 
         _logger.LogInformation("Found {QueuedDownloadsCount} queued downloads", queuedDownloads.Count);
 
-        foreach (var queuedDownload in queuedDownloads.Where(queuedDownload => queuedDownload.Status == Enums.DownloadStatus.Queued))
+        foreach (QueuedDownload queuedDownload in queuedDownloads.Where(queuedDownload => queuedDownload.Status == Enums.DownloadStatus.Queued))
         {
             queuedDownload.Status = Enums.DownloadStatus.Downloading;
             await DownloadVideo(queuedDownload.Id);
@@ -78,7 +63,7 @@ public class YoutubeService : IYoutubeService
 
         var request = new HttpRequestMessage(HttpMethod.Head,
             $"https://www.youtube.com/oembed?url=http://www.youtube.com/watch?v={id}&format=json");
-        var response = await client.SendAsync(request);
+        HttpResponseMessage response = await client.SendAsync(request);
 
         // var response = await client.GetAsync($"https://gdata.youtube.com/feeds/api/videos/{id}");
         // var response = await client.GetAsync($"https://www.youtube.com/watch?v={id}&format=json");
@@ -106,7 +91,7 @@ public class YoutubeService : IYoutubeService
     {
         if (!await IsValidId(id)) return null;
 
-        var cmd = $@"{_youtubeDlPath} -j  {id}";
+        var cmd = $@"{_youtubeDlPath} -j {id}";
         var res = await CliCommand.CallCommand(cmd);
         var video = JsonSerializer.Deserialize<YoutubeVideo>(res, _serializerOptions);
         return video;
