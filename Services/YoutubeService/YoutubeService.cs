@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models;
+using Models.DomainModels;
 using Rnd;
 
 namespace Services.YoutubeService;
@@ -42,7 +43,8 @@ public class YoutubeService : IYoutubeService
 
         _logger.LogInformation("Found {QueuedDownloadsCount} queued downloads", queuedDownloads.Count);
 
-        foreach (QueuedDownload queuedDownload in queuedDownloads.Where(queuedDownload => queuedDownload.Status == Enums.DownloadStatus.Queued))
+        foreach (QueuedDownload queuedDownload in queuedDownloads.Where(queuedDownload =>
+                     queuedDownload.Status == Enums.DownloadStatus.Queued))
         {
             queuedDownload.Status = Enums.DownloadStatus.Downloading;
             await DownloadVideo(queuedDownload.Id);
@@ -82,7 +84,7 @@ public class YoutubeService : IYoutubeService
     {
         var video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == id).FirstOrDefaultAsync();
 
-        var path = Path.Combine("Downloads", $"{video.Id}");
+        var path = Path.Combine("Downloads", $"{id}");
 
         return new FileStream(path, FileMode.Open);
     }

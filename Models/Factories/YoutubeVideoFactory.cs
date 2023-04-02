@@ -1,4 +1,5 @@
-﻿using YoutubeExplode.Videos;
+﻿using Models.DomainModels;
+using YoutubeExplode.Videos;
 
 namespace Models.Factories;
 
@@ -18,7 +19,7 @@ public static class YoutubeVideoFactory
             UploadDate = video.UploadDate.DateTime,
 
             Description = video.Description,
-            Duration = video.Duration!.Value.Seconds,
+            Duration = video.Duration ?? new TimeSpan(),
             DurationString = video.Duration!.Value.ToString(),
             Thumbnail = video.Thumbnails.OrderByDescending(x => x.Resolution.Area).First().Url,
             Uploader = video.Author.ChannelTitle,

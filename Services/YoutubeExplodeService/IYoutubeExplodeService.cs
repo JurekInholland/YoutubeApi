@@ -1,10 +1,11 @@
 ﻿using Models;
+using Models.DomainModels;
 using YoutubeExplode.Channels;
 using YoutubeExplode.Search;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
-namespace Services.YoutubeExploseService;
+namespace Services.YoutubeExplodeService;
 
 public interface IYoutubeExplodeService
 {
@@ -13,4 +14,6 @@ public interface IYoutubeExplodeService
     public Task<IStreamInfo[]> DownloadVideo(string videoId);
 
     public Task<IChannel> GetChannel(string channelId);
+
+    public Task<IEnumerable<YoutubeSearchResult>> GetSearchResults(string query);
 }

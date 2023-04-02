@@ -3,6 +3,7 @@ using System;
 using Domain.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,14 +11,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(YoutubeAppContext))]
-    partial class YoutubeAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230402152039_2nd")]
+    partial class _2nd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
 
-            modelBuilder.Entity("Models.DomainModels.QueuedDownload", b =>
+            modelBuilder.Entity("Models.QueuedDownload", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -38,7 +41,7 @@ namespace Domain.Migrations
                     b.ToTable("QueuedDownloads");
                 });
 
-            modelBuilder.Entity("Models.DomainModels.RelatedVideo", b =>
+            modelBuilder.Entity("Models.RelatedVideo", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -81,7 +84,7 @@ namespace Domain.Migrations
                     b.ToTable("RelatedVideo");
                 });
 
-            modelBuilder.Entity("Models.DomainModels.YoutubeComment", b =>
+            modelBuilder.Entity("Models.YoutubeComment", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -134,7 +137,7 @@ namespace Domain.Migrations
                     b.ToTable("YoutubeComment");
                 });
 
-            modelBuilder.Entity("Models.DomainModels.YoutubeVideo", b =>
+            modelBuilder.Entity("Models.YoutubeVideo", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -161,8 +164,8 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<TimeSpan>("Duration")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Duration")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("DurationString")
                         .IsRequired()
@@ -222,23 +225,23 @@ namespace Domain.Migrations
                     b.ToTable("YoutubeVideos");
                 });
 
-            modelBuilder.Entity("Models.DomainModels.QueuedDownload", b =>
+            modelBuilder.Entity("Models.QueuedDownload", b =>
                 {
-                    b.HasOne("Models.DomainModels.YoutubeVideo", "Video")
+                    b.HasOne("Models.YoutubeVideo", "Video")
                         .WithMany()
                         .HasForeignKey("VideoId");
 
                     b.Navigation("Video");
                 });
 
-            modelBuilder.Entity("Models.DomainModels.YoutubeComment", b =>
+            modelBuilder.Entity("Models.YoutubeComment", b =>
                 {
-                    b.HasOne("Models.DomainModels.YoutubeVideo", null)
+                    b.HasOne("Models.YoutubeVideo", null)
                         .WithMany("Comments")
                         .HasForeignKey("YoutubeVideoId");
                 });
 
-            modelBuilder.Entity("Models.DomainModels.YoutubeVideo", b =>
+            modelBuilder.Entity("Models.YoutubeVideo", b =>
                 {
                     b.Navigation("Comments");
                 });

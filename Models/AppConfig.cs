@@ -5,7 +5,7 @@
 /// </summary>
 public class AppConfig
 {
-    public string DataPath { get; set; }
-    public string YtDlPath { get; set; }
-    public string YoutubeApiKey { get; set; }
+    public string DataPath { get; set; } = string.Empty;
+    public string YtDlPath { get; set; } = string.Empty;
+    public string YoutubeApiKey { get; set; } = string.Empty;
 }

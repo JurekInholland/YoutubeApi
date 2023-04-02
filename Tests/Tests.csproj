@@ -24,7 +24,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\App\App.csproj" />
       <ProjectReference Include="..\Services\Services.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services" />
     </ItemGroup>
 
 </Project>

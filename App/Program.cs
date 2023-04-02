@@ -8,8 +8,9 @@ using Microsoft.OpenApi.Models;
 using Models;
 using Services.DownloadService;
 using Services.QueueService;
+using Services.TaskService;
 using Services.YoutubeApiService;
-using Services.YoutubeExploseService;
+using Services.YoutubeExplodeService;
 using Services.YoutubeService;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -57,6 +58,7 @@ builder.Services.AddTransient<IQueueService, QueueService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+builder.Services.AddHostedService<TaskService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR();

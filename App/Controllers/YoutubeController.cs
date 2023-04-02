@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Rnd;
-using Services.YoutubeExploseService;
+using Services.YoutubeExplodeService;
 using Services.YoutubeService;
 
 namespace App.Controllers;
@@ -64,44 +64,44 @@ public class YoutubeController : BaseController
         return Ok("download");
     }
 
-    /// <summary>
-    /// Get video info via YoutubeExplode
-    /// </summary>
-    [HttpGet("explodeInfo", Name = nameof(GetExplodeInfo))]
-    public async Task<IActionResult> GetExplodeInfo(string videoId)
-    {
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
-
-        var video = await _youtubeExplodeService.GetVideo(videoId);
-        stopwatch.Stop();
-        Response.Headers.Add("X-Elapsed-Milliseconds", stopwatch.ElapsedMilliseconds.ToString());
-        return Ok(video);
-    }
+    // /// <summary>
+    // /// Get video info via YoutubeExplode
+    // /// </summary>
+    // [HttpGet("explodeInfo", Name = nameof(GetExplodeInfo))]
+    // public async Task<IActionResult> GetExplodeInfo(string videoId)
+    // {
+    //     var stopwatch = new Stopwatch();
+    //     stopwatch.Start();
+    //
+    //     var video = await _youtubeExplodeService.GetVideo(videoId);
+    //     stopwatch.Stop();
+    //     Response.Headers.Add("X-Elapsed-Milliseconds", stopwatch.ElapsedMilliseconds.ToString());
+    //     return Ok(video);
+    // }
 
     /// <summary>
     /// Get video info via YoutubeDownloader
     /// </summary>
     /// <param name="videoId"></param>
     /// <returns></returns>
-    [HttpGet("video", Name = nameof(GetVideoInfo))]
-    public async Task<IActionResult> GetVideoInfo(string videoId)
-    {
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var info = await YoutubeDownloader.GetVideoInfo(videoId);
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
-
-        // Deserialize and pretty-print JSON string
-        var jsonElement = JsonSerializer.Deserialize<JsonElement>(info);
-        string prettyJson = JsonSerializer.Serialize(jsonElement, options);
-        stopwatch.Stop();
-        Response.Headers.Add("X-Elapsed-Milliseconds", stopwatch.ElapsedMilliseconds.ToString());
-        return Ok(prettyJson);
-    }
+    // [HttpGet("video", Name = nameof(GetVideoInfo))]
+    // public async Task<IActionResult> GetVideoInfo(string videoId)
+    // {
+    //     var stopwatch = new Stopwatch();
+    //     stopwatch.Start();
+    //     var info = await YoutubeDownloader.GetVideoInfo(videoId);
+    //     var options = new JsonSerializerOptions
+    //     {
+    //         WriteIndented = true
+    //     };
+    //
+    //     // Deserialize and pretty-print JSON string
+    //     var jsonElement = JsonSerializer.Deserialize<JsonElement>(info);
+    //     string prettyJson = JsonSerializer.Serialize(jsonElement, options);
+    //     stopwatch.Stop();
+    //     Response.Headers.Add("X-Elapsed-Milliseconds", stopwatch.ElapsedMilliseconds.ToString());
+    //     return Ok(prettyJson);
+    // }
 
     /// <summary>
     /// This is summary
@@ -132,21 +132,12 @@ public class YoutubeController : BaseController
     /// <response code="400">If slugs parameter is missing</response>
     /// <response code="404">If number of records found doesn't equal
     /// number of records requested</response>
-    [Produces("application/json")]
-    [HttpGet("channel", Name = nameof(GetChannelInfo))]
-    public async Task<IActionResult> GetChannelInfo(string channelId)
-    {
-        var info = await YoutubeDownloader.GetChannelInfo(channelId);
-        return Ok(info);
-
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
-
-        // Deserialize and pretty-print JSON string
-        var jsonElement = JsonSerializer.Deserialize<JsonElement>(info);
-        string prettyJson = JsonSerializer.Serialize(jsonElement, options);
-        return Ok(prettyJson);
-    }
+    // [Produces("application/json")]
+    // [HttpGet("channel", Name = nameof(GetChannelInfo))]
+    // public async Task<IActionResult> GetChannelInfo(string channelId)
+    // {
+    //     var info = await YoutubeDownloader.GetChannelInfo(channelId);
+    //     return Ok(info);
+    //
+    // }
 }

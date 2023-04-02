@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Models;
+using Models.DomainModels;
+using Models.Requests;
 using Services.QueueService;
 
 namespace App.Controllers;
@@ -34,6 +36,13 @@ public class QueueController : BaseController
         return Ok(queuedDownload);
     }
 
+    [HttpDelete("clear", Name = nameof(ClearQueue))]
+    public async Task<IActionResult> ClearQueue()
+    {
+        await _queueService.ClearQueue();
+        return Ok();
+    }
+
     /// <summary>
     /// Get all enqueued videos
     /// </summary>
@@ -49,12 +58,11 @@ public class QueueController : BaseController
     /// </summary>
     [OpenApiRequestBody("application/json", typeof(string), Description = "Youtube video id")]
     [HttpPost("add", Name = nameof(AddToQueue))]
-    public async Task<IActionResult> AddToQueue([FromBody] string videoId)
+    public async Task<IActionResult> AddToQueue([FromBody] EnqueueDownloadRequest request)
     {
-
         try
         {
-            QueuedDownload queuedDownload = await _queueService.EnqueueDownload(videoId);
+            QueuedDownload queuedDownload = await _queueService.EnqueueDownload(request.VideoId);
             return Ok(queuedDownload);
         }
         catch (Exception e)

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Models;
+namespace Models.DomainModels;
 
 public class YoutubeComment : BaseEntity
 {

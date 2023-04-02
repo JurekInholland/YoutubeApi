@@ -3,6 +3,7 @@ using System;
 using Domain.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(YoutubeAppContext))]
-    partial class YoutubeAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230402211400_Virtual")]
+    partial class Virtual
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -28,12 +31,13 @@ namespace Domain.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("VideoId")
+                    b.Property<string>("YoutubeVideoId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VideoId");
+                    b.HasIndex("YoutubeVideoId");
 
                     b.ToTable("QueuedDownloads");
                 });
@@ -226,7 +230,9 @@ namespace Domain.Migrations
                 {
                     b.HasOne("Models.DomainModels.YoutubeVideo", "Video")
                         .WithMany()
-                        .HasForeignKey("VideoId");
+                        .HasForeignKey("YoutubeVideoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Video");
                 });

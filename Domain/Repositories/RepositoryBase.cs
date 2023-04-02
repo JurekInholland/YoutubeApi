@@ -57,4 +57,9 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntit
         if (entity is null) return;
         Context.Set<T>().Remove(entity);
     }
+
+    public void DeleteAll()
+    {
+        Context.Set<T>().RemoveRange(Context.Set<T>());
+    }
 }
