@@ -113,7 +113,19 @@ public class YoutubeController : BaseController
     public async Task<IActionResult> DownloadVideo(string videoId)
     {
         var info = await YoutubeDownloader.DownloadVideo(videoId);
-        return Ok(info);
+
+        using var reader = new StreamReader(info);
+
+        var res = "";
+
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync();
+            res += line;
+            _logger.LogInformation(line);
+        }
+
+        return Ok(res);
     }
 
     /// <summary>

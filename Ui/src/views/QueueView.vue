@@ -18,13 +18,16 @@ const clearQueue = async () => {
 
 const enqueue = async () => {
     const videoId = queueInput.value;
-    youtubeStore.enqueue(videoId);
+    const success = await youtubeStore.enqueue(videoId);
+    if (success) {
+        queueInput.value = "";
+    }
 };
 </script>
 
 <template>
     <h1>Queue</h1>
-    <div>
+    <div class="item-container">
         <QueueItem v-for="item in youtubeStore.queue" :key="item.id" :item="item" />
     </div>
     <div class="controls">
@@ -39,6 +42,13 @@ const enqueue = async () => {
 </template>
 
 <style scoped lang="scss">
+.item-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem;
+}
+
 .controls {
     display: flex;
     gap: 1rem;

@@ -1,8 +1,11 @@
+using System.Diagnostics;
+using Domain;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.DomainModels;
+using Rnd;
 using Services.YoutubeExplodeService;
 
 namespace Services.QueueService;
@@ -12,12 +15,14 @@ public class QueueService : IQueueService
     private readonly ILogger<QueueService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IYoutubeExplodeService _youtubeExplodeService;
+    private readonly YoutubeHub _hub;
 
-    public QueueService(ILogger<QueueService> logger, IUnitOfWork unitOfWork, IYoutubeExplodeService youtubeExplodeService)
+    public QueueService(ILogger<QueueService> logger, IUnitOfWork unitOfWork, IYoutubeExplodeService youtubeExplodeService, YoutubeHub hub)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _youtubeExplodeService = youtubeExplodeService;
+        _hub = hub;
     }
 
     public async Task<IEnumerable<QueuedDownload>> GetQueuedDownloads()
@@ -35,6 +40,41 @@ public class QueueService : IQueueService
     {
         _unitOfWork.QueuedDownloads.DeleteById(videoId);
         await _unitOfWork.Save();
+    }
+
+    public async Task ProcessQueue()
+    {
+        Stopwatch stopWatch = new();
+        stopWatch.Start();
+        QueuedDownload? queuedDownload = await DequeueDownload();
+        // QueuedDownload? queuedDownload = await _unitOfWork.QueuedDownloads.All().Include(q => q.Video)
+        //     .Where(x => x.Status == Enums.DownloadStatus.Queued).FirstOrDefaultAsync();
+
+
+        Console.WriteLine(stopWatch.ElapsedMilliseconds);
+        if (queuedDownload is null)
+        {
+            _logger.LogInformation("No videos in queue");
+            return;
+        }
+
+        // queuedDownload.Status = Enums.DownloadStatus.Downloading;
+        // _unitOfWork.QueuedDownloads.Update(queuedDownload);
+        // await _unitOfWork.Save();
+
+        Task.Run(async () => await YoutubeDownloader.DownloadVideo(queuedDownload.Video.Id, DownloadCallback));
+        Console.WriteLine(stopWatch.ElapsedMilliseconds);
+        stopWatch.Stop();
+    }
+
+    private static void DownloadCallback(string? content, string videoId, DateTime lastExecution)
+    {
+        var delta = DateTime.Now - lastExecution;
+
+        if (content is null || delta < TimeSpan.FromSeconds(.2)) return;
+
+        Console.WriteLine($"Downloaded {content} in {delta}");
+        Console.WriteLine("");
     }
 
     public async Task<QueuedDownload> EnqueueDownload(string videoId)

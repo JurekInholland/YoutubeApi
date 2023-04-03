@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
+using System;
 
 namespace Rnd;
 
@@ -7,10 +9,14 @@ public class CliCommand
 {
     private static string[] shell = GetCommandShell();
 
+    private static Stream? _outputStream;
 
     private static void OnOutputDataReceived(object? sender, DataReceivedEventArgs e)
     {
         var output = e.Data;
+
+        _outputStream?.Write(Encoding.UTF8.GetBytes(output));
+
         //do something with your data
         Console.WriteLine("output:" + output);
     }
@@ -47,9 +53,7 @@ public class CliCommand
     /// <summary>
     /// Execute a shell command and return the output
     /// </summary>
-    /// <param name="cmd"></param>
-    /// <returns>command output</returns>
-    public static async Task<string> CallCommand(string cmd)
+    public static async Task<string> CallCommand(string cmd, DataReceivedEventHandler callback = null!)
     {
         using var process = new Process();
         process.StartInfo.FileName = shell[0];
@@ -59,13 +63,10 @@ public class CliCommand
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.RedirectStandardError = true;
 
-        // process.OutputDataReceived += OnOutputDataReceived;
-        // process.ErrorDataReceived += OnErrorDataReceived;
-        // process.Exited += OnExited;
+        process.OutputDataReceived += callback;
 
         process.Start();
-        // process.BeginOutputReadLine();
-        string output = await process.StandardOutput.ReadToEndAsync();
+        process.BeginOutputReadLine();
 
         await process.WaitForExitAsync();
 
@@ -74,10 +75,7 @@ public class CliCommand
             throw new CliException($"Command failed with exit code {process.ExitCode} - {await process.StandardError.ReadToEndAsync()}");
         }
 
-        return output;
-        // Console.WriteLine(Directory.GetCurrentDirectory());
-        // Console.WriteLine(process.StandardOutput.ReadToEnd());
-        // Console.WriteLine(process.StandardError.ReadToEnd());
+        return await process.StandardOutput.ReadToEndAsync();
     }
 }
 

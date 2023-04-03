@@ -25,16 +25,17 @@ export const useYoutubeStore = defineStore({
       this.reset()
     },
 
-    async enqueue(videoId: string) {
+    async enqueue(videoId: string): Promise<boolean> {
       const queueItem: QueuedDownload | AxiosError = await apiService.EnqueueDownload(videoId)
       if (queueItem instanceof Error) {
         console.log(queueItem)
-        return
+        return false
       }
       this.queue.push(queueItem)
+      return true
     },
     async dequeue(queueItem: QueuedDownload) {
-      await apiService.DeleteFromQueue(queueItem.id);
+      await apiService.DeleteFromQueue(queueItem.id)
       this.queue = this.queue.filter((item) => item.id !== queueItem.id)
     },
 

@@ -14,4 +14,6 @@ public interface IQueueService
     public Task<QueuedDownload?> DequeueDownload();
     public Task ClearQueue();
     public Task DeleteFromQueue(string videoId);
+
+    public Task ProcessQueue();
 }

@@ -7,7 +7,7 @@ public class TaskService : BackgroundService, ITaskService
 {
     private readonly ILogger<TaskService> _logger;
 
-    private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(10000));
+    private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(100000));
 
     public TaskService(ILogger<TaskService> logger)
     {
@@ -30,6 +30,6 @@ public class TaskService : BackgroundService, ITaskService
     private async Task DoWorkAsync()
     {
         _logger.LogInformation(DateTime.Now.ToString("O"));
-        await Task.Delay(500);
+        await Task.Delay(2000);
     }
 }

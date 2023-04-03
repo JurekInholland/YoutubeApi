@@ -26,6 +26,16 @@ public class QueueController : BaseController
 
 
     /// <summary>
+    /// Process the queue
+    /// </summary>
+    [HttpGet("process", Name = nameof(ProcessQueue))]
+    public async Task<IActionResult> ProcessQueue()
+    {
+        await _queueService.ProcessQueue();
+        return Ok();
+    }
+
+    /// <summary>
     /// Get next enqueued video
     /// </summary>
     /// <returns></returns>

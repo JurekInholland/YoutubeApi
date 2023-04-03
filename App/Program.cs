@@ -1,6 +1,6 @@
 using System.Reflection;
-using App;
 using App.Middleware;
+using Domain;
 using Domain.Context;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -44,11 +44,14 @@ builder.Services.Configure<AppConfig>(cfg =>
 
 builder.Services.AddDbContext<YoutubeAppContext>(options => { options.UseSqlite("Data Source=data/youtube.db"); });
 
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<YoutubeHub>();
 
-builder.Services.AddTransient<IYoutubeService, YoutubeService>();
-builder.Services.AddTransient<IYoutubeApiService, YoutubeApiService>();
-builder.Services.AddTransient<IDownloadService, DownloadService>();
-builder.Services.AddTransient<IYoutubeExplodeService, YoutubeExplodeService>();
+
+builder.Services.AddScoped<IYoutubeService, YoutubeService>();
+builder.Services.AddScoped<IYoutubeApiService, YoutubeApiService>();
+builder.Services.AddScoped<IDownloadService, DownloadService>();
+builder.Services.AddScoped<IYoutubeExplodeService, YoutubeExplodeService>();
 builder.Services.AddTransient<IQueueService, QueueService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -82,6 +85,7 @@ app.UseAuthorization();
 app.UseStaticFiles();
 
 app.MapControllers();
+app.MapHub<YoutubeHub>("/api/signalr");
 
 // app.UseMiddleware<ProxyMiddleware>();
 await app.RunAsync();
