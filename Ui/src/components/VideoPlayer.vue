@@ -3,11 +3,11 @@ import { ref, onMounted, computed, type Ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import type { IPlayerState } from '@/models';
 import VolumeButton from '@/components/buttons/VolumeButton.vue';
-import FullscreenButton from './buttons/FullscreenButton.vue';
-import SettingsButton from './buttons/SettingsButton.vue';
-import ExitFullscreenButton from './buttons/ExitFullscreenButton.vue';
-import PlayPauseButton from './buttons/PlayPauseButton.vue';
-import SvgButton from './buttons/SvgButton.vue';
+import FullscreenButton from '@/components/buttons/FullScreenButton.vue';
+import SettingsButton from '@/components/buttons/SettingsButton.vue';
+import ExitFullscreenButton from '@/components/buttons/ExitFullscreenButton.vue';
+import PlayPauseButton from '@/components/buttons/PlayPauseButton.vue';
+import SvgButton from '@/components/buttons/SvgButton.vue';
 
 const props = defineProps<{
     src: string,
@@ -286,7 +286,7 @@ const smoothUpdate = () => {
                 <FullscreenButton v-if="!playerState.isFullscreen" @click.stop="onDoubleClick" />
                 <ExitFullscreenButton v-else @click.stop="onDoubleClick" />
 
-                <div v-if="playerState.settings" class="settings-container" v-click-outside="auxclick">
+                <div v-if="playerState.settings" class="settings-container" v-click-outside-element="auxclick">
                     <ul>
                         <li>settings entry one</li>
                         <li>set2</li>
