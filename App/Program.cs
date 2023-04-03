@@ -19,7 +19,6 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<RouteOptions>(options => options.LowercaseQueryStrings = true);
 // Add services to the container.
 
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -43,11 +42,7 @@ builder.Services.Configure<AppConfig>(cfg =>
     cfg.YoutubeApiKey = builder.Configuration.GetValue<string>("YoutubeApiKey") ?? string.Empty;
 });
 
-builder.Services.AddDbContext<YoutubeAppContext>(options =>
-{
-    options.UseSqlite("Data Source=youtube.db");
-
-});
+builder.Services.AddDbContext<YoutubeAppContext>(options => { options.UseSqlite("Data Source=data/youtube.db"); });
 
 
 builder.Services.AddTransient<IYoutubeService, YoutubeService>();
@@ -58,12 +53,16 @@ builder.Services.AddTransient<IQueueService, QueueService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-builder.Services.AddHostedService<TaskService>();
+// builder.Services.AddHostedService<TaskService>();
+
+builder.Services.AddSingleton<TaskService>();
+builder.Services.AddHostedService<TaskService>(provider => provider.GetService<TaskService>()!);
 
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<YoutubeHub>();
+builder.Services.AddControllers();
 
 
 WebApplication app = builder.Build();

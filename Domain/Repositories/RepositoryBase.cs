@@ -23,9 +23,9 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntit
         return Context.Set<T>().Where(expression).AsNoTracking();
     }
 
-    public void Create(T entity)
+    public async Task Create(T entity)
     {
-        Context.Set<T>().Add(entity);
+        await Context.Set<T>().AddAsync(entity);
     }
 
     public void Update(T entity)
@@ -51,7 +51,7 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : BaseEntit
         Context.Set<T>().Remove(entity);
     }
 
-    public void DeleteById(Guid id)
+    public void DeleteById(string id)
     {
         var entity = Context.Set<T>().Find(id);
         if (entity is null) return;

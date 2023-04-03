@@ -73,4 +73,15 @@ public class QueueController : BaseController
             return BadRequest(e.Message);
         }
     }
+
+    /// <summary>
+    /// Remove a queued video from the queue
+    /// </summary>
+    [HttpDelete("{videoId}", Name = nameof(DeleteFromQueue))]
+    public async Task<IActionResult> DeleteFromQueue(string videoId)
+    {
+        _logger.LogInformation("Deleting video {VideoId} from queue", videoId);
+        await _queueService.DeleteFromQueue(videoId);
+        return Ok();
+    }
 }

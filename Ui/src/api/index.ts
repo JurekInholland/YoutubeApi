@@ -29,6 +29,13 @@ export default class ApiService {
       url: apiUrls.clearQueue
     })
   }
+  public async DeleteFromQueue(videoId: string): Promise<void> {
+    await this.request({
+      method: 'DELETE',
+      url: `${apiUrls.deleteFromQueue}/${videoId}`
+    })
+  }
+
   public async EnqueueDownload(videoId: string): Promise<QueuedDownload | AxiosError> {
     const res = await this.request<QueuedDownload>({
       method: 'POST',

@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { DownloadStatus, type QueuedDownload } from '@/types';
+import { Icon } from '@iconify/vue';
+import { useYoutubeStore } from '@/stores/youtubeStore';
+
+const store = useYoutubeStore();
 
 const props = defineProps<{
     item: QueuedDownload
 }>()
 
+const removeFromQueue = async () => {
+    await store.dequeue(props.item);
+}
 
 </script>
 
@@ -14,10 +21,25 @@ const props = defineProps<{
         <img :src="item.video.thumbnail" alt="">
         <p>{{ item.queuedAt }}</p>
         <p>{{ DownloadStatus[item.status] }}</p>
+        <p>{{ item.id }}</p>
+        <button @click="removeFromQueue">
+            <Icon icon="ic:round-delete" />
+        </button>
     </div>
 </template>
 
 <style scoped lang="scss">
+button {
+    display: block;
+    font-size: 1.5rem;
+    color: red;
+}
+
+button>svg {
+    height: 4rem;
+    width: 4rem;
+}
+
 .queued-item {
     display: flex;
     flex-direction: column;

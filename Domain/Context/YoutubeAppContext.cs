@@ -41,6 +41,6 @@ public class YoutubeAppContext : DbContext
     {
         base.OnConfiguring(optionsBuilder);
         if (optionsBuilder.IsConfigured) return;
-        optionsBuilder.UseSqlite("Data Source=youtube.db");
+        optionsBuilder.UseSqlite("Data Source=data/youtube.db");
     }
 }

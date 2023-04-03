@@ -7,7 +7,7 @@ public class TaskService : BackgroundService, ITaskService
 {
     private readonly ILogger<TaskService> _logger;
 
-    private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(100000));
+    private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(10000));
 
     public TaskService(ILogger<TaskService> logger)
     {

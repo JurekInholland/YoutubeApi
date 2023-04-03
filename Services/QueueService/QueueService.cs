@@ -31,6 +31,12 @@ public class QueueService : IQueueService
         await _unitOfWork.Save();
     }
 
+    public async Task DeleteFromQueue(string videoId)
+    {
+        _unitOfWork.QueuedDownloads.DeleteById(videoId);
+        await _unitOfWork.Save();
+    }
+
     public async Task<QueuedDownload> EnqueueDownload(string videoId)
     {
         var queued = _unitOfWork.QueuedDownloads.Where(x => x.Id == videoId);
@@ -39,19 +45,15 @@ public class QueueService : IQueueService
             throw new InvalidOperationException("Video already in queue");
         }
 
+        YoutubeVideo? existing = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).FirstOrDefaultAsync();
+
+        if (existing is not null)
+        {
+            _unitOfWork.YoutubeVideos.Delete(existing);
+            await _unitOfWork.Save();
+        }
 
         YoutubeVideo video = await _youtubeExplodeService.GetVideo(videoId);
-
-        // try
-        // {
-        //     _unitOfWork.YoutubeVideos.Create(video);
-        // }
-        // catch (Exception e)
-        // {
-        //     Console.WriteLine(e);
-        // }
-
-        // _logger.LogInformation("Enqueuing video {VideoId} - {VideoTitle}", video.Id, video.Title);
 
         QueuedDownload queuedDownload = new()
         {
@@ -62,12 +64,8 @@ public class QueueService : IQueueService
             Video = video
         };
 
-        // if (_unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).Any())
-        // {
-        //     queuedDownload.Video = null!;
-        // }
 
-        _unitOfWork.QueuedDownloads.Update(queuedDownload);
+        await _unitOfWork.QueuedDownloads.Create(queuedDownload);
         await _unitOfWork.Save();
         // queuedDownload.Video = video;
         return queuedDownload;

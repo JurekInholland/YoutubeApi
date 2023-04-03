@@ -33,7 +33,8 @@ export const useYoutubeStore = defineStore({
       }
       this.queue.push(queueItem)
     },
-    dequeue(queueItem: QueuedDownload) {
+    async dequeue(queueItem: QueuedDownload) {
+      await apiService.DeleteFromQueue(queueItem.id);
       this.queue = this.queue.filter((item) => item.id !== queueItem.id)
     },
 
