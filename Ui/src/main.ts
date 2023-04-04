@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { createManager } from '@vue-youtube/core'
 // import vClickOutside from 'click-outside-vue3'
 import vueClickOutsideElement from 'vue-click-outside-element'
+import { VueSignalR } from '@quangdao/vue-signalr'
 
 import App from './App.vue'
 import router from './router'
@@ -17,6 +18,7 @@ app.use(createPinia())
 
 const youtubeStore = useYoutubeStore()
 app.provide('youtubeStore', youtubeStore)
+app.use(VueSignalR, { url: 'api/signalr' })
 
 app.use(router)
 app.use(createManager())

@@ -15,6 +15,7 @@
     <ItemGroup>
       <PackageReference Include="Aria2.NET" Version="1.0.5" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="7.0.4" />
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
       <PackageReference Include="YoutubeExplode" Version="6.2.12" />
@@ -22,9 +23,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
-        <HintPath>..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\7.0.4\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
-      </Reference>
+      <Reference Include="Microsoft.AspNetCore.SignalR.Core" />
+
     </ItemGroup>
 
 </Project>

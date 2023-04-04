@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { QueuedDownload } from '@/types'
+import type { DownloadProgress, QueuedDownload } from '@/types'
 import { apiService } from '@/constants'
 import type { AxiosError } from 'axios'
 export const useYoutubeStore = defineStore({
@@ -34,11 +34,17 @@ export const useYoutubeStore = defineStore({
       this.queue.push(queueItem)
       return true
     },
+
     async dequeue(queueItem: QueuedDownload) {
       await apiService.DeleteFromQueue(queueItem.id)
       this.queue = this.queue.filter((item) => item.id !== queueItem.id)
     },
-
+    async updateDownloadProgress(progress: DownloadProgress) {
+      const queueItem = this.queue.find((item) => item.id === progress.id)
+      if (queueItem) {
+        queueItem.progress = progress
+      }
+    },
     reset() {
       this.queue = []
     }

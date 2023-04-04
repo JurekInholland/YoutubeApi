@@ -112,20 +112,20 @@ public class YoutubeController : BaseController
     [HttpPut("video", Name = nameof(DownloadVideo))]
     public async Task<IActionResult> DownloadVideo(string videoId)
     {
-        var info = await YoutubeDownloader.DownloadVideo(videoId);
+        // await YoutubeDownloader.DownloadVideo(videoId);
+        //
+        // using var reader = new StreamReader(info);
+        //
+        // var res = "";
+        //
+        // while (!reader.EndOfStream)
+        // {
+        //     var line = await reader.ReadLineAsync();
+        //     res += line;
+        //     _logger.LogInformation(line);
+        // }
 
-        using var reader = new StreamReader(info);
-
-        var res = "";
-
-        while (!reader.EndOfStream)
-        {
-            var line = await reader.ReadLineAsync();
-            res += line;
-            _logger.LogInformation(line);
-        }
-
-        return Ok(res);
+        return Ok();
     }
 
     /// <summary>

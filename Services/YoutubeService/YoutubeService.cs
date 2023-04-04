@@ -76,7 +76,7 @@ public class YoutubeService : IYoutubeService
     {
         if (!await IsValidId(id)) return false;
         var cmd = $@"{_youtubeDlPath} -j {id}";
-        var res = await CliCommand.CallCommand(cmd);
+        // var res = await CliCommand.CallCommand(cmd);
         return true;
     }
 
@@ -94,26 +94,26 @@ public class YoutubeService : IYoutubeService
         if (!await IsValidId(id)) return null;
 
         var cmd = $@"{_youtubeDlPath} -j {id}";
-        var res = await CliCommand.CallCommand(cmd);
-        var video = JsonSerializer.Deserialize<YoutubeVideo>(res, _serializerOptions);
-        return video;
+        // var res = await CliCommand.CallCommand(cmd);
+        // var video = JsonSerializer.Deserialize<YoutubeVideo>(res, _serializerOptions);
+        return null;
     }
 
     public async Task<dynamic?> GetFullInfo(string id)
     {
         if (!await IsValidId(id)) throw new InvalidDataException("Invalid videoId");
         var cmd = $@"{_youtubeDlPath} -j --get-comments --extractor-args youtube:max_comments=100,10,10 {id}";
-        var res = await CliCommand.CallCommand(cmd);
-        dynamic? json = JsonSerializer.Deserialize<dynamic>(res, _serializerOptions);
-        return json;
+        // var res = await CliCommand.CallCommand(cmd);
+        // dynamic? json = JsonSerializer.Deserialize<dynamic>(res, _serializerOptions);
+        return "json";
     }
 
 
     public async Task<string> GetChannelInfo(string id)
     {
         var cmd = $@"{_youtubeDlPath} -j https://www.youtube.com/channel/{id}";
-        var res = await CliCommand.CallCommand(cmd);
+        // var res = await CliCommand.CallCommand(cmd);
 
-        return res;
+        return "res";
     }
 }

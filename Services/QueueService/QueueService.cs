@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Domain;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,13 @@ public class QueueService : IQueueService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IYoutubeExplodeService _youtubeExplodeService;
     private readonly YoutubeHub _hub;
+
+    private static readonly Regex DownloadProgressRegex =
+        new(
+            @"\[(?<kind>\w+)\]\s+(?<progress>\d+\.\d+)%\s+of\s+~\s+(?<size>\d+\.\d+)\s*(?<unit>[a-zA-Z]+)\s+at\s+(?<speed>\d+\.\d+)\s*(?<speedUnit>[a-zA-Z]+\/s)\s+ETA\s+(?<eta>\d{2}:\d{2})\s+\(frag\s+(?<frag>\d+\/\d+)\)");
+
+
+    private DateTime _lastExecution = DateTime.MinValue;
 
     public QueueService(ILogger<QueueService> logger, IUnitOfWork unitOfWork, IYoutubeExplodeService youtubeExplodeService, YoutubeHub hub)
     {
@@ -44,38 +53,86 @@ public class QueueService : IQueueService
 
     public async Task ProcessQueue()
     {
-        Stopwatch stopWatch = new();
-        stopWatch.Start();
+        await DownloadQueueVideos();
+    }
+
+    private async ValueTask DownloadQueueVideos()
+    {
+        Console.WriteLine("DownloadQueueVideos");
         QueuedDownload? queuedDownload = await DequeueDownload();
-        // QueuedDownload? queuedDownload = await _unitOfWork.QueuedDownloads.All().Include(q => q.Video)
-        //     .Where(x => x.Status == Enums.DownloadStatus.Queued).FirstOrDefaultAsync();
 
-
-        Console.WriteLine(stopWatch.ElapsedMilliseconds);
-        if (queuedDownload is null)
+        Console.WriteLine("DL " + queuedDownload?.Video.Title);
+        while (queuedDownload is not null)
         {
-            _logger.LogInformation("No videos in queue");
+            await YoutubeDownloader.DownloadVideo(queuedDownload.Video.Id, DownloadCallback);
+            Console.WriteLine("dl done 1");
+            queuedDownload.Status = Enums.DownloadStatus.Finished;
+            // _unitOfWork.QueuedDownloads.Update(queuedDownload);
+            await _unitOfWork.Save();
+            queuedDownload = await DequeueDownload();
+            Console.WriteLine("qd");
+        }
+
+        Console.WriteLine("dl done 2");
+    }
+
+    private async Task DownloadCallback(string? content, string videoId)
+    {
+        Console.WriteLine("content: " + content);
+        TimeSpan delta = DateTime.Now - _lastExecution;
+
+        if (content is not null && content.Contains("[Metadata] Adding metadata to"))
+        {
+            DownloadProgress finalProgress = new()
+            {
+                Id = videoId,
+                Progress = 100,
+                Status = "finished"
+            };
+            await _hub.SendObjects("user", "downloadProgress", finalProgress);
             return;
         }
 
-        // queuedDownload.Status = Enums.DownloadStatus.Downloading;
-        // _unitOfWork.QueuedDownloads.Update(queuedDownload);
-        // await _unitOfWork.Save();
-
-        Task.Run(async () => await YoutubeDownloader.DownloadVideo(queuedDownload.Video.Id, DownloadCallback));
-        Console.WriteLine(stopWatch.ElapsedMilliseconds);
-        stopWatch.Stop();
-    }
-
-    private static void DownloadCallback(string? content, string videoId, DateTime lastExecution)
-    {
-        var delta = DateTime.Now - lastExecution;
-
         if (content is null || delta < TimeSpan.FromSeconds(.2)) return;
 
-        Console.WriteLine($"Downloaded {content} in {delta}");
-        Console.WriteLine("");
+        DownloadProgress? progress = ParseProgressLine(content, videoId);
+        if (progress is null) return;
+
+        await _hub.SendObjects("user", "downloadProgress", progress);
+
+        _lastExecution = DateTime.Now;
     }
+
+    private static DownloadProgress? ParseProgressLine(string line, string videoId)
+    {
+        if (line is null or "")
+        {
+            return null;
+        }
+
+        Match match = DownloadProgressRegex.Match(line);
+        if (!match.Success) return null;
+
+        string kind = match.Groups["kind"].Value;
+        float progress = float.Parse(match.Groups["progress"].Value, CultureInfo.InvariantCulture);
+        float size = float.Parse(match.Groups["size"].Value);
+        string unit = match.Groups["unit"].Value;
+        float speed = float.Parse(match.Groups["speed"].Value.Replace('.', ','));
+        string speedUnit = match.Groups["speedUnit"].Value;
+        TimeSpan eta = TimeSpan.ParseExact(match.Groups["eta"].Value, "mm':'ss", CultureInfo.InvariantCulture);
+        string frag = match.Groups["frag"].Value;
+
+        return new DownloadProgress
+        {
+            Id = videoId,
+            Status = kind,
+            Progress = progress,
+            Speed = speed + speedUnit,
+            Eta = eta,
+            Fragment = frag
+        };
+    }
+
 
     public async Task<QueuedDownload> EnqueueDownload(string videoId)
     {

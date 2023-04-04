@@ -6,6 +6,7 @@ using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Models;
+using Services;
 using Services.DownloadService;
 using Services.QueueService;
 using Services.TaskService;
@@ -52,14 +53,14 @@ builder.Services.AddScoped<IYoutubeService, YoutubeService>();
 builder.Services.AddScoped<IYoutubeApiService, YoutubeApiService>();
 builder.Services.AddScoped<IDownloadService, DownloadService>();
 builder.Services.AddScoped<IYoutubeExplodeService, YoutubeExplodeService>();
-builder.Services.AddTransient<IQueueService, QueueService>();
+builder.Services.AddScoped<IQueueService, QueueService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // builder.Services.AddHostedService<TaskService>();
 
-builder.Services.AddSingleton<TaskService>();
-builder.Services.AddHostedService<TaskService>(provider => provider.GetService<TaskService>()!);
+// builder.Services.AddSingleton<TaskService>();
+builder.Services.AddHostedService<TaskService>();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR();

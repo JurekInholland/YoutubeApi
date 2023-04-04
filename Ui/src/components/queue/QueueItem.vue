@@ -3,6 +3,7 @@ import { DownloadStatus, type QueuedDownload } from '@/types';
 import { Icon } from '@iconify/vue';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import { formatDateAgo } from '@/utils';
+import ProgressBar from '../ProgressBar.vue';
 const store = useYoutubeStore();
 
 const props = defineProps<{
@@ -23,7 +24,12 @@ const removeFromQueue = async () => {
             <p>{{ formatDateAgo(new Date(item.queuedAt)) }}</p>
             <p>{{ DownloadStatus[item.status] }}</p>
             <p>{{ item.id }}</p>
-
+        </div>
+        <ProgressBar v-if="item.progress" :value="item.progress!.progress" :text="item.progress!.status" />
+        <div v-if="item.progress" class="progress">
+            <div>{{ item.progress.status }}</div>
+            <div>{{ item.progress.progress }}%</div>
+            <div>{{ item.progress.speed }}</div>
         </div>
         <button @click="removeFromQueue">
             <Icon icon="ic:round-delete" />
@@ -50,6 +56,9 @@ button {
     border-radius: 10px;
     gap: 1rem;
 
+    .progress {
+        flex-basis: 30%;
+    }
     .info {
         display: flex;
         flex-direction: column;

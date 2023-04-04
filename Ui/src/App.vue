@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import SignalR from './components/SignalR.vue';
 import TopBar from './components/TopBar.vue';
 </script>
 
 <template>
+  <SignalR />
   <TopBar />
 
   <div class="wrapper">

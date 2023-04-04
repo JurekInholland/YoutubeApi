@@ -31,7 +31,8 @@ public class QueueController : BaseController
     [HttpGet("process", Name = nameof(ProcessQueue))]
     public async Task<IActionResult> ProcessQueue()
     {
-        await _queueService.ProcessQueue();
+        Task.Run(() => _queueService.ProcessQueue());
+        // await _queueService.ProcessQueue();
         return Ok();
     }
 

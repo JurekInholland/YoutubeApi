@@ -53,7 +53,7 @@ public class CliCommand
     /// <summary>
     /// Execute a shell command and return the output
     /// </summary>
-    public static async Task<string> CallCommand(string cmd, DataReceivedEventHandler callback = null!)
+    public static async Task CallCommand(string cmd, DataReceivedEventHandler callback = null!)
     {
         using var process = new Process();
         process.StartInfo.FileName = shell[0];
@@ -75,7 +75,7 @@ public class CliCommand
             throw new CliException($"Command failed with exit code {process.ExitCode} - {await process.StandardError.ReadToEndAsync()}");
         }
 
-        return await process.StandardOutput.ReadToEndAsync();
+        // return await process.StandardOutput.ReadToEndAsync();
     }
 }
 

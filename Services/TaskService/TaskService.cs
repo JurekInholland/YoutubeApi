@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Services.QueueService;
 
 namespace Services.TaskService;
 
@@ -8,6 +9,7 @@ public class TaskService : BackgroundService, ITaskService
     private readonly ILogger<TaskService> _logger;
 
     private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(100000));
+    private readonly IQueueService _queueService;
 
     public TaskService(ILogger<TaskService> logger)
     {
@@ -24,6 +26,7 @@ public class TaskService : BackgroundService, ITaskService
         while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
         {
             await DoWorkAsync();
+            // await _queueService.ProcessQueue();
         }
     }
 

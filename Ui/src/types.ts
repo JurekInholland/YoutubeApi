@@ -34,6 +34,7 @@ export interface QueuedDownload {
   status: DownloadStatus
   queuedAt: Date
   video: YoutubeVideo
+  progress?: DownloadProgress
 }
 
 export interface VideoSearchResult {
@@ -43,4 +44,13 @@ export interface VideoSearchResult {
   channel_id: string
   duration: number
   thumbnail: string
+}
+
+export interface DownloadProgress {
+  id: string
+  status: string
+  progress: number
+  speed: number
+  eta: number
+  fragment: string
 }
