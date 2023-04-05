@@ -56,6 +56,7 @@ const onPointerUp = (e: PointerEvent) => {
 .active {
     background-color: red;
 }
+
 .description {
     height: 1rem;
     overflow: hidden;
@@ -79,11 +80,17 @@ const onPointerUp = (e: PointerEvent) => {
         flex: 1 2 auto;
         transition: all .5s ease;
         width: 100%;
+        overflow: hidden;
 
         h3 {
             font-size: 18px;
             font-weight: bold;
             line-height: 22px;
+            // overflow: hidden;
+            // text-overflow: ellipsis;
+            white-space: nowrap;
+            // flex-grow: 0;
+            // word-wrap: break-word;
         }
     }
 }

@@ -4,8 +4,10 @@ import { Icon } from '@iconify/vue';
 import Logo from './Logo.vue';
 import { apiService } from '@/constants';
 import { useRouter } from 'vue-router';
+import { useYoutubeStore } from '@/stores/youtubeStore';
 
 const router = useRouter();
+const store = useYoutubeStore();
 
 const searchFocs = ref(false);
 const searchQuery: Ref<string> = ref('');
@@ -16,12 +18,25 @@ const suggestions: Ref<string[]> = ref([]);
 
 const activeIndex: Ref<number> = ref(-1);
 
+const menuOpen: Ref<boolean> = ref(false);
+
 const activeChange = () => {
     // console.log("E",e)
     console.log("active")
     searchFocs.value = !searchFocs.value;
 }
 
+watch(router.currentRoute, (val) => {
+    console.log("ROUTE", val)
+    searchFocs.value = false;
+    menuOpen.value = false;
+})
+watch(searchFocs, (val) => {
+    if (val) {
+        activeIndex.value = -1;
+    }
+
+})
 // watch(searchQuery, async (val) => {
 //     console.log("searchQuery", val)
 //     const res = await apiService.GetSearchCompletion(val);
@@ -34,21 +49,21 @@ const activeChange = () => {
 // });
 
 const clearSearch = () => {
-    searchQuery.value = '';
+    store.searchQuery = '';
 }
 
 const onChange = async () => {
 
-    const res = await apiService.GetSearchCompletion(searchQuery.value);
+    const res = await apiService.GetSearchCompletion(store.searchQuery);
     if (res instanceof Error) {
         console.log("ERROR", res)
     }
     else {
         suggestions.value = res;
     }
-    oldQuery.value = searchQuery.value;
+    oldQuery.value = store.searchQuery;
     // console.log("CHANGE", e)
-    // searchQuery.value = (e.target as HTMLInputElement).value;
+    // store.searchQuery = (e.target as HTMLInputElement).value;
 }
 
 const onKeyPress = (e: KeyboardEvent) => {
@@ -56,20 +71,27 @@ const onKeyPress = (e: KeyboardEvent) => {
 
     if (e.key === "ArrowDown") {
         activeIndex.value = (activeIndex.value + 1) % (suggestions.value.length + 1);
-        searchQuery.value = suggestions.value[activeIndex.value] ?? oldQuery.value;
+        store.searchQuery = suggestions.value[activeIndex.value] ?? oldQuery.value;
 
 
     }
     else if (e.key === "ArrowUp") {
         activeIndex.value = (activeIndex.value - 1 + suggestions.value.length + 1) % (suggestions.value.length + 1);        // activeIndex.value = (activeIndex.value - 1) % (suggestions.value.length + 1);
-        searchQuery.value = suggestions.value[activeIndex.value] ?? oldQuery.value;
+        store.searchQuery = suggestions.value[activeIndex.value] ?? oldQuery.value;
 
     }
     else if (e.key === "Enter") {
         if (activeIndex.value !== -1) {
-            searchQuery.value = suggestions.value[activeIndex.value];
+            store.searchQuery = suggestions.value[activeIndex.value];
             suggestions.value = [];
         }
+        else {
+            store.searchQuery = oldQuery.value;
+        }
+        if (store.searchQuery === "") {
+            return;
+        }
+        onSearch();
     }
 
 }
@@ -82,18 +104,25 @@ const onMouseLeave = () => {
     activeIndex.value = -1;
 }
 const onSearch = () => {
-    console.log("SEARCHING FOR ", searchQuery.value)
-    if (searchQuery.value === "") {
+    console.log("SEARCHING FOR ", store.searchQuery)
+    searchFocs.value = false;
+
+    if (store.searchQuery === "") {
         return;
     }
-    router.push({ name: "results", query: { search_query: searchQuery.value } })
-    // store.fetchSearchResults(searchQuery.value)
+    if (router.currentRoute.value.name !== "results") {
+        router.push({ name: "results", query: { search_query: store.searchQuery } })
+    }
+    else {
+        store.fetchSearchResults(store.searchQuery);
+    }
+    // store.fetchSearchResults(store.searchQuery)
 }
 
 const onSearchSuggestionClick = (e: Event) => {
     console.log("SUGGESTION CLICKED")
     const suggestion = (e.target as HTMLDivElement).innerText;
-    searchQuery.value = suggestion;
+    store.searchQuery = suggestion;
     suggestions.value = [];
     onSearch();
 }
@@ -101,7 +130,7 @@ const onSearchSuggestionClick = (e: Event) => {
 const onFocusOut = () => {
     setTimeout(() => {
         searchFocs.value = false;
-    }, 100);
+    }, 150);
 }
 </script>
 
@@ -109,17 +138,19 @@ const onFocusOut = () => {
     <div class="ytd-mmasthead">
         <div class="left">
             <!-- <div class="yt-icon">
-                                                                                                                                                                                                                                                                                                                                <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
-                                                                                                                                                                                                                                                                                                                                    style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                                                                                                                                                                                                                                                                                                                                        <g class="style-scope yt-icon">
-                                                                                                                                                                                                                                                                                                                                        <path d="M21,6H3V5h18V6z M21,11H3v1h18V11z M21,17H3v1h18V17z" class="style-scope yt-icon"></path>
-                                                                                                                                                                                                                                                                                                                                    </g>
-                                                                                                                                                                                                                                                                                                                                </svg>
-                                                                                                                                                                                                                                                                                                                            </div> -->
+                                                                                                                                                                                                                                                                                                                                                                                                <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
+                                                                                                                                                                                                                                                                                                                                                                                                    style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                                                                                                                                                                                                                                                                                                                                                                                                        <g class="style-scope yt-icon">
+                                                                                                                                                                                                                                                                                                                                                                                                        <path d="M21,6H3V5h18V6z M21,11H3v1h18V11z M21,17H3v1h18V17z" class="style-scope yt-icon"></path>
+                                                                                                                                                                                                                                                                                                                                                                                                    </g>
+                                                                                                                                                                                                                                                                                                                                                                                                </svg>
+                                                                                                                                                                                                                                                                                                                                                                                            </div> -->
             <button class="menu-button">
-                <Icon class="menu" icon="mdi-light:menu" />
+                <Icon class="menu" icon="mdi-light:menu" @click="menuOpen = !menuOpen" />
             </button>
-            <Logo class="logo" />
+            <router-link to="/">
+                <Logo class="logo" />
+            </router-link>
             <span id="country-code">
                 .juri.lol
             </span>
@@ -129,31 +160,34 @@ const onFocusOut = () => {
             <div class="search" :class="searchFocs ? 'active' : ''">
                 <div class="ytd-searchbox">
                     <Icon v-if="searchFocs" style="font-size: 1.5rem;" class="search-icon" icon="system-uicons:search" />
-                    <input @input="onChange" @focusin="searchFocs = true" @focusout="onFocusOut" v-model="searchQuery"
+                    <input @input="onChange" @focusin="searchFocs = true" @focusout="onFocusOut" v-model="store.searchQuery"
                         placeholder="Search" type="text" @keydown="onKeyPress">
 
-                    <button class="close" v-if="searchQuery !== ''" @click="clearSearch">
+                    <button class="close" v-if="store.searchQuery !== ''" @click="clearSearch">
                         <Icon style="font-size: 1.5rem;" icon="clarity:close-line" />
 
                     </button>
-                    <div class="results" v-if="searchFocs && suggestions.length > 0 && searchQuery.length > 0">
+                    <div class="results" v-if="searchFocs && suggestions.length > 0 && store.searchQuery.length > 0">
                         <ul @mouseleave="onMouseLeave">
 
                             <li v-for="(suggestion, index) in suggestions" key="index"
                                 :class="{ selected: index === activeIndex }" @mouseover="onResultMouseover(index)"
                                 @click="onSearchSuggestionClick">
-                                <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                <p>{{ suggestion }}</p>
+                                <div>
+                                    <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                    <p>{{ suggestion }}</p>
+
+                                </div>
                             </li>
 
                             <!-- <li>
-                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                                                                                                                                                                                                                            <p>this is a test</p>
-                                                                                                                                                                                                                                        </li>
-                                                                                                                                                                                                                                        <li>
-                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                                                                                                                                                                                                                            <p>this is a test</p>
-                                                                                                                                                                                                                                        </li> -->
+                                                                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                                                                                                                                                                                                                                                                                            <p>this is a test</p>
+                                                                                                                                                                                                                                                                                                        </li>
+                                                                                                                                                                                                                                                                                                        <li>
+                                                                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                                                                                                                                                                                                                                                                                            <p>this is a test</p>
+                                                                                                                                                                                                                                                                                                        </li> -->
                         </ul>
                     </div>
                 </div>
@@ -172,10 +206,76 @@ const onFocusOut = () => {
             <Icon style="font-size: 1.5rem;" icon="mdi:account" />
         </div>
     </div>
+
+    <div class="side-nav" :class="menuOpen ? 'open' : ''">
+        <div class="side-header">
+            <button class="menu" @click="menuOpen = false">
+                <Icon style="font-size: 1.5rem;" icon="mdi-light:menu" />
+            </button>
+            <router-link to="/">
+                <Logo class="side-logo" />
+            </router-link>
+        </div>
+        <!-- <h1>side</h1> -->
+    </div>
 </template>
 
 
 <style scoped lang="scss">
+.side-header {
+    margin-left: 12px;
+    width: 100%;
+    align-items: flex-start;
+    // padding-left: 18px;
+    display: flex;
+    gap: 0;
+
+    button {
+        all: unset;
+        // margin: 0;
+        // margin-top: 6px;
+        margin-left: 14px;
+        // margin-left: -12px;
+        flex-grow: 1;
+        font-size: 2rem;
+        margin-top: 12px;
+    }
+
+}
+
+.side-logo {
+    padding: 18px 88px 18px 6px;
+
+
+    max-width: 100%;
+    max-height: 56px;
+    flex-grow: 0;
+    // all:unset;
+    // width: 28px;
+    //     height: 28px;
+    // margin-left: 12px;
+    a {
+        all: unset;
+    }
+}
+
+.side-nav {
+    position: absolute;
+    width: 240px;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    background-color: black;
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform .2s ease;
+    // opacity: .5;
+}
+
+.open {
+    transform: translateX(0);
+}
+
 .selected {
     background-color: rgb(238, 238, 238);
 }
@@ -186,7 +286,7 @@ const onFocusOut = () => {
     background-color: transparent;
     transition: background-color .2s ease;
     border-radius: 50%;
-    right: -5px;
+    right: -3px;
     z-index: 10;
 }
 
@@ -216,14 +316,18 @@ const onFocusOut = () => {
         }
 
         li {
-            gap: 1.25rem;
-            line-height: 1.5rem;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            padding: .25rem 1.25rem;
-            cursor: default;
+            background-color: aqua;
 
+            div {
+                gap: 1.25rem;
+                line-height: 1.5rem;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                padding: .25rem 1.25rem;
+                cursor: default;
+                // background-color: red;
+            }
         }
 
 
@@ -330,6 +434,9 @@ display: block;
     align-items: center;
     justify-content: space-between;
     min-width: 500px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .left {
@@ -338,9 +445,15 @@ display: block;
     justify-content: center;
     flex-shrink: 0;
     flex-grow: 0;
-    margin-left: 22px;
+    // margin-left: 22px;
     margin-right: 1rem;
     font-size: 10px;
+    gap: .5rem;
+}
+
+.left a {
+    // all: unset;
+
 }
 
 .center {

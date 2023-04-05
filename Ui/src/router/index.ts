@@ -46,6 +46,12 @@ const router = createRouter({
         searchQuery: route.query.search_query
       }),
       component: () => import('../views/SearchResultView.vue')
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/SettingsView.vue')
+      
     }
   ]
 })

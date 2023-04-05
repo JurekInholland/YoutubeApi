@@ -12,11 +12,13 @@ export const useYoutubeStore = defineStore({
   state: (): {
     queue: QueuedDownload[]
     videos: YoutubeVideo[]
-    searchResults: YoutubeVideo[]
+    searchResults: { [key: string]: YoutubeVideo[] }
+    searchQuery: string
   } => ({
     queue: [],
     videos: [],
-    searchResults: []
+    searchResults: {},
+    searchQuery: ''
   }),
 
   getters: {
@@ -27,7 +29,7 @@ export const useYoutubeStore = defineStore({
   },
   actions: {
     clearSearchResults() {
-      this.searchResults = []
+      // this.searchResults = {}
     },
 
     async fetchVideos() {
@@ -46,7 +48,7 @@ export const useYoutubeStore = defineStore({
       const res = await apiService.GetSearchResults(query)
       if (res instanceof Error) {
         console.log(res)
-      } else this.searchResults = res
+      } else this.searchResults[query] = res
     },
 
     async clearQueue() {

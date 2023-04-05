@@ -12,13 +12,18 @@ const searchQuery = route.query.search_query as string;
 
 watch(() => route.query.search_query, async (newVal, oldVal) => {
     console.log("watch", newVal, oldVal)
+    store.searchQuery = newVal as string;
     store.clearSearchResults();
     if (newVal !== oldVal && newVal !== "") {
         await store.fetchSearchResults(newVal as string)
     }
 });
 onMounted(async () => {
-    console.log("SEARCHING FOR ", searchQuery)
+    store.searchQuery = searchQuery;
+
+    if (store.searchResults[searchQuery]) {
+        return;
+    }
     await store.fetchSearchResults(searchQuery)
 
 })
@@ -31,7 +36,7 @@ onMounted(async () => {
             <h1>{{ route.query.search_query }}</h1>
             <!-- <p v-for="result in store.searchResults">{{ result.title }}</p> -->
             <SearchResult 
-                v-for="result in store.searchResults" :video="result" />
+                v-for="result in store.searchResults[store.searchQuery]" :video="result" />
 
         </div>
     </section>

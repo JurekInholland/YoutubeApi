@@ -3,9 +3,12 @@
 *, *::before, *::after {
   box-sizing: border-box;
 }
-
+a {
+  cursor: pointer;
+}
 body {
   margin: 0;
+  background-color: black;
 }
 
 html {

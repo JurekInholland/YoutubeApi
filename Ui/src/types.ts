@@ -40,7 +40,7 @@ export interface YoutubeVideo {
   uploader: string
   dateAdded: Date
   uploadDate: Date
-  localVideo: LocalVideo
+  localVideo: LocalVideo | null
   likeCount: number
   dislikeCount: number
   viewCount: number
@@ -76,4 +76,11 @@ export interface TaskProgress {
   time: Date
   task: ApplicationTask
   status: TaskStatus
+}
+
+export interface ApplicationSettings {
+  showRelatedVideos: boolean
+  showComments: boolean
+  autoplay: boolean
+  
 }
