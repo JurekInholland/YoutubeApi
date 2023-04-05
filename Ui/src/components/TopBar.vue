@@ -1,13 +1,107 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, markRaw, type Ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import Logo from './Logo.vue';
+import { apiService } from '@/constants';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
 const searchFocs = ref(false);
-const searchQuery = ref('');
+const searchQuery: Ref<string> = ref('');
+
+const oldQuery: Ref<string> = ref('');
+
+const suggestions: Ref<string[]> = ref([]);
+
+const activeIndex: Ref<number> = ref(-1);
+
 const activeChange = () => {
     // console.log("E",e)
     console.log("active")
     searchFocs.value = !searchFocs.value;
+}
+
+// watch(searchQuery, async (val) => {
+//     console.log("searchQuery", val)
+//     const res = await apiService.GetSearchCompletion(val);
+//     if (res instanceof Error) {
+//         console.log("ERROR", res)
+//     }
+//     else {
+//         suggestions.value = res;
+//     }
+// });
+
+const clearSearch = () => {
+    searchQuery.value = '';
+}
+
+const onChange = async () => {
+
+    const res = await apiService.GetSearchCompletion(searchQuery.value);
+    if (res instanceof Error) {
+        console.log("ERROR", res)
+    }
+    else {
+        suggestions.value = res;
+    }
+    oldQuery.value = searchQuery.value;
+    // console.log("CHANGE", e)
+    // searchQuery.value = (e.target as HTMLInputElement).value;
+}
+
+const onKeyPress = (e: KeyboardEvent) => {
+    console.log("KEYPRESS", e.key)
+
+    if (e.key === "ArrowDown") {
+        activeIndex.value = (activeIndex.value + 1) % (suggestions.value.length + 1);
+        searchQuery.value = suggestions.value[activeIndex.value] ?? oldQuery.value;
+
+
+    }
+    else if (e.key === "ArrowUp") {
+        activeIndex.value = (activeIndex.value - 1 + suggestions.value.length + 1) % (suggestions.value.length + 1);        // activeIndex.value = (activeIndex.value - 1) % (suggestions.value.length + 1);
+        searchQuery.value = suggestions.value[activeIndex.value] ?? oldQuery.value;
+
+    }
+    else if (e.key === "Enter") {
+        if (activeIndex.value !== -1) {
+            searchQuery.value = suggestions.value[activeIndex.value];
+            suggestions.value = [];
+        }
+    }
+
+}
+const onResultMouseover = (idx: number) => {
+    activeIndex.value = idx;
+}
+
+const onMouseLeave = () => {
+    console.log("mouse leave")
+    activeIndex.value = -1;
+}
+const onSearch = () => {
+    console.log("SEARCHING FOR ", searchQuery.value)
+    if (searchQuery.value === "") {
+        return;
+    }
+    router.push({ name: "results", query: { search_query: searchQuery.value } })
+    // store.fetchSearchResults(searchQuery.value)
+}
+
+const onSearchSuggestionClick = (e: Event) => {
+    console.log("SUGGESTION CLICKED")
+    const suggestion = (e.target as HTMLDivElement).innerText;
+    searchQuery.value = suggestion;
+    suggestions.value = [];
+    onSearch();
+}
+
+const onFocusOut = () => {
+    setTimeout(() => {
+        searchFocs.value = false;
+    }, 100);
 }
 </script>
 
@@ -15,13 +109,13 @@ const activeChange = () => {
     <div class="ytd-mmasthead">
         <div class="left">
             <!-- <div class="yt-icon">
-                                            <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
-                                                style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                                                <g class="style-scope yt-icon">
-                                                    <path d="M21,6H3V5h18V6z M21,11H3v1h18V11z M21,17H3v1h18V17z" class="style-scope yt-icon"></path>
-                                                </g>
-                                            </svg>
-                                        </div> -->
+                                                                                                                                                                                                                                                                                                                                <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
+                                                                                                                                                                                                                                                                                                                                    style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                                                                                                                                                                                                                                                                                                                                        <g class="style-scope yt-icon">
+                                                                                                                                                                                                                                                                                                                                        <path d="M21,6H3V5h18V6z M21,11H3v1h18V11z M21,17H3v1h18V17z" class="style-scope yt-icon"></path>
+                                                                                                                                                                                                                                                                                                                                    </g>
+                                                                                                                                                                                                                                                                                                                                </svg>
+                                                                                                                                                                                                                                                                                                                            </div> -->
             <button class="menu-button">
                 <Icon class="menu" icon="mdi-light:menu" />
             </button>
@@ -35,16 +129,36 @@ const activeChange = () => {
             <div class="search" :class="searchFocs ? 'active' : ''">
                 <div class="ytd-searchbox">
                     <Icon v-if="searchFocs" style="font-size: 1.5rem;" class="search-icon" icon="system-uicons:search" />
-                    <input @focusin="searchFocs = true" @focusout="searchFocs = false" v-model="searchQuery"
-                        placeholder="Search" type="text">
+                    <input @input="onChange" @focusin="searchFocs = true" @focusout="onFocusOut" v-model="searchQuery"
+                        placeholder="Search" type="text" @keydown="onKeyPress">
 
-                    <button v-if="searchQuery !== ''">
-                        <Icon style="font-size: 1.5rem;" icon="mdi:close" />
+                    <button class="close" v-if="searchQuery !== ''" @click="clearSearch">
+                        <Icon style="font-size: 1.5rem;" icon="clarity:close-line" />
 
                     </button>
+                    <div class="results" v-if="searchFocs && suggestions.length > 0 && searchQuery.length > 0">
+                        <ul @mouseleave="onMouseLeave">
+
+                            <li v-for="(suggestion, index) in suggestions" key="index"
+                                :class="{ selected: index === activeIndex }" @mouseover="onResultMouseover(index)"
+                                @click="onSearchSuggestionClick">
+                                <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                <p>{{ suggestion }}</p>
+                            </li>
+
+                            <!-- <li>
+                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                                                                                                                                                                                                                            <p>this is a test</p>
+                                                                                                                                                                                                                                        </li>
+                                                                                                                                                                                                                                        <li>
+                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                                                                                                                                                                                                                            <p>this is a test</p>
+                                                                                                                                                                                                                                        </li> -->
+                        </ul>
+                    </div>
                 </div>
-                <button class="search-button">
-                    <Icon style="font-size: 1.5rem;" icon="system-uicons:search" />
+                <button class="search-button" @click="onSearch">
+                    <Icon style="font-size: 1.1rem;" icon="simple-line-icons:magnifier" />
                 </button>
 
                 <button class="mic-button">
@@ -61,7 +175,65 @@ const activeChange = () => {
 </template>
 
 
-<style scoped>
+<style scoped lang="scss">
+.selected {
+    background-color: rgb(238, 238, 238);
+}
+
+.close {
+    position: absolute;
+    padding: .5rem;
+    background-color: transparent;
+    transition: background-color .2s ease;
+    border-radius: 50%;
+    right: -5px;
+    z-index: 10;
+}
+
+.close:hover {
+    background-color: rgba(255, 255, 255, 0.125);
+}
+
+.results {
+    // display: none;
+    position: absolute;
+    top: 2.75rem;
+    left: 0;
+    // height: 400px;
+    width: 100%;
+    background-color: white;
+    z-index: 200;
+    border-radius: 12px;
+    box-shadow: 0px 5px 12px 0px rgba(0, 0, 0, 0.5);
+
+
+    ul {
+        color: black;
+        margin: 1rem 0;
+
+        svg {
+            color: black;
+        }
+
+        li {
+            gap: 1.25rem;
+            line-height: 1.5rem;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: .25rem 1.25rem;
+            cursor: default;
+
+        }
+
+
+        // li:hover {
+        //     background-color: rgb(238, 238, 238);
+        // }
+    }
+}
+
+
 svg {
     color: white;
 }
@@ -74,6 +246,9 @@ svg {
     border-radius: 0 40px 40px 0;
     flex-grow: 0;
     width: 64px;
+    background-color: rgb(32, 32, 32);
+
+
 }
 
 button {
@@ -86,15 +261,17 @@ button {
     padding: 8px;
 }
 
-button>svg {
-    height: 100%;
-    width: 100%;
-}
+// button>svg {
+//     height: 100%;
+//     width: 100%;
+// }
+
 .mic-button {
     border-radius: 50%;
-    background-color: rgb(18,20,20);
+    background-color: rgb(18, 20, 20);
     margin-left: .5rem;
 }
+
 .menu {
     overflow: hidden;
     color: white;
@@ -125,6 +302,7 @@ input {
 
 .search-icon {
     margin-right: .5rem;
+    flex-shrink: 0;
 }
 
 /* .search-icon {
@@ -169,8 +347,8 @@ display: block;
     align-items: center;
     flex: 0 1 720px;
     min-width: 0px;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1rem;
 
 }
 
@@ -184,6 +362,7 @@ display: block;
 }
 
 .ytd-searchbox {
+    position: relative;
     background-color: #0e0f0f;
     box-shadow: inset 0 1px 2px var(-vt-c-white-mute);
     color: var(-vt-c-white-mute);
@@ -223,4 +402,12 @@ display: block;
     position: absolute;
     color: rgba(255, 255, 255, .75);
 }
+
+input:focus-within+.results {
+    display: block;
+}
+
+// input:active+.results {
+//     display: block;
+// }
 </style>

@@ -11,15 +11,22 @@ export const addSeperators = (num: number, separator: string = ','): string => {
 
 export const formatViews = (views: number): string => {
   const suffixes: { [key: number]: string } = {
-    1000000000000: 'T', // save for the future :)
+    1000000000000: 'T',
     1000000000: 'B',
     1000000: 'M',
-    1000: 'K'
+    1000: 'K',
   }
 
-  for (const magnitude of Object.keys(suffixes) as unknown as number[]) {
-    if (views >= magnitude) {
-      return (views / magnitude).toFixed(1) + suffixes[magnitude]
+  for (const magnitude of Object.keys(suffixes).reverse() as unknown as number[]) {
+    const mag = Number(magnitude)
+    console.log(views, mag)
+    if (views >= mag) {
+      console.log("IS")
+      const rounding = (views / mag).toString().indexOf('.') <= 1 ? 1 : 0
+
+      return (views / mag).toFixed(rounding) + suffixes[mag]
+    } else {
+      console.log("IS NOT")
     }
   }
 

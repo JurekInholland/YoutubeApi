@@ -68,10 +68,12 @@ public class YoutubeExplodeService : IYoutubeExplodeService
     public async Task<YoutubeVideo> GetVideo(string url)
     {
         Video video = await _youtube.Videos.GetAsync(url);
+        // var channel = await _youtube.Channels.GetAsync(video.Author.ChannelId);
+
         return YoutubeVideoFactory.FromYoutubeExplode(video);
     }
 
-    public async Task<IEnumerable<YoutubeSearchResult>> GetSearchResults(string query)
+    public async Task<IEnumerable<YoutubeVideo>> GetSearchResults(string query)
     {
         List<YoutubeSearchResult> results = new();
 
@@ -82,6 +84,7 @@ public class YoutubeExplodeService : IYoutubeExplodeService
         {
             foreach (ISearchResult searchResult in batch.Items)
             {
+                if (results.Count >= 12) break;
                 Console.WriteLine(stopwatch.ElapsedMilliseconds);
                 if (searchResult is not VideoSearchResult videoResult) continue;
                 results.Add(YoutubeSearchResultFactory.FromVideoSearchResult(videoResult));
@@ -90,8 +93,18 @@ public class YoutubeExplodeService : IYoutubeExplodeService
             break;
         }
 
+        var tasks = new List<Task<YoutubeVideo>>();
+
+        foreach (var res in results)
+        {
+            tasks.Add(GetVideo(res.Id));
+        }
+
+        var responses = await Task.WhenAll(tasks);
+
+
         stopwatch.Stop();
-        return results;
+        return responses;
         // foreach (var item in results)
         // {
         //     if (item is not VideoSearchResult videoResult) continue;

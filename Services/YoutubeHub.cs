@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Models;
 
 namespace Services;
 
@@ -14,7 +15,22 @@ public class YoutubeHub : Hub
 
     public string GetConnectionId() => Context.ConnectionId;
 
-    public async Task SendObjects(string user, string callbackName, object obj)
+    public async Task SendTaskUpdate(Enums.ApplicationTask task, Enums.TaskStatus status)
+    {
+        await Clients.All.SendAsync("taskUpdate", new TaskProgress
+        {
+            Time = DateTime.Now,
+            Task = task,
+            Status = status
+        });
+    }
+
+    public async Task SendDownloadProgress(DownloadProgress progress)
+    {
+        await Clients.All.SendAsync("downloadProgress", progress);
+    }
+
+    public async Task SendObject(string user, string callbackName, object obj)
     {
         // _logger.LogInformation("Sending object to {User}", user);
         await Clients.All.SendAsync(callbackName, obj);

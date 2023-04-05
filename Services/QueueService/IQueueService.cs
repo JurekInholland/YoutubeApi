@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Hosting;
 using Models;
 using Models.DomainModels;
 
@@ -5,6 +6,10 @@ namespace Services.QueueService;
 
 public interface IQueueService
 {
+    public Task CallExecuteAsync(CancellationToken cancellationToken);
+    public Task StopAsync();
+
+
     public Task<IEnumerable<QueuedDownload>> GetQueuedDownloads();
 
     public Task<QueuedDownload> EnqueueDownload(string videoId);
@@ -15,5 +20,6 @@ public interface IQueueService
     public Task ClearQueue();
     public Task DeleteFromQueue(string videoId);
 
-    public Task ProcessQueue();
+    public Task ProcessQueue(CancellationToken cancellationTokens);
+    Task ResetQueue();
 }

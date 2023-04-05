@@ -17,20 +17,21 @@ const removeFromQueue = async () => {
 </script>
 
 <template>
-    <div class="queued-item">
+    <div class="queued-item"
+        :class="[item.status === DownloadStatus.Finished ? 'finished' : '', item.progress ? 'active' : '']">
         <img :src="item.video.thumbnail" alt="">
         <div class="info">
             <h3>{{ item.video.title }}</h3>
             <p>{{ formatDateAgo(new Date(item.queuedAt)) }}</p>
             <p>{{ DownloadStatus[item.status] }}</p>
-            <p>{{ item.id }}</p>
+            <!-- <p>{{ item.id }}</p> -->
+            <ProgressBar v-if="item.progress" :value="item.progress!.progress" :text="item.progress!.status" />
         </div>
-        <ProgressBar v-if="item.progress" :value="item.progress!.progress" :text="item.progress!.status" />
-        <div v-if="item.progress" class="progress">
+        <!-- <div v-if="item.progress" class="progress">
             <div>{{ item.progress.status }}</div>
             <div>{{ item.progress.progress }}%</div>
             <div>{{ item.progress.speed }}</div>
-        </div>
+        </div> -->
         <button @click="removeFromQueue">
             <Icon icon="ic:round-delete" />
         </button>
@@ -38,14 +39,27 @@ const removeFromQueue = async () => {
 </template>
 
 <style scoped lang="scss">
+.finished {
+    opacity: .5;
+}
+
+
+
+
 button {
     display: block;
     font-size: 2rem;
     color: red;
 }
 
+.queued-item.active {
+    border: 2px solid red;
+
+}
 
 .queued-item {
+    box-sizing: border-box;
+    border: 2px solid rgba(255, 255, 255, .5);
     display: flex;
     // flex-direction: column;
     align-items: center;
@@ -55,10 +69,15 @@ button {
     background-color: #202020;
     border-radius: 10px;
     gap: 1rem;
+    transition: all .5s ease;
+    padding: .75rem;
+
+
 
     .progress {
         flex-basis: 30%;
     }
+
     .info {
         display: flex;
         flex-direction: column;

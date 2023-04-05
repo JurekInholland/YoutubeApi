@@ -29,6 +29,14 @@ public class YoutubeController : BaseController
         _youtubeExplodeService = youtubeExplodeService;
     }
 
+
+    [HttpGet("searchCompletion", Name = nameof(GetSearchCompletion))]
+    public async Task<IActionResult> GetSearchCompletion(string query)
+    {
+        var result = await _youtubeService.GetSearchCompletion(query);
+        return Ok(result);
+    }
+
     /// <summary>
     /// Get YoutubeExplode info of a youtube video
     /// </summary>

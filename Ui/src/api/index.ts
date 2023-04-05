@@ -1,5 +1,5 @@
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios'
-import type { QueuedDownload } from '@/types'
+import type { QueuedDownload, YoutubeVideo } from '@/types'
 import { apiUrls } from '@/constants'
 
 export default class ApiService {
@@ -13,6 +13,43 @@ export default class ApiService {
         'Content-Type': 'application/json'
       }
     })
+  }
+  public async GetSearchResults(query: string) {
+    const res = await this.request<YoutubeVideo[]>({
+      method: 'GET',
+      url: apiUrls.getSearchResults,
+      params: { query: query }
+    })
+    return res
+  }
+  
+  public async GetSearchCompletion(query: string): Promise<string[] | AxiosError> {
+    const res = await this.request<string[]>({
+      method: 'GET',
+      url: apiUrls.getSearchCompletion,
+      params: { query: query }
+    })
+    console.log(res)
+    return res
+  }
+
+  public async GetVideos(): Promise<YoutubeVideo[] | AxiosError> {
+    const res = await this.request<YoutubeVideo[]>({
+      method: 'GET',
+      url: apiUrls.getVideos
+    })
+    console.log(res)
+    return res
+  }
+
+  public async GetVideoInfo(videoId: string): Promise<YoutubeVideo | AxiosError> {
+    const res = await this.request<YoutubeVideo>({
+      method: 'GET',
+      url: `${apiUrls.getVideoInfo}`,
+      params: { videoId: videoId }
+    })
+    console.log(res)
+    return res
   }
 
   public async GetQueuedDownloads(): Promise<QueuedDownload[] | AxiosError> {

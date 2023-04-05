@@ -11,4 +11,5 @@ public interface IYoutubeService
     public Task<string> GetChannelInfo(string id);
     public Task<dynamic?> GetFullInfo(string id);
 
+    public Task<string?[]> GetSearchCompletion(string query);
 }

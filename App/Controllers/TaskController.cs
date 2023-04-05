@@ -3,13 +3,19 @@ using Services.TaskService;
 
 namespace App.Controllers;
 
+/// <summary>
+/// Handle task scheduling
+/// </summary>
 public class TaskController : BaseController
 {
     private readonly ILogger<TaskController> _logger;
-    private readonly TaskService _taskService;
+    private readonly ITaskService _taskService;
 
 
-    public TaskController(ILogger<TaskController> logger, TaskService taskService)
+    /// <summary>
+    /// TaskController constructor
+    /// </summary>
+    public TaskController(ILogger<TaskController> logger, ITaskService taskService)
     {
         _logger = logger;
         _taskService = taskService;

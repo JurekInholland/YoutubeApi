@@ -24,6 +24,19 @@ public class QueueController : BaseController
         _queueService = queueService;
     }
 
+    /// <summary>
+    /// Debug; Reset queue status of all items
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("reset", Name = nameof(ResetQueue))]
+    public async Task<IActionResult> ResetQueue()
+    {
+
+        await _queueService.ResetQueue();
+        return Ok();
+    }
+
+
 
     /// <summary>
     /// Process the queue
@@ -31,7 +44,7 @@ public class QueueController : BaseController
     [HttpGet("process", Name = nameof(ProcessQueue))]
     public async Task<IActionResult> ProcessQueue()
     {
-        Task.Run(() => _queueService.ProcessQueue());
+        Task.Run(() => _queueService.ProcessQueue(CancellationToken.None));
         // await _queueService.ProcessQueue();
         return Ok();
     }

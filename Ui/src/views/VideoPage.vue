@@ -7,6 +7,9 @@ import type { IRelatedVideo, IVideo } from '@/models';
 import { computed, onMounted, ref, type Ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import VideoPlayer from '@/components/VideoPlayer.vue';
+import { apiService } from '@/constants';
+import { AxiosError } from 'axios';
+import type { YoutubeVideo } from '@/types';
 const route = useRoute()
 
 const parsedId = computed(() => {
@@ -19,26 +22,39 @@ const startTime = computed(() => {
     return route.query.t ? parseInt(route.query.t as string) : 0
 })
 
-const video: Ref<IVideo | undefined> = ref();
+const fetchVideo = async (id: string): Promise<YoutubeVideo | undefined> => {
+    const vid = await apiService.GetVideoInfo(id);
+    if (vid instanceof Error) {
+        console.log("ERROR", vid)
+        return undefined;
+    }
+    else {
+        // video.value = vid;
+        return vid;
+    }
+}
+
+const video: Ref<YoutubeVideo | undefined> = ref();
 
 const vids: Ref<Array<IRelatedVideo>> = ref([])
 
 watch(() => route.path, async () => {
-    console.log("watch parsedId",parsedId.value)
-    video.value = await fetch(`/api/Info/GetVideoInfo?videoId=${parsedId.value}`).then(res => res.json())
+    console.log("watch parsedId", parsedId.value)
+    video.value = await fetchVideo(parsedId.value!)
     // vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${video.value.id}`,).then(res => res.json())
 }, { immediate: true })
 
 watch(() => video.value, async () => {
-    if (video.value != undefined) {
-        vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${video.value.id}`,).then(res => res.json())
-    }
+    // if (video.value != undefined) {
+    //     vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${video.value.id}`,).then(res => res.json())
+    // }
 }, { immediate: true })
 
 onMounted(async () => {
     if (video.value === undefined) {
         console.log("VIDEO IS NULL")
-        video.value = await fetch(`/api/Info/GetVideoInfo?videoId=${parsedId.value}`,).then(res => res.json())
+
+        // video.value = await fetch(`/api/Info/GetVideoInfo?videoId=${parsedId.value}`,).then(res => res.json())
     }
     else {
         console.log("VIDEO IS NOT NULL", video.value)

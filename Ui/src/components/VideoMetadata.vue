@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { IVideo } from '@/models';
+import type { YoutubeVideo } from '@/types';
 import { Icon } from '@iconify/vue';
 import SvgButton from './buttons/SvgButton.vue';
 
-const props = defineProps<{ video: IVideo }>();
+const props = defineProps<{ video: YoutubeVideo }>();
 </script>
 
 <template>
@@ -17,22 +18,22 @@ const props = defineProps<{ video: IVideo }>();
                         alt="avatar" />
 
                 </div>
-                <div class="upload-info">
+            <div class="upload-info">
                 <h3>{{ props.video.uploader }}</h3>
-                <p>{{ props.video.channel_follower_count }} subscribers</p>
-            </div>
+                <!-- <p>{{ props.video.channel_follower_count }} subscribers</p> -->
+                </div>
             </div>
             <div>
                 <SvgButton class="dlbtn" text="Download" view-box="0 0 24 24"
                     path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" />
                 <!-- <button>
-                                                        <Icon icon="clarity:download-line" />
-                                                        Download
-                                                    </button> -->
+                                                            <Icon icon="clarity:download-line" />
+                                                            Download
+                                                        </button> -->
             </div>
         </div>
         <div id="description">
-            <div class="info">{{ props.video.view_count }} views 1 year ago</div>
+            <div class="info">{{ props.video.viewCount }} views 1 year ago</div>
             <p>{{ props.video.description.slice(0, 300) }}</p>
         </div>
     </div>
@@ -78,15 +79,18 @@ h3 {
 #owner img {
     border-radius: 50%;
 }
+
 .upload-info {
     display: flex;
     flex-direction: column;
     gap: 0.33rem;
 }
+
 .info {
     font-weight: 500;
     line-height: 28px;
 }
+
 #description {
     border-radius: 12px;
     line-height: 20px;

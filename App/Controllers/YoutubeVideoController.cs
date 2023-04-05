@@ -35,7 +35,7 @@ public class YoutubeVideoController : BaseController
     {
         _logger.LogInformation("Getting video {VideoId}", videoId);
 
-        YoutubeVideo? video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).FirstOrDefaultAsync();
+        YoutubeVideo? video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).Include(y => y.LocalVideo).FirstOrDefaultAsync();
         if (video is not null) return Ok(video);
 
         _logger.LogInformation("Video {VideoId} not found in database, getting from youtube", videoId);
@@ -50,5 +50,16 @@ public class YoutubeVideoController : BaseController
         }
 
         return Ok(video);
+    }
+
+    /// <summary>
+    /// Get all locally available youtube videos
+    /// </summary>
+    [HttpGet("all", Name = nameof(GetAllYoutubeVideos))]
+    public async Task<IActionResult> GetAllYoutubeVideos()
+    {
+        _logger.LogInformation("Getting all videos");
+        var videos = await _unitOfWork.YoutubeVideos.All().Include(x => x.LocalVideo).Where(y => y.LocalVideo != null).ToListAsync();
+        return Ok(videos);
     }
 }

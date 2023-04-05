@@ -1,9 +1,10 @@
-using System.Diagnostics;
 using System.Globalization;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using Domain;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.DomainModels;
@@ -12,12 +13,15 @@ using Services.YoutubeExplodeService;
 
 namespace Services.QueueService;
 
-public class QueueService : IQueueService
+public class QueueService : BackgroundService, IQueueService
 {
     private readonly ILogger<QueueService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IYoutubeExplodeService _youtubeExplodeService;
     private readonly YoutubeHub _hub;
+
+    private CancellationTokenSource? _cancellationTokenSource;
+
 
     private static readonly Regex DownloadProgressRegex =
         new(
@@ -26,12 +30,27 @@ public class QueueService : IQueueService
 
     private DateTime _lastExecution = DateTime.MinValue;
 
-    public QueueService(ILogger<QueueService> logger, IUnitOfWork unitOfWork, IYoutubeExplodeService youtubeExplodeService, YoutubeHub hub)
+    public QueueService(ILogger<QueueService> logger, IServiceScopeFactory serviceScopeFactory,
+        YoutubeHub hub)
     {
+        IServiceScope scope = serviceScopeFactory.CreateScope();
+
         _logger = logger;
-        _unitOfWork = unitOfWork;
-        _youtubeExplodeService = youtubeExplodeService;
+        _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        _youtubeExplodeService = scope.ServiceProvider.GetRequiredService<IYoutubeExplodeService>();
         _hub = hub;
+    }
+
+    public Task StopAsync()
+    {
+        if (_cancellationTokenSource != null)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+        }
+
+        return Task.CompletedTask;
     }
 
     public async Task<IEnumerable<QueuedDownload>> GetQueuedDownloads()
@@ -45,29 +64,118 @@ public class QueueService : IQueueService
         await _unitOfWork.Save();
     }
 
+    public async Task ClearCompleted()
+    {
+        await _unitOfWork.QueuedDownloads.DeleteByStatus(Enums.DownloadStatus.Finished);
+        await _unitOfWork.Save();
+    }
+
     public async Task DeleteFromQueue(string videoId)
     {
         _unitOfWork.QueuedDownloads.DeleteById(videoId);
         await _unitOfWork.Save();
     }
 
-    public async Task ProcessQueue()
+
+    public async Task ProcessQueue(CancellationToken cancellationToken)
     {
-        await DownloadQueueVideos();
+        try
+        {
+            await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Started);
+
+            await DownloadQueueVideos(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Error);
+
+            _logger.LogError(e, "Error processing queue");
+        }
+        finally
+        {
+            await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Finished);
+
+            Console.WriteLine("QUEUE PROCESSED");
+        }
     }
 
-    private async ValueTask DownloadQueueVideos()
+    public async Task ResetQueue()
+    {
+        var done = await _unitOfWork.QueuedDownloads.GetByStatus(Enums.DownloadStatus.Finished);
+        foreach (var queuedDownload in done)
+        {
+            queuedDownload.Status = Enums.DownloadStatus.Queued;
+        }
+
+        await _unitOfWork.Save();
+    }
+
+    private static async Task<LocalVideo?> ReadDownloadedVideoJson(QueuedDownload queuedDownload)
+    {
+        // var settings = await _unitOfWork.ApplicationSettings.GetSettings();
+
+        var jsonPath =
+            $"data/videos/{queuedDownload.Video.Uploader}/{queuedDownload.Id} - {queuedDownload.Video.Title}.info.json".Replace(":", "_");
+
+        var jsonFile = await File.ReadAllTextAsync(jsonPath);
+        var doc = JsonDocument.Parse(jsonFile);
+
+        int width = doc.RootElement.GetProperty("width").GetInt32();
+        int height = doc.RootElement.GetProperty("height").GetInt32();
+        int fps = doc.RootElement.GetProperty("fps").GetInt32();
+        float vbr = doc.RootElement.GetProperty("vbr").GetSingle();
+        float abr = doc.RootElement.GetProperty("abr").GetSingle();
+        string ext = doc.RootElement.GetProperty("ext").GetString()!;
+        int size = doc.RootElement.GetProperty("filesize_approx").GetInt32();
+
+        var videoPath = $"data/videos/{queuedDownload.Video.Uploader}/{queuedDownload.Video.Id} - {queuedDownload.Video.Title}.{ext}";
+
+        LocalVideo localVideo = new()
+        {
+            Id = queuedDownload.Video.Id,
+            Path = videoPath,
+            Width = width,
+            Height = height,
+            Fps = fps,
+            Vbr = vbr,
+            Abr = abr,
+            Extension = ext,
+            Size = size
+        };
+        return localVideo;
+    }
+
+    private async Task DownloadQueueVideos(CancellationToken cancellationToken)
     {
         Console.WriteLine("DownloadQueueVideos");
         QueuedDownload? queuedDownload = await DequeueDownload();
 
+
         Console.WriteLine("DL " + queuedDownload?.Video.Title);
-        while (queuedDownload is not null)
+
+        string format = "data/videos/%(uploader)s/%(id)s - %(title)s.%(ext)s";
+
+        while (queuedDownload is not null && !cancellationToken.IsCancellationRequested)
         {
-            await YoutubeDownloader.DownloadVideo(queuedDownload.Video.Id, DownloadCallback);
+            await YoutubeDownloader.DownloadVideo(queuedDownload.Video.Id, format, DownloadCallback);
+            LocalVideo? local = await ReadDownloadedVideoJson(queuedDownload);
+
+            if (queuedDownload.Video.LocalVideo is not null)
+            {
+                Console.WriteLine("Video already downloaded");
+
+                _unitOfWork.LocalVideos.Delete(queuedDownload.Video.LocalVideo);
+                // queuedDownload.Video.LocalVideo = null;
+                await _unitOfWork.Save();
+            }
+
+
+            queuedDownload.Video.LocalVideo = local;
+            await _unitOfWork.LocalVideos.Create(local!);
+            _unitOfWork.YoutubeVideos.Update(queuedDownload.Video);
             Console.WriteLine("dl done 1");
             queuedDownload.Status = Enums.DownloadStatus.Finished;
-            // _unitOfWork.QueuedDownloads.Update(queuedDownload);
+            _unitOfWork.QueuedDownloads.Update(queuedDownload);
             await _unitOfWork.Save();
             queuedDownload = await DequeueDownload();
             Console.WriteLine("qd");
@@ -89,7 +197,8 @@ public class QueueService : IQueueService
                 Progress = 100,
                 Status = "finished"
             };
-            await _hub.SendObjects("user", "downloadProgress", finalProgress);
+            // await _hub.SendObject("user", "downloadProgress", finalProgress);
+            await _hub.SendDownloadProgress(finalProgress);
             return;
         }
 
@@ -98,7 +207,8 @@ public class QueueService : IQueueService
         DownloadProgress? progress = ParseProgressLine(content, videoId);
         if (progress is null) return;
 
-        await _hub.SendObjects("user", "downloadProgress", progress);
+        // await _hub.SendObject("user", "downloadProgress", progress);
+        await _hub.SendDownloadProgress(progress);
 
         _lastExecution = DateTime.Now;
     }
@@ -152,6 +262,11 @@ public class QueueService : IQueueService
 
         YoutubeVideo video = await _youtubeExplodeService.GetVideo(videoId);
 
+        if (video.Duration > TimeSpan.FromMinutes(60))
+        {
+            throw new InvalidOperationException("Video is too long");
+        }
+
         QueuedDownload queuedDownload = new()
         {
             Id = videoId,
@@ -176,10 +291,21 @@ public class QueueService : IQueueService
             return null;
         }
 
-        QueuedDownload? queuedDownload = await queuedDownloads.Include(q => q.Video)
+        QueuedDownload? queuedDownload = await queuedDownloads.Include(q => q.Video).ThenInclude(v => v.LocalVideo)
             .OrderBy(x => x.QueuedAt)
             .FirstOrDefaultAsync(x => x.Status == Enums.DownloadStatus.Queued);
 
         return queuedDownload;
+    }
+
+    public async Task CallExecuteAsync(CancellationToken cancellationToken)
+    {
+        await ExecuteAsync(cancellationToken);
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        Console.WriteLine("QUEUESEVICE EXECUTE ASYNC");
+        await DownloadQueueVideos(stoppingToken);
     }
 }

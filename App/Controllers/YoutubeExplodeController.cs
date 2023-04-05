@@ -79,6 +79,7 @@ public class YoutubeExplodeController : BaseController
         try
         {
             var results = await _youtubeExplodeService.GetSearchResults(query);
+            Response.Headers.Add("response-count", results.ToList().Count.ToString());
             _logger.LogInformation("Returning search results for {Query}", query);
             return Ok(results);
         }

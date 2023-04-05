@@ -108,6 +108,18 @@ public class YoutubeService : IYoutubeService
         return "json";
     }
 
+    public async Task<string?[]> GetSearchCompletion(string query)
+    {
+        using var client = new HttpClient();
+        var url = $"https://suggestqueries.google.com/complete/search?client=youtube-reduced&ds=yt&alt=json&q={query}";
+        var res = (await client.GetStringAsync(url)).Replace("window.google.ac.h(", "")[..^1];
+        var json = JsonDocument.Parse(res).RootElement;
+
+        var result = json.EnumerateArray().ToArray()[1].EnumerateArray().Select(x => x[0].GetString()).ToArray();
+
+        return result;
+    }
+
 
     public async Task<string> GetChannelInfo(string id)
     {

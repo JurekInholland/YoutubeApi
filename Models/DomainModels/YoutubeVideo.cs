@@ -31,4 +31,6 @@ public class YoutubeVideo : BaseEntity
     public float Abr { get; set; }
 
     public List<YoutubeComment> Comments { get; set; } = new();
+
+    public virtual LocalVideo? LocalVideo { get; set; }
 }

@@ -1,5 +1,5 @@
 <template>
-    <svg viewBox="0 0 90 20" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
+    <svg viewBox="15 0 90 20" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
         style="pointer-events: none; display: block; width: 100%; height: 100%;">
         <g viewBox="0 0 90 20" preserveAspectRatio="xMidYMid meet" class="style-scope yt-icon">
         <g class="style-scope yt-icon">

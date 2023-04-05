@@ -17,6 +17,72 @@ namespace Domain.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
 
+            modelBuilder.Entity("Models.ApplicationSettings", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DownloadPath")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan>("MaxVideoDuration")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NamingFormat")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1",
+                            DownloadPath = "data/videos",
+                            MaxVideoDuration = new TimeSpan(0, 1, 0, 0, 0),
+                            NamingFormat = "{id} - {title}s{ext}"
+                        });
+                });
+
+            modelBuilder.Entity("Models.DomainModels.LocalVideo", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Abr")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Fps")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("Vbr")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LocalVideos");
+                });
+
             modelBuilder.Entity("Models.DomainModels.QueuedDownload", b =>
                 {
                     b.Property<string>("Id")
@@ -36,49 +102,6 @@ namespace Domain.Migrations
                     b.HasIndex("VideoId");
 
                     b.ToTable("QueuedDownloads");
-                });
-
-            modelBuilder.Entity("Models.DomainModels.RelatedVideo", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelTitle")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("LikeCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("PublishTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Thumbnail")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RelatedVideo");
                 });
 
             modelBuilder.Entity("Models.DomainModels.YoutubeComment", b =>
@@ -222,6 +245,15 @@ namespace Domain.Migrations
                     b.ToTable("YoutubeVideos");
                 });
 
+            modelBuilder.Entity("Models.DomainModels.LocalVideo", b =>
+                {
+                    b.HasOne("Models.DomainModels.YoutubeVideo", null)
+                        .WithOne("LocalVideo")
+                        .HasForeignKey("Models.DomainModels.LocalVideo", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Models.DomainModels.QueuedDownload", b =>
                 {
                     b.HasOne("Models.DomainModels.YoutubeVideo", "Video")
@@ -241,6 +273,8 @@ namespace Domain.Migrations
             modelBuilder.Entity("Models.DomainModels.YoutubeVideo", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("LocalVideo");
                 });
 #pragma warning restore 612, 618
         }

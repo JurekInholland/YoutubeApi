@@ -5,7 +5,10 @@ export const apiUrls = {
   clearQueue: 'Queue/clear',
   deleteFromQueue: 'Queue/',
   addToQueue: 'Queue/add',
-  getVideoInfo: 'YoutubeExplode/video'
+  getVideoInfo: 'YoutubeVideo',
+  getVideos: 'YoutubeVideo/all',
+  getSearchCompletion: 'Youtube/searchCompletion',
+  getSearchResults: 'YoutubeExplode/search'
 }
 
 export const apiService: ApiService = new ApiService()

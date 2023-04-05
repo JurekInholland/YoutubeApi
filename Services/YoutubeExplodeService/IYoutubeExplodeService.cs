@@ -15,5 +15,5 @@ public interface IYoutubeExplodeService
 
     public Task<IChannel> GetChannel(string channelId);
 
-    public Task<IEnumerable<YoutubeSearchResult>> GetSearchResults(string query);
+    public Task<IEnumerable<YoutubeVideo>> GetSearchResults(string query);
 }

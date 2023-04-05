@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
-using Models;
+﻿using System.Text.RegularExpressions;
 
 namespace Rnd;
 
@@ -10,8 +6,9 @@ public static class YoutubeDownloader
 {
     private static readonly Regex VideoIdRegex = new(@"(?:[?&]v=|\/embed\/|\/1\/|\/v\/|https:\/\/(?:www\.)?youtu\.be\/)([^&\n?#]+)");
 
-    // private static DateTime lastExecution = DateTime.Now;
-
+    /// <summary>
+    /// Callback delegate; Pass a method with this signature to the DownloadVideo method to get progress updates
+    /// </summary>
     public delegate Task DownloadProgressCallback(string? progress, string videoId);
 
     public static string ParseVideoId(string routeArgs)
@@ -25,37 +22,12 @@ public static class YoutubeDownloader
         return string.Empty;
     }
 
-
-    private static void ProcessDownloadProgress(string? progress, string videoId, DateTime lastExecution)
-    {
-        // Console.WriteLine("time: " + TimeSpan.FromSeconds(.1));
-
-        if (progress is null) return;
-
-        if (progress.Contains("[Metadata] Adding metadata to"))
-        {
-            Console.WriteLine("DONE!!!");
-            return;
-        }
-
-        // if (delta < TimeSpan.FromSeconds(.2))
-        // {
-        //     // Console.WriteLine("[SKIPPING] " + progress);
-        //     return;
-        // }
-
-        // lastExecution = DateTime.Now;
-        // var prog = ParseProgressLine(progress, videoId);
-        // if (prog is not null)
-        //     Console.WriteLine(prog.ToString());
-    }
-
-    public static async Task DownloadVideo(string videoId,
+    public static async Task DownloadVideo(string videoId, string outputFormat,
         DownloadProgressCallback progressCallback = null!)
     {
         Console.WriteLine("DownloadVideo: " + videoId);
         var cmd =
-            $"yt-dlp --merge-output-format \"mkv\" --embed-metadata -f bestvideo+bestaudio {videoId} -o \"data/%(uploader)s/%(title)s.%(ext)s\"";
+            $"yt-dlp --merge-output-format \"mkv\" --embed-metadata --write-info-json -f bestvideo+bestaudio {videoId} -o \"{outputFormat}\"";
 
 
         await CliCommand.CallCommand(cmd,

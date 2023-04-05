@@ -4,6 +4,17 @@ export enum DownloadStatus {
   Finished = 2,
   Error = 3
 }
+export enum ApplicationTask {
+  ProcessDownloadQueue,
+  ProcessDownloadQueueItem,
+  CleanUpDownloadQueue
+}
+export enum TaskStatus {
+  NeverRan,
+  Started,
+  Finished,
+  Error
+}
 
 export interface YoutubeChannel {
   id: string
@@ -25,8 +36,14 @@ export interface YoutubeVideo {
   title: string
   thumbnail: string
   description: string
+  duration: number
   uploader: string
+  dateAdded: Date
+  uploadDate: Date
   localVideo: LocalVideo
+  likeCount: number
+  dislikeCount: number
+  viewCount: number
 }
 
 export interface QueuedDownload {
@@ -53,4 +70,10 @@ export interface DownloadProgress {
   speed: number
   eta: number
   fragment: string
+}
+
+export interface TaskProgress {
+  time: Date
+  task: ApplicationTask
+  status: TaskStatus
 }

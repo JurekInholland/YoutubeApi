@@ -11,8 +11,8 @@ const router = createRouter({
       meta: { layout: DefaultLayout }
     },
     {
-      path: '/:ytQuery',
-      name: 'home2',
+      path: '/:videoId',
+      name: 'video',
       component: () => import('../views/VideoPage.vue'),
       meta: { layout: DefaultLayout }
     },
@@ -33,6 +33,19 @@ const router = createRouter({
       path: '/queue',
       name: 'queue',
       component: () => import('../views/QueueView.vue')
+    },
+    {
+      path: '/library',
+      name: 'library',
+      component: () => import('../views/LibraryView.vue')
+    },
+    {
+      path: '/results',
+      name: 'results',
+      props: (route) => ({
+        searchQuery: route.query.search_query
+      }),
+      component: () => import('../views/SearchResultView.vue')
     }
   ]
 })
