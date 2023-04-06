@@ -15,7 +15,6 @@ const props = defineProps<{
             <p>Prgress</p>
         </div>
     </div>
-    <!-- <progress :value="value" max="100">{{ text }}</progress> -->
 </template>
 
 <style scoped>

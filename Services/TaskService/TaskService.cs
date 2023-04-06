@@ -9,12 +9,12 @@ public class TaskService : BackgroundService, ITaskService
     private readonly ILogger<TaskService> _logger;
 
     private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(50000));
-    private readonly IQueueService _queueService;
+    // private readonly IQueueService _queueService;
 
     public TaskService(ILogger<TaskService> logger, IQueueService queueService)
     {
         _logger = logger;
-        _queueService = queueService;
+        // _queueService = queueService;
     }
 
     public override async Task StartAsync(CancellationToken cancellationToken)

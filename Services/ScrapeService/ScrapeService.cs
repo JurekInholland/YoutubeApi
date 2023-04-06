@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using Models.DomainModels;
 
 namespace Services.ScrapeService;
@@ -8,9 +9,11 @@ namespace Services.ScrapeService;
 public partial class ScrapeService : IScrapeService
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<ScrapeService> _logger;
 
-    public ScrapeService()
+    public ScrapeService(ILogger<ScrapeService> logger)
     {
+        _logger = logger;
         _httpClient = new HttpClient();
     }
 
@@ -40,7 +43,7 @@ public partial class ScrapeService : IScrapeService
         return (long) (number * multiplier);
     }
 
-    [GeneratedRegex("<title>([^&]+) - YouTube</title>")]
+    [GeneratedRegex(@"<title>([^&]+(?:&quot;[^&]+)*|[^&]+(?:""[^""]+)*?) - YouTube</title>")]
     private static partial Regex VideoTitle();
 
     [GeneratedRegex("""description":{"simpleText":"([^"]+)""")]
@@ -97,7 +100,9 @@ public partial class ScrapeService : IScrapeService
         htmlDocument.LoadHtml(html);
         string sourceCode = htmlDocument.DocumentNode.OuterHtml;
 
-        string title = VideoTitle().Match(sourceCode).Groups[1].Value;
+        // string title = VideoTitle().Match(sourceCode).Groups[1].Value;
+        string title = htmlDocument.DocumentNode.SelectSingleNode("//title")?.InnerText.Trim().Replace(" - YouTube", "") ?? "Not found";
+
         string description = Description().Match(sourceCode).Groups[1].Value;
         string lengthSeconds = LengthSeconds().Match(sourceCode).Groups[1].Value;
         string ownerProfileUrl = OwnerProfile().Match(sourceCode).Groups[1].Value;

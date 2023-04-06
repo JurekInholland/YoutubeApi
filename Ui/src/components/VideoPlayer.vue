@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, type Ref } from 'vue';
-import { Icon } from '@iconify/vue';
 import type { IPlayerState } from '@/models';
 import VolumeButton from '@/components/buttons/VolumeButton.vue';
 import FullscreenButton from '@/components/buttons/FullScreenButton.vue';
@@ -24,7 +23,6 @@ const playerState: Ref<IPlayerState> = ref<IPlayerState>({
     settings: false
 });
 
-// const paused = ref(true);
 
 const previewPos = ref(0);
 
@@ -211,7 +209,7 @@ const progress = computed(() => {
 })
 
 const smoothUpdate = () => {
-    const elapsed = (Date.now() - startDate.value!) / 1000;
+    const elapsed = (Date.now() - startDate.value) / 1000;
     const currentTime = startTime.value! + elapsed;
     // console.log("elapsed", elapsed, "currentTime", currentTime)
     if (currentTime < playerState.value.duration) {
@@ -311,7 +309,7 @@ const smoothUpdate = () => {
 
             </div>
         </div>
-        <video id="vid" src="http://media.w3.org/2010/05/sintel/trailer.mp4" ref="video">
+        <video id="vid" aria-description="video" src="http://media.w3.org/2010/05/sintel/trailer.mp4" ref="video">
         </video>
     </div>
 
@@ -368,6 +366,8 @@ const smoothUpdate = () => {
 
 .video-container.full-screen {
     height: 100%;
+    max-height: 100vh;
+
 }
 
 .video-container.full-screen .video-container.controls {
@@ -377,10 +377,6 @@ const smoothUpdate = () => {
 .video-container.theater {
     max-height: 90vh;
 
-}
-
-.video-container.full-screen {
-    max-height: 100vh;
 }
 
 video {

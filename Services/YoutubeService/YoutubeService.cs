@@ -38,22 +38,6 @@ public class YoutubeService : IYoutubeService
     }
 
 
-    public async Task DownloadQueuedVideos()
-    {
-        var queuedDownloads = await _unitOfWork.QueuedDownloads.All().OrderBy(x => x.QueuedAt).ToListAsync();
-
-        _logger.LogInformation("Found {QueuedDownloadsCount} queued downloads", queuedDownloads.Count);
-
-        foreach (QueuedDownload queuedDownload in queuedDownloads.Where(queuedDownload =>
-                     queuedDownload.Status == Enums.DownloadStatus.Queued))
-        {
-            queuedDownload.Status = Enums.DownloadStatus.Downloading;
-            await DownloadVideo(queuedDownload.Id);
-            _unitOfWork.QueuedDownloads.Update(queuedDownload);
-            await _unitOfWork.Save();
-        }
-    }
-
     /// <summary>
     /// Make a GET request to validate the given Id is a valid Youtube video Id.
     /// https: //webapps.stackexchange.com/a/54448
@@ -124,7 +108,7 @@ public class YoutubeService : IYoutubeService
     public async Task<string?[]> GetSearchCompletion(string query)
     {
         using var client = new HttpClient();
-        var url = $"https://suggestqueries.google.com/complete/search?client=youtube-reduced&ds=yt&alt=json&q={query}";
+        var url = $"https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&alt=json&q={query}&hl=en";
         var res = (await client.GetStringAsync(url)).Replace("window.google.ac.h(", "")[..^1];
         var json = JsonDocument.Parse(res).RootElement;
 

@@ -3,19 +3,53 @@ import YoutubePlayer from '@/components/YoutubePlayer.vue';
 import VideoMetadata from '@/components/VideoMetadata.vue';
 import SidebarVideo from '@/components/SidebarVideo.vue';
 
-import type { IRelatedVideo, IVideo } from '@/models';
+import type { IRelatedVideo } from '@/models';
 import { computed, onMounted, ref, type Ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import VideoPlayer from '@/components/VideoPlayer.vue';
 import { apiService } from '@/constants';
-import { AxiosError } from 'axios';
 import type { YoutubeVideo } from '@/types';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 const route = useRoute()
 const store = useYoutubeStore()
 
+const relatedVideos: Ref<Array<YoutubeVideo>> = ref([])
+
+// onMounted(async() => {
+
+// })
+
+
+watch(() => store.currentVideo, async () => {
+    if (store.currentVideo != undefined) {
+
+        if (relatedVideos.value.length > 0) {
+            // relatedVideos.value = []
+            return;
+        }
+        for (const vidId of store.currentVideo!.relatedVideos) {
+            // todo: move getvideoinfo to store and check store first. if store empty, make request
+
+            const storedVid = store.getVideoById(vidId)
+            if (storedVid) {
+
+                relatedVideos.value.push(storedVid)
+                return
+            }
+
+            const vid = await apiService.GetVideoInfo(vidId)
+            if (vid instanceof Error) {
+                console.log("ERROR", vid)
+            }
+            else {
+                store.videos.push(vid)
+                relatedVideos.value.push(vid)
+            }
+        }
+    }
+}, { immediate: true })
+
 const parsedId = computed(() => {
-    var split = route.path.substring(1).split("?")[0]
+    const split = route.path.substring(1).split("?")[0]
     if (split.length === 11) return split
     return route.query.v ? route.query.v as string : null
 })
@@ -24,21 +58,20 @@ const startTime = computed(() => {
     return route.query.t ? parseInt(route.query.t as string) : 0
 })
 
-const fetchVideo = async (id: string): Promise<YoutubeVideo | undefined> => {
-    const vid = await apiService.GetVideoInfo(id);
-    if (vid instanceof Error) {
-        console.log("ERROR", vid)
-        return undefined;
-    }
-    else {
-        // video.value = vid;
-        return vid;
-    }
-}
+// const fetchVideo = async (id: string): Promise<YoutubeVideo | undefined> => {
+//     const vid = await apiService.GetVideoInfo(id);
+//     if (vid instanceof Error) {
+//         console.log("ERROR", vid)
+//         return undefined;
+//     }
+//     else {
+//         // video.value = vid;
+//         return vid;
+//     }
+// }
 
 // const video: Ref<YoutubeVideo | undefined> = ref();
 
-const vids: Ref<Array<IRelatedVideo>> = ref([])
 
 watch(() => route.path, async () => {
     console.log("watch parsedId", parsedId.value)
@@ -76,8 +109,7 @@ onMounted(async () => {
         </div>
 
         <div id="secondary">
-            <p>sidebar</p>
-            <!-- <SidebarVideo v-for="vid in vids" :video="vid" /> -->
+            <SidebarVideo v-for="vid in relatedVideos" :video="vid" />
         </div>
     </div>
 </template>
@@ -95,7 +127,7 @@ onMounted(async () => {
     gap: 1.5rem;
     margin-inline: auto;
     margin-top: 1.5rem;
-    flex-flow: wrap;
+    flex-wrap: wrap;
 }
 
 #primary {
@@ -109,9 +141,9 @@ onMounted(async () => {
     min-width: 300px;
     flex-basis: 300px;
     flex-grow: 1;
-    background: #333;
+    /* background: #333; */
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 </style>

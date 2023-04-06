@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import MorphButton from './MorphButton.vue';
 import gsap from 'gsap';
 
 const svg = ref<SVGSVGElement | null>(null);
 const onHover = (e: Event) => {
-    // console.log("onHover", e)
-    // if (e.target === svg.value) return;
-    // if (e.target instanceof SVGPathElement) return;
     console.log("TARGET", e.target)
 
     gsap.to(svg.value, {

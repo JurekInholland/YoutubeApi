@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import SearchResult from '@/components/SearchResult.vue';
 import { useYoutubeStore } from '@/stores/youtubeStore';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 
@@ -33,7 +33,6 @@ onMounted(async () => {
 <template >
     <section class="search-results">
         <div class="result-list">
-            <!-- <p v-for="result in store.searchResults">{{ result.title }}</p> -->
             <SearchResult v-for="result in store.searchResults[store.searchQuery]" :video="result" />
 
         </div>

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Models;
 using Models.DomainModels;
 using Rnd;
+using Services.ScrapeService;
 using Services.YoutubeExplodeService;
 
 namespace Services.QueueService;
@@ -19,6 +20,7 @@ public class QueueService : BackgroundService, IQueueService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IYoutubeExplodeService _youtubeExplodeService;
     private readonly YoutubeHub _hub;
+    private readonly IScrapeService _scrapeService;
 
     private CancellationTokenSource? _cancellationTokenSource;
 
@@ -31,7 +33,7 @@ public class QueueService : BackgroundService, IQueueService
     private DateTime _lastExecution = DateTime.MinValue;
 
     public QueueService(ILogger<QueueService> logger, IServiceScopeFactory serviceScopeFactory,
-        YoutubeHub hub)
+        YoutubeHub hub, IScrapeService scrapeService)
     {
         IServiceScope scope = serviceScopeFactory.CreateScope();
 
@@ -39,6 +41,7 @@ public class QueueService : BackgroundService, IQueueService
         _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         _youtubeExplodeService = scope.ServiceProvider.GetRequiredService<IYoutubeExplodeService>();
         _hub = hub;
+        _scrapeService = scrapeService;
     }
 
     public Task StopAsync()
@@ -227,8 +230,8 @@ public class QueueService : BackgroundService, IQueueService
 
         string kind = match.Groups["kind"].Value;
         float progress = float.Parse(match.Groups["progress"].Value, CultureInfo.InvariantCulture);
-        float size = float.Parse(match.Groups["size"].Value);
-        string unit = match.Groups["unit"].Value;
+        // float size = float.Parse(match.Groups["size"].Value);
+        // string unit = match.Groups["unit"].Value;
         float speed = float.Parse(match.Groups["speed"].Value.Replace('.', ','));
         string speedUnit = match.Groups["speedUnit"].Value;
         TimeSpan eta = TimeSpan.ParseExact(match.Groups["eta"].Value, "mm':'ss", CultureInfo.InvariantCulture);
@@ -262,7 +265,8 @@ public class QueueService : BackgroundService, IQueueService
             await _unitOfWork.Save();
         }
 
-        YoutubeVideo video = await _youtubeExplodeService.GetVideo(videoId);
+        // YoutubeVideo video = await _youtubeExplodeService.GetVideo(videoId);
+        YoutubeVideo video = await _scrapeService.ScrapeYoutubeVideo(videoId);
 
         if (video.Duration > TimeSpan.FromMinutes(60))
         {
@@ -283,19 +287,19 @@ public class QueueService : BackgroundService, IQueueService
         try
         {
             await _unitOfWork.Save();
-
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
         }
+
         // queuedDownload.Video = video;
         return queuedDownload;
     }
 
     public async Task<QueuedDownload?> DequeueDownload()
     {
-        var queuedDownloads = _unitOfWork.QueuedDownloads.All().Include(q => q.Video);
+        var queuedDownloads = _unitOfWork.QueuedDownloads.All().Include(q => q.Video).ThenInclude(v => v.YoutubeChannel);
         if (!queuedDownloads.Any())
         {
             return null;

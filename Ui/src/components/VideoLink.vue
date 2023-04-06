@@ -12,7 +12,7 @@ const props = defineProps<{
 
 <template>
     <div class="video-container">
-        <router-link class="outer" :to="{ name: 'video', params: { videoId: video.id } }">
+        <router-link class="outer" :to="{ name: 'video', params: { videoId: video.id ? video.id : '' } }">
             <div class="thumbnail">
                 <div class="runtime">34:56</div>
                 <img :src="video.thumbnail" alt="">
@@ -25,7 +25,7 @@ const props = defineProps<{
                 </a>
                 <div class="text">
                     <h3 class="title">{{ video.title }}</h3>
-                    <router-link to="">{{ video.uploader }}</router-link>
+                    <router-link to="">{{ video.youtubeChannel!.handle }}</router-link>
                     <!-- <p>pannenkoek2012</p> -->
                     <p>{{ formatViews(video.viewCount) }} views <span class="separator"> 2 days ago</span></p>
                 </div>
@@ -108,13 +108,8 @@ const props = defineProps<{
 }
 
 .video-container {
-    // all: unset;
-
     display: flex;
-    // background-color: darkblue;
     height: auto;
-    display: flex;
-    // flex-grow: 1;
 
     img {
         border-radius: 12px;

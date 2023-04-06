@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Models.DomainModels;
 using Moq;
+using Services.ScrapeService;
 using Services.YoutubeExplodeService;
 
 namespace Tests.Controllers;
@@ -16,6 +17,7 @@ public class YoutubeVideoControllerTests
     private IUnitOfWork _unitOfWorkMock = null!;
     private Mock<IYoutubeExplodeService> _youtubeExplodeServiceMock = null!;
     private YoutubeVideoController _youtubeVideoController = null!;
+    private Mock<IScrapeService> _scrapeServiceMock;
 
     [SetUp]
     public void Setup()
@@ -26,10 +28,14 @@ public class YoutubeVideoControllerTests
 
         _logger = new NullLogger<YoutubeVideoController>();
         _youtubeExplodeServiceMock = new Mock<IYoutubeExplodeService>();
+
+        _scrapeServiceMock = new Mock<IScrapeService>();
+
         // _controller = new YoutubeExplodeController(_logger, _youtubeExplodeServiceMock.Object);
         _unitOfWorkMock = new UnitOfWork(new YoutubeAppContext(options));
 
-        _youtubeVideoController = new YoutubeVideoController(_logger, _unitOfWorkMock, _youtubeExplodeServiceMock.Object);
+        _youtubeVideoController =
+            new YoutubeVideoController(_logger, _unitOfWorkMock, _youtubeExplodeServiceMock.Object, _scrapeServiceMock.Object);
     }
 
 

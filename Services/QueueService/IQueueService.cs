@@ -20,6 +20,6 @@ public interface IQueueService
     public Task ClearQueue();
     public Task DeleteFromQueue(string videoId);
 
-    public Task ProcessQueue(CancellationToken cancellationTokens);
+    public Task ProcessQueue(CancellationToken cancellationToken);
     Task ResetQueue();
 }

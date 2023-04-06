@@ -9,6 +9,22 @@ export const addSeperators = (num: number, separator: string = ','): string => {
   })
 }
 
+export const formatDuration = (duration: string): string => {
+  const [hours, minutes, seconds] = duration.split(':').map((t) => Number(t))
+  const time = []
+
+  if (hours) {
+    time.push(hours)
+  }
+  time.push(minutes.toString().padStart(2, '0'), seconds.toString().padStart(2, '0'))
+
+  return time.join(':')
+}
+
+// todo: use this when description is expanded
+export const formatWithNumberSeparator = (num: number): string => {
+  return num.toLocaleString('en-Us')
+}
 export const formatViews = (views: number): string => {
   const suffixes: { [key: number]: string } = {
     1000000000000: 'T',
@@ -29,7 +45,7 @@ export const formatViews = (views: number): string => {
 }
 
 export const formatDateAgo = (date: Date): string => {
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
+  const seconds = Math.ceil((Date.now() - date.getTime()) / 1000)
   const intervals: { [key: string]: number } = {
     year: 31536000,
     month: 2592000,
@@ -42,7 +58,7 @@ export const formatDateAgo = (date: Date): string => {
   for (const interval of Object.keys(intervals)) {
     const divisor = intervals[interval]
     if (seconds >= divisor) {
-      const count = Math.floor(seconds / divisor)
+      const count = Math.ceil(seconds / divisor)
       return `${count} ${interval}${count > 1 ? 's' : ''} ago`
     }
   }

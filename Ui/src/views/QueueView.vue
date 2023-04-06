@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import QueueItem from '@/components/queue/QueueItem.vue';
-import { inject, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { apiService } from '@/constants';
 
 const youtubeStore = useYoutubeStore();
@@ -55,6 +55,7 @@ button {
     background-color: rgba(255, 255, 255, .5);
     padding: .5rem;
     border-radius: .75rem;
+    color : white;
 }
 
 .item-container {
@@ -70,9 +71,7 @@ button {
     margin-left: 1rem;
 }
 
-button {
-    color: white;
-}
+
 
 input {
     background-color: white;

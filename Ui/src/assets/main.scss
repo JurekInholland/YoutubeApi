@@ -7,28 +7,23 @@
 }
 a {
   cursor: pointer;
+  color: unset;
+  text-decoration: none;
 }
 body {
   margin: 0;
-  background-color: black;
+  background-color: #0b0c0d;
+  color: rgba(255, 255, 255, 0.87);
 }
 
 html {
   -webkit-font-smoothing: antialiased;
   font-family: Roboto, Noto, sans-serif;
 }
-body {
-  background-color: #0b0c0d;
-  color: rgba(255, 255, 255, 0.87);
-}
-a {
-  color: unset;
-  text-decoration: none;
-}
+
 input {
   writing-mode: horizontal-tb !important;
   text-rendering: auto;
-  color: fieldtext;
   letter-spacing: normal;
   word-spacing: normal;
   line-height: normal;
@@ -40,23 +35,23 @@ input {
   appearance: auto;
   -webkit-rtl-ordering: logical;
   cursor: text;
-  background-color: field;
-  margin: 0em;
+  margin: 0;
   padding: 1px 2px;
-  border-width: 2px;
-  border-style: inset;
-  border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+  //border-width: 2px;
+  //border-style: inset;
+  //border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
   border-image: initial;
   background-color: transparent;
   color: white;
-  border-color: initial;
+  //border-color: initial;
   box-shadow: none;
   border: none;
   outline: none;
 }
 
 button {
-  display: block;
+  display: flex;
+  gap: 0.5rem;
   background-color: transparent;
   padding: 0;
   margin: 0;
@@ -64,7 +59,11 @@ button {
   border: none;
   outline: none;
   cursor: pointer;
+  svg {
+    font-size: 24px;
+  }
 }
+
 button:focus {
   outline: none;
 }

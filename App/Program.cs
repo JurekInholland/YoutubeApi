@@ -1,16 +1,13 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using App.Middleware;
-using Domain;
 using Domain.Context;
 using Domain.Repositories;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Models;
 using Services;
-using Services.DownloadService;
 using Services.QueueService;
 using Services.ScrapeService;
 using Services.TaskService;
@@ -57,22 +54,14 @@ builder.Services.AddSingleton<YoutubeHub>();
 
 builder.Services.AddScoped<IYoutubeService, YoutubeService>();
 builder.Services.AddScoped<IYoutubeApiService, YoutubeApiService>();
-builder.Services.AddScoped<IDownloadService, DownloadService>();
 builder.Services.AddScoped<IYoutubeExplodeService, YoutubeExplodeService>();
 builder.Services.AddScoped<IThumbnailService, ThumbnailService>();
-builder.Services.AddScoped<IScrapeService, ScrapeService>();
-// builder.Services.AddScoped<IQueueService, QueueService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// builder.Services.AddHostedService<TaskService>();
-
-// builder.Services.AddSingleton<TaskService>();
-// builder.Services.AddHostedService<TaskService>();
-// builder.Services.AddHostedService<QueueService>();
+builder.Services.AddTransient<IScrapeService, ScrapeService>();
 builder.Services.AddTransient<IQueueService, QueueService>();
 builder.Services.AddTransient<ITaskService, TaskService>();
-// builder.Services.AddHostedService<TaskService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ITaskService>());
 
 builder.Services.AddHttpClient();

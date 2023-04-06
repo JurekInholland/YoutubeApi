@@ -10,11 +10,11 @@ public class ApplicationSettingsRepository : RepositoryBase<ApplicationSettings>
 
     public ApplicationSettingsRepository(DbContext context) : base(context)
     {
-        Context = Context;
+        Context = context;
     }
 
     public async Task<ApplicationSettings> GetSettings()
     {
-        return await YoutubeContext.ApplicationSettings.FirstOrDefaultAsync();
+        return await YoutubeContext.ApplicationSettings.FirstOrDefaultAsync() ?? new ApplicationSettings();
     }
 }

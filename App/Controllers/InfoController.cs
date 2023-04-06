@@ -27,6 +27,7 @@ public class InfoController : BaseController
     [HttpGet(nameof(CheckId))]
     public async Task<IActionResult> CheckId(string id)
     {
+        _logger.LogInformation("Checking id: {Id}", id);
         var valid = await _youtubeService.IsValidId(id);
         return Ok(valid ? "Valid" : "Invalid");
     }

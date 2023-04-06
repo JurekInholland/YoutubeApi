@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import type { IRelatedVideo } from '@/models';
+import type { YoutubeVideo } from '@/types';
+import { formatDateAgo, formatViews, formatDuration } from '@/utils';
 import { RouterLink } from 'vue-router'
 
 const props = defineProps<{
-    video: IRelatedVideo
+    video: YoutubeVideo
 }>()
 
 </script>
 
 <template>
-    <router-link :to="'/' + props.video.id" class="video">
+    <router-link :to="{ name: 'video', params: { videoId: video.id } }" class="video">
         <div class="thumbnail">
-            <img :src="props.video.thumbnail" alt="">
-            <div class="play-overlay">a</div>
+            <img :src="props.video.youtubeThumbnailUrl" alt="">
+            <div class="play-overlay">{{ formatDuration(props.video.duration) }}</div>
         </div>
         <div class="details">
             <h3>{{ props.video.title }}</h3>
-            <div>{{ props.video.channelTitle }}</div>
-            <div>111K views {{ props.video.publishTime }}</div>
+            <div>{{ props.video.youtubeChannel?.title }}</div>
+            <div>{{ formatViews(props.video.viewCount) }} views {{ formatDateAgo(new Date(props.video.uploadDate)) }}</div>
         </div>
     </router-link>
 </template>
@@ -32,7 +33,11 @@ const props = defineProps<{
     text-overflow: elipsis;
     white-space: normal;
     margin-bottom: 2px;
+    min-height: 95px;
+}
 
+.video:hover .play-overlay {
+    opacity: 0;
 }
 
 h3 {
@@ -57,6 +62,9 @@ img {
 .thumbnail {
     position: relative;
     display: flex;
+    /* min-width: 200px; */
+    min-width: 168px;
+    height: auto;
     /* justify-content: center;
     align-items: center; */
 }
@@ -68,11 +76,14 @@ img {
     display: flex;
     flex-grow: 1;
     background: rgba(0, 0, 0, 0.8);
-    padding: 0 12px;
+    padding: 0 4px;
+    color: white;
     /* background-color: red;
     width: 46px;
     height: 46px; */
     z-index: 1;
     border-radius: 3px;
+    opacity: 1;
+    transition: opacity .2s ease;
 }
 </style>

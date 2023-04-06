@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.DomainModels;
+using Services.ScrapeService;
 using Services.YoutubeExplodeService;
 using YoutubeExplode.Exceptions;
 
@@ -15,23 +16,49 @@ public class YoutubeVideoController : BaseController
     private readonly ILogger<YoutubeVideoController> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IYoutubeExplodeService _youtubeExplodeService;
+    private readonly IScrapeService _scrapeService;
 
     /// <summary>
     /// YoutubeVideoController constructor
     /// </summary>
     public YoutubeVideoController(ILogger<YoutubeVideoController> logger, IUnitOfWork unitOfWork,
-        IYoutubeExplodeService youtubeExplodeService)
+        IYoutubeExplodeService youtubeExplodeService, IScrapeService scrapeService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _youtubeExplodeService = youtubeExplodeService;
+        _scrapeService = scrapeService;
     }
 
     /// <summary>
-    /// Get a youtube video
+    ///
     /// </summary>
-    [HttpGet("", Name = nameof(GetYoutubeVideo))]
+    /// <param name="videoId"></param>
+    /// <returns></returns>
+    [HttpGet(Name = nameof(GetYoutubeVideo))]
     public async Task<IActionResult> GetYoutubeVideo(string videoId)
+    {
+        YoutubeVideo? video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).Include(y => y.LocalVideo)
+            .Include(x => x.YoutubeChannel).FirstOrDefaultAsync();
+        if (video is not null) return Ok(video);
+
+        try
+        {
+            video = await _scrapeService.ScrapeYoutubeVideo(videoId);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning("EXCEPTION DURING SCRAPE: {Exception}", e);
+        }
+
+        return Ok(video);
+    }
+
+    /// <summary>
+    /// Get a youtube video DEPRECATED
+    /// </summary>
+    [HttpGet("old", Name = nameof(GetYoutubeVideoOld))]
+    public async Task<IActionResult> GetYoutubeVideoOld(string videoId)
     {
         _logger.LogInformation("Getting video {VideoId}", videoId);
 
@@ -60,7 +87,9 @@ public class YoutubeVideoController : BaseController
     public async Task<IActionResult> GetAllYoutubeVideos()
     {
         _logger.LogInformation("Getting all videos");
-        var videos = await _unitOfWork.YoutubeVideos.All().Include(x => x.LocalVideo).Where(y => y.LocalVideo != null).ToListAsync();
+        var videos = await _unitOfWork.YoutubeVideos.All()
+            .Include(x => x.LocalVideo)
+            .Where(y => y.LocalVideo != null).ToListAsync();
         return Ok(videos);
     }
 }

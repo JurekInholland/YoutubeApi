@@ -9,7 +9,7 @@ public class SettingsManager : ISettingsManager
     private readonly ILogger<SettingsManager> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
-    private ApplicationSettings _settings = new();
+    private readonly ApplicationSettings _settings;
 
     public SettingsManager(ILogger<SettingsManager> logger, IUnitOfWork unitOfWork)
     {
@@ -27,6 +27,7 @@ public class SettingsManager : ISettingsManager
 
     public async Task SetSettings(ApplicationSettings settings)
     {
+        _logger.LogInformation("Updating settings");
         settings.Id = _settings.Id;
         _unitOfWork.ApplicationSettings.Update(settings);
         await _unitOfWork.Save();

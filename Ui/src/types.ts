@@ -19,8 +19,10 @@ export enum TaskStatus {
 export interface YoutubeChannel {
   id: string
   title: string
+  handle: string
   channelUrl: string
   thumbnailUrl: string
+  subscribers: string
   videos?: YoutubeVideo[]
 }
 
@@ -36,19 +38,19 @@ export interface YoutubeVideo {
   id: string
   title: string
   thumbnail: string
+  youtubeThumbnailUrl: string
   description: string
-  duration: number
-  uploader: string
-  channelId: string
   dateAdded: Date
+  lastUpdated: Date
   uploadDate: Date
-  localVideo: LocalVideo | null
-  likeCount: number
-  dislikeCount: number
+  duration: string
   viewCount: number
+  likeCount: number
+  categories: string[]
+  relatedVideos: string[]
 
+  localVideo: LocalVideo | null
   youtubeChannel: YoutubeChannel | null
-
 }
 
 export interface QueuedDownload {
@@ -87,5 +89,4 @@ export interface ApplicationSettings {
   showRelatedVideos: boolean
   showComments: boolean
   autoplay: boolean
-  
 }

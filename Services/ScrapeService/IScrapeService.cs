@@ -4,6 +4,6 @@ namespace Services.ScrapeService;
 
 public interface IScrapeService
 {
-    public Task<YoutubeVideo> ScrapeYoutubeVideo(string url);
+    public Task<YoutubeVideo> ScrapeYoutubeVideo(string videoId);
     public Task<string> GetRawHtml(string url);
 }

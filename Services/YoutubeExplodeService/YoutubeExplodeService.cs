@@ -103,7 +103,7 @@ public class YoutubeExplodeService : IYoutubeExplodeService
         Stopwatch stopwatch = new();
         stopwatch.Start();
 
-        await foreach (var batch in _youtube.Search.GetResultBatchesAsync(query))
+        await foreach (var batch in _youtube.Search.GetResultBatchesAsync(query, SearchFilter.Video))
         {
             foreach (ISearchResult searchResult in batch.Items)
             {

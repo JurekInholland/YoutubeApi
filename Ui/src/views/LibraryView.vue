@@ -22,7 +22,6 @@ onMounted(() => {
 <style scoped lang="scss">
 .container {
     display: flex;
-    max-width: 100vw;
     // overflow: hidden;
     justify-content: center;
 

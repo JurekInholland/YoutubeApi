@@ -19,7 +19,7 @@ const removeFromQueue = async () => {
 <template>
     <div class="queued-item"
         :class="[item.status === DownloadStatus.Finished ? 'finished' : '', item.progress ? 'active' : '']">
-        <img :src="item.video.thumbnail" alt="">
+        <img :src="item.video.youtubeThumbnailUrl" alt="">
         <div class="info">
             <router-link :to="`/watch?v=${item.video.id}`">
                 <h3>{{ item.video.title }}</h3>

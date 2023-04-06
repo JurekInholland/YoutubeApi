@@ -2,7 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import DefaultLayout from '../layouts/DefaultLayout.vue'
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
+  
   routes: [
     {
       path: '/',
@@ -57,7 +58,10 @@ const router = createRouter({
       name: 'channel',
       component: () => import('../views/ChannelView.vue')
     }
-  ]
+  ],
+  scrollBehavior() {
+    window.scrollTo(0,0);
+  }
 })
 
 export default router

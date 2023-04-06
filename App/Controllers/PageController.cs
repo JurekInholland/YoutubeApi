@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers;
 
@@ -15,7 +14,7 @@ public class PageController : ControllerBase
     /// Get the index page
     /// </summary>
     [HttpGet("/{route?}", Name = nameof(Index))]
-    public IActionResult Index([FromRoute]string? route = "")
+    public IActionResult Index([FromRoute] string? route = "")
     {
         return new ContentResult
         {
@@ -25,11 +24,4 @@ public class PageController : ControllerBase
             StatusCode = 200
         };
     }
-
-    // [HttpGet("/{route}", Name = nameof(Get))]
-    // public IActionResult Get(string route)
-    // {
-    //     Console.WriteLine("route: " + route);
-    //     return Ok("Route: " + route);
-    // }
 }
