@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -99,6 +100,18 @@ public class YoutubeService : IYoutubeService
         return null;
     }
 
+    public async Task<string> GetMetadata(string id)
+    {
+        var stopWatch = new Stopwatch();
+        stopWatch.Start();
+
+        var cmd = $@"{_youtubeDlPath} --print channel_follower_count {id}";
+        var res = await CliCommand.CallCommandWithReturn(cmd);
+        Console.WriteLine(stopWatch.ElapsedMilliseconds);
+        return res;
+    }
+
+
     public async Task<dynamic?> GetFullInfo(string id)
     {
         if (!await IsValidId(id)) throw new InvalidDataException("Invalid videoId");
@@ -124,8 +137,8 @@ public class YoutubeService : IYoutubeService
     public async Task<string> GetChannelInfo(string id)
     {
         var cmd = $@"{_youtubeDlPath} -j https://www.youtube.com/channel/{id}";
-        // var res = await CliCommand.CallCommand(cmd);
+        var res = await CliCommand.CallCommandWithReturn(cmd);
 
-        return "res";
+        return res;
     }
 }

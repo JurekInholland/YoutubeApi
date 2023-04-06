@@ -2,6 +2,7 @@
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import QueueItem from '@/components/queue/QueueItem.vue';
 import { inject, onMounted, ref } from 'vue';
+import { apiService } from '@/constants';
 
 const youtubeStore = useYoutubeStore();
 
@@ -14,6 +15,11 @@ onMounted(async () => {
 const clearQueue = async () => {
     console.log("clearing queue");
     await youtubeStore.clearQueue();
+};
+
+const processQueue = async () => {
+    console.log("processing queue");
+    await apiService.processQueue();
 };
 
 const enqueue = async () => {
@@ -38,10 +44,19 @@ const enqueue = async () => {
         <button @click="enqueue">
             Enqueue
         </button>
+        <button @click="processQueue">
+            Process Queue
+        </button>
     </div>
 </template>
 
 <style scoped lang="scss">
+button {
+    background-color: rgba(255, 255, 255, .5);
+    padding: .5rem;
+    border-radius: .75rem;
+}
+
 .item-container {
     display: flex;
     flex-direction: column;
@@ -52,6 +67,7 @@ const enqueue = async () => {
 .controls {
     display: flex;
     gap: 1rem;
+    margin-left: 1rem;
 }
 
 button {

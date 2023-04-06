@@ -10,7 +10,9 @@ import VideoPlayer from '@/components/VideoPlayer.vue';
 import { apiService } from '@/constants';
 import { AxiosError } from 'axios';
 import type { YoutubeVideo } from '@/types';
+import { useYoutubeStore } from '@/stores/youtubeStore';
 const route = useRoute()
+const store = useYoutubeStore()
 
 const parsedId = computed(() => {
     var split = route.path.substring(1).split("?")[0]
@@ -34,30 +36,30 @@ const fetchVideo = async (id: string): Promise<YoutubeVideo | undefined> => {
     }
 }
 
-const video: Ref<YoutubeVideo | undefined> = ref();
+// const video: Ref<YoutubeVideo | undefined> = ref();
 
 const vids: Ref<Array<IRelatedVideo>> = ref([])
 
 watch(() => route.path, async () => {
     console.log("watch parsedId", parsedId.value)
-    video.value = await fetchVideo(parsedId.value!)
-    // vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${video.value.id}`,).then(res => res.json())
+    store.fetchCurrentVideo(parsedId.value!)
+    // vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${store.currentVideo.id}`,).then(res => res.json())
 }, { immediate: true })
 
-watch(() => video.value, async () => {
-    // if (video.value != undefined) {
-    //     vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${video.value.id}`,).then(res => res.json())
+watch(() => store.currentVideo, async () => {
+    // if (store.currentVideo != undefined) {
+    //     vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${store.currentVideo.id}`,).then(res => res.json())
     // }
 }, { immediate: true })
 
 onMounted(async () => {
-    if (video.value === undefined) {
+    if (store.currentVideo === undefined) {
         console.log("VIDEO IS NULL")
 
-        // video.value = await fetch(`/api/Info/GetVideoInfo?videoId=${parsedId.value}`,).then(res => res.json())
+        // store.currentVideo = await fetch(`/api/Info/GetVideoInfo?videoId=${parsedId.value}`,).then(res => res.json())
     }
     else {
-        console.log("VIDEO IS NOT NULL", video.value)
+        console.log("VIDEO IS NOT NULL", store.currentVideo)
     }
     // vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${video.id}`,).then(res => res.json())
 })
@@ -69,13 +71,13 @@ onMounted(async () => {
         <div id="primary">
             <YoutubePlayer v-if="parsedId" :video-id="parsedId" :start-time="startTime" />
             <!-- <VideoPlayer src="./vid.webm" color="green" /> -->
-            <VideoMetadata v-if="video" :video="video" />
+            <VideoMetadata v-if="store.currentVideo" :video="store.currentVideo" />
             <div v-else>LOADING</div>
         </div>
 
         <div id="secondary">
             <p>sidebar</p>
-            <SidebarVideo v-for="vid in vids" :video="vid" />
+            <!-- <SidebarVideo v-for="vid in vids" :video="vid" /> -->
         </div>
     </div>
 </template>

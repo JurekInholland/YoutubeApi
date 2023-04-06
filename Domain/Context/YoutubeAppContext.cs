@@ -9,6 +9,8 @@ namespace Domain.Context;
 public class YoutubeAppContext : DbContext
 {
     public DbSet<YoutubeVideo> YoutubeVideos { get; set; } = null!;
+    public DbSet<YoutubeChannel> YoutubeChannels { get; set; } = null!;
+
     public DbSet<QueuedDownload> QueuedDownloads { get; set; } = null!;
     public DbSet<ApplicationSettings> ApplicationSettings { get; set; } = null!;
 
@@ -45,7 +47,22 @@ public class YoutubeAppContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<YoutubeVideo>()
+            .HasOne(a => a.YoutubeChannel)
+            .WithMany(a => a.Videos)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<YoutubeVideo>()
             .Property(e => e.Categories)
+            .HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            .Metadata.SetValueComparer(new ValueComparer<string[]>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToArray()));
+
+        modelBuilder.Entity<YoutubeVideo>()
+            .Property(e => e.RelatedVideos)
             .HasConversion(
                 v => string.Join(',', v),
                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries))

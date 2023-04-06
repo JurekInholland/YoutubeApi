@@ -31,20 +31,22 @@ const onPointerUp = (e: PointerEvent) => {
 </script>
 
 <template>
-    <div>
+    <div class="main" :class="isDown ? 'active' : ''" @pointerdown.prevent="onPointerDown">
         <router-link class="result" :to="'/watch?v=' + video.id">
 
             <div class="thumbnail">
                 <img :src="video.thumbnail" alt="">
             </div>
-            <div class="infos" :class="isDown ? 'active' : ''" @pointerdown.prevent="onPointerDown">
+            <div class="infos">
                 <h3>{{ video.title }}</h3>
-                <p>{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new Date(video.uploadDate)) }}</p>
+                <p class="view-count">{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new
+                    Date(video.uploadDate)) }}</p>
 
-                <div class="author">
-                    <img src="" alt="">
-                    <p>{{ video.uploader }}</p>
-                </div>
+                <router-link class="author" :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+
+                    <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="">
+                    <p>{{ video.youtubeChannel?.title }}</p>
+                </router-link>
                 <p class="description">{{ video.description }}</p>
             </div>
         </router-link>
@@ -53,16 +55,47 @@ const onPointerUp = (e: PointerEvent) => {
 
 
 <style scoped lang="scss">
-.active {
-    background-color: red;
+.view-count {
+    color: rgba(255, 255, 255, .7);
+    margin-bottom: 1rem;
 }
 
+.main {
+    border: 1px solid rgba(255, 255, 255, 0);
+    transition: border-color 1s ease;
+    padding: .25rem;
+}
+
+a:hover {
+    color: white;
+}
+
+.author {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: rgba(255, 255, 255, .7);
+    transition: color .2s ease;
+    margin-bottom: 1rem;
+
+    img {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+}
+
+
+
 .description {
-    height: 1rem;
     overflow: hidden;
     text-overflow: ellipsis;
     flex-grow: 0;
-    word-wrap: break-word;
+    // word-wrap: break-word;
+    line-height: 1rem;
+    max-height: 2rem;
+    color: rgba(255, 255, 255, .7);
 }
 
 .result {
@@ -70,34 +103,47 @@ const onPointerUp = (e: PointerEvent) => {
     // background-color: green;
     gap: 1rem;
     color: unset;
-    text-decoration: none;
 
-    .infos {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+
+}
+
+.infos {
+    display: flex;
+    flex-direction: column;
+    // outline: 1px solid rgba(128, 128, 128, 0);
+    // flex-grow: 0;
+    flex: 1 2 auto;
+    margin-top: .25rem;
+    width: 100%;
+    overflow: hidden;
+    font-size: 12px;
+
+    h3 {
+        font-size: 18px;
+        font-weight: 400;
+        color: white;
+        // font-weight: bold;
+        line-height: 26px;
+        max-height: 52px;
+        margin-bottom: .2rem;
+        // overflow: hidden;
+        // text-overflow: ellipsis;
+        // white-space: nowrap;
         // flex-grow: 0;
-        flex: 1 2 auto;
-        transition: all .5s ease;
-        width: 100%;
-        overflow: hidden;
-
-        h3 {
-            font-size: 18px;
-            font-weight: bold;
-            line-height: 22px;
-            // overflow: hidden;
-            // text-overflow: ellipsis;
-            white-space: nowrap;
-            // flex-grow: 0;
-            // word-wrap: break-word;
-        }
+        // word-wrap: break-word;
     }
 }
 
-.result:focus-within {
-    background-color: red;
+.active {
+    background-color: rgb(54, 54, 54);
+    border: 1px solid rgb(54, 54, 54);
+    transition: none;
+    // outline: 2px solid rgb(128, 128, 128);
 }
+
+// .result:focus-within {
+//     background-color: red;
+// }
 
 .thumbnail {
     aspect-ratio: 16/9;

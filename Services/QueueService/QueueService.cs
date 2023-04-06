@@ -115,7 +115,8 @@ public class QueueService : BackgroundService, IQueueService
         // var settings = await _unitOfWork.ApplicationSettings.GetSettings();
 
         var jsonPath =
-            $"data/videos/{queuedDownload.Video.Uploader}/{queuedDownload.Id} - {queuedDownload.Video.Title}.info.json".Replace(":", "_");
+            $"data/videos/{queuedDownload.Video.YoutubeChannel.Title}/{queuedDownload.Id} - {queuedDownload.Video.Title}.info.json"
+                .Replace(":", "_");
 
         var jsonFile = await File.ReadAllTextAsync(jsonPath);
         var doc = JsonDocument.Parse(jsonFile);
@@ -128,7 +129,8 @@ public class QueueService : BackgroundService, IQueueService
         string ext = doc.RootElement.GetProperty("ext").GetString()!;
         int size = doc.RootElement.GetProperty("filesize_approx").GetInt32();
 
-        var videoPath = $"data/videos/{queuedDownload.Video.Uploader}/{queuedDownload.Video.Id} - {queuedDownload.Video.Title}.{ext}";
+        var videoPath =
+            $"data/videos/{queuedDownload.Video.YoutubeChannel.Title}/{queuedDownload.Video.Id} - {queuedDownload.Video.Title}.{ext}";
 
         LocalVideo localVideo = new()
         {
@@ -278,14 +280,22 @@ public class QueueService : BackgroundService, IQueueService
 
 
         await _unitOfWork.QueuedDownloads.Create(queuedDownload);
-        await _unitOfWork.Save();
+        try
+        {
+            await _unitOfWork.Save();
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
         // queuedDownload.Video = video;
         return queuedDownload;
     }
 
     public async Task<QueuedDownload?> DequeueDownload()
     {
-        var queuedDownloads = _unitOfWork.QueuedDownloads.All();
+        var queuedDownloads = _unitOfWork.QueuedDownloads.All().Include(q => q.Video);
         if (!queuedDownloads.Any())
         {
             return null;

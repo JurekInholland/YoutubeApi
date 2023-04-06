@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.Extensions.Options;
 using Models;
 using Models.DomainModels;
 using Models.Requests;
@@ -18,7 +19,7 @@ public class QueueController : BaseController
     /// <summary>
     /// QueueController constructor
     /// </summary>
-    public QueueController(ILogger<QueueController> logger, IQueueService queueService)
+    public QueueController(ILogger<QueueController> logger, IQueueService queueService, IOptions<JsonOptions> options)
     {
         _logger = logger;
         _queueService = queueService;

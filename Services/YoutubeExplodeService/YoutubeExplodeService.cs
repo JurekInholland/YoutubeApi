@@ -39,7 +39,19 @@ public class YoutubeExplodeService : IYoutubeExplodeService
 
     public async Task<IChannel> GetChannel(string channelId)
     {
-        return await _youtube.Channels.GetAsync(channelId);
+        Channel chan = await _youtube.Channels.GetAsync(channelId);
+
+
+        var url = chan.Thumbnails.First().Url;
+        using var client = new HttpClient();
+
+        var res = await client.GetAsync(url);
+        var bytes = await res.Content.ReadAsByteArrayAsync();
+
+        await File.WriteAllBytesAsync($"data/thumbnails/{chan.Id}.jpg", bytes);
+
+
+        return chan;
     }
 
 
@@ -67,10 +79,21 @@ public class YoutubeExplodeService : IYoutubeExplodeService
 
     public async Task<YoutubeVideo> GetVideo(string url)
     {
-        Video video = await _youtube.Videos.GetAsync(url);
-        // var channel = await _youtube.Channels.GetAsync(video.Author.ChannelId);
+        // Stopwatch stopwatch = new();
+        // stopwatch.Start();
 
-        return YoutubeVideoFactory.FromYoutubeExplode(video);
+        Video video = await _youtube.Videos.GetAsync(url);
+
+        // Console.WriteLine("Got video in " + stopwatch.ElapsedMilliseconds);
+        // Task.Run(() => GetChannel(video.Author.ChannelId));
+        // Console.WriteLine("Got channel in " + stopwatch.ElapsedMilliseconds);
+        //
+        // // var channel = await GetChannel(video.Author.ChannelId);
+
+        var result = YoutubeVideoFactory.FromYoutubeExplode(video);
+        // Console.WriteLine("conversion in " + stopwatch.ElapsedMilliseconds);
+        // stopwatch.Stop();
+        return result;
     }
 
     public async Task<IEnumerable<YoutubeVideo>> GetSearchResults(string query)

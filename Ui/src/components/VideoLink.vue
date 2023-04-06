@@ -130,7 +130,6 @@ const props = defineProps<{
         display: flex;
         flex-direction: column;
         color: rgba(255, 255, 255, .75);
-        text-decoration: none;
         // margin: 1rem;
         gap: .5rem;
     }

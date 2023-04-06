@@ -12,4 +12,5 @@ public interface IYoutubeService
     public Task<dynamic?> GetFullInfo(string id);
 
     public Task<string?[]> GetSearchCompletion(string query);
+    public Task<string> GetMetadata(string id);
 }

@@ -14,6 +14,14 @@ export default class ApiService {
       }
     })
   }
+
+  public async processQueue() {
+    return await this.request({
+      method: 'GET',
+      url: apiUrls.processQueue
+    })
+  }
+
   public async GetSearchResults(query: string) {
     const res = await this.request<YoutubeVideo[]>({
       method: 'GET',
@@ -22,7 +30,7 @@ export default class ApiService {
     })
     return res
   }
-  
+
   public async GetSearchCompletion(query: string): Promise<string[] | AxiosError> {
     const res = await this.request<string[]>({
       method: 'GET',

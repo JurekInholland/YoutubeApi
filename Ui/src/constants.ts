@@ -8,7 +8,8 @@ export const apiUrls = {
   getVideoInfo: 'YoutubeVideo',
   getVideos: 'YoutubeVideo/all',
   getSearchCompletion: 'Youtube/searchCompletion',
-  getSearchResults: 'YoutubeExplode/search'
+  getSearchResults: 'YoutubeExplode/search',
+  processQueue: 'Queue/process',
 }
 
 export const apiService: ApiService = new ApiService()

@@ -21,7 +21,10 @@ const removeFromQueue = async () => {
         :class="[item.status === DownloadStatus.Finished ? 'finished' : '', item.progress ? 'active' : '']">
         <img :src="item.video.thumbnail" alt="">
         <div class="info">
-            <h3>{{ item.video.title }}</h3>
+            <router-link :to="`/watch?v=${item.video.id}`">
+                <h3>{{ item.video.title }}</h3>
+
+            </router-link>
             <p>{{ formatDateAgo(new Date(item.queuedAt)) }}</p>
             <p>{{ DownloadStatus[item.status] }}</p>
             <!-- <p>{{ item.id }}</p> -->
@@ -71,7 +74,7 @@ button {
     gap: 1rem;
     transition: all .5s ease;
     padding: .75rem;
-
+    overflow: hidden;
 
 
     .progress {
@@ -108,6 +111,7 @@ button {
         border-radius: 10px;
         aspect-ratio: 16/9;
         max-width: 180px;
+        flex-shrink: 0;
     }
 }
 </style>

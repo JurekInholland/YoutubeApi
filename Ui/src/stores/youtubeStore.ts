@@ -14,11 +14,13 @@ export const useYoutubeStore = defineStore({
     videos: YoutubeVideo[]
     searchResults: { [key: string]: YoutubeVideo[] }
     searchQuery: string
+    currentVideo: YoutubeVideo | undefined
   } => ({
     queue: [],
     videos: [],
     searchResults: {},
-    searchQuery: ''
+    searchQuery: '',
+    currentVideo: undefined
   }),
 
   getters: {
@@ -32,7 +34,23 @@ export const useYoutubeStore = defineStore({
       // this.searchResults = {}
     },
 
+    async fetchCurrentVideo(videoId: string) {
+      console.log("fetching current video: " + videoId)
+      const found: YoutubeVideo | undefined = Object.values(this.searchResults)
+        .flat()
+        .find((video) => video.id === videoId)
+
+      if (found) {
+        this.currentVideo = found
+        return
+      }
+      const res = await apiService.GetVideoInfo(videoId)
+      if (res instanceof Error) {
+      } else this.currentVideo = res
+    },
+
     async fetchVideos() {
+      console.log('fetching videos')
       const res = await apiService.GetVideos()
       if (res instanceof Error) {
         console.log(res)

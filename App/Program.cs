@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using App.Middleware;
 using Domain;
 using Domain.Context;
@@ -11,7 +12,9 @@ using Models;
 using Services;
 using Services.DownloadService;
 using Services.QueueService;
+using Services.ScrapeService;
 using Services.TaskService;
+using Services.ThumbnailService;
 using Services.Validators;
 using Services.YoutubeApiService;
 using Services.YoutubeExplodeService;
@@ -56,6 +59,8 @@ builder.Services.AddScoped<IYoutubeService, YoutubeService>();
 builder.Services.AddScoped<IYoutubeApiService, YoutubeApiService>();
 builder.Services.AddScoped<IDownloadService, DownloadService>();
 builder.Services.AddScoped<IYoutubeExplodeService, YoutubeExplodeService>();
+builder.Services.AddScoped<IThumbnailService, ThumbnailService>();
+builder.Services.AddScoped<IScrapeService, ScrapeService>();
 // builder.Services.AddScoped<IQueueService, QueueService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -74,7 +79,12 @@ builder.Services.AddHttpClient();
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<YoutubeHub>();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 
 // builder.Services.AddFluentValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<DownloadYoutubeVideoValidator>(); // register validators

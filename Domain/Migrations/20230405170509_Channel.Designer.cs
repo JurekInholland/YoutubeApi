@@ -3,6 +3,7 @@ using System;
 using Domain.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(YoutubeAppContext))]
-    partial class YoutubeAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230405170509_Channel")]
+    partial class Channel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -109,10 +112,6 @@ namespace Domain.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Subscribers")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -203,10 +202,6 @@ namespace Domain.Migrations
 
                     b.Property<long>("LikeCount")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("RelatedVideos")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Thumbnail")
                         .IsRequired()

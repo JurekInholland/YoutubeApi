@@ -13,13 +13,12 @@ const props = defineProps<{ video: YoutubeVideo }>();
 
         <div id="top-row">
             <div id="owner">
-                <div id="avatar">
-                    <img src="https://yt3.ggpht.com/BbWaWU-qyR5nfxxXclxsI8zepppYL5x1agIPGfRdXFm5fPEewDsRRWg4x6P6fdKNhj84GoUpUI4=s48-c-k-c0x00ffffff-no-nd-rj"
-                        alt="avatar" />
-
-                </div>
-            <div class="upload-info">
-                <h3>{{ props.video.uploader }}</h3>
+                <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }" id="avatar">
+                    <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" />
+                </router-link>
+                <div class="upload-info">
+                <h3>{{ props.video.youtubeChannel?.title }}</h3>
+                <p>{{ props.video.youtubeChannel?.id }}</p>
                 <!-- <p>{{ props.video.channel_follower_count }} subscribers</p> -->
                 </div>
             </div>
@@ -27,9 +26,9 @@ const props = defineProps<{ video: YoutubeVideo }>();
                 <SvgButton class="dlbtn" text="Download" view-box="0 0 24 24"
                     path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" />
                 <!-- <button>
-                                                            <Icon icon="clarity:download-line" />
-                                                            Download
-                                                        </button> -->
+                                                                                                    <Icon icon="clarity:download-line" />
+                                                                                                    Download
+                                                                                                </button> -->
             </div>
         </div>
         <div id="description">
@@ -39,9 +38,17 @@ const props = defineProps<{ video: YoutubeVideo }>();
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 * {
     font-family: Roboto;
+}
+
+#avatar {
+    img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+    }
 }
 
 .metadata {

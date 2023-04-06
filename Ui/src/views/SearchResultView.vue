@@ -31,21 +31,20 @@ onMounted(async () => {
 </script>
 
 <template >
-    <section class="search-results" >
-        <div class="result-list" >
-            <h1>{{ route.query.search_query }}</h1>
+    <section class="search-results">
+        <div class="result-list">
             <!-- <p v-for="result in store.searchResults">{{ result.title }}</p> -->
-            <SearchResult 
-                v-for="result in store.searchResults[store.searchQuery]" :video="result" />
+            <SearchResult v-for="result in store.searchResults[store.searchQuery]" :video="result" />
 
         </div>
     </section>
 </template>
 
 <style scoped lang="scss">
-.active {
-    background-color: red;
-}
+// .active {
+//     background-color: red;
+// }
+
 .search-results {
     display: flex;
     flex-direction: column;

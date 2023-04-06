@@ -50,6 +50,28 @@ public class CliCommand
         throw new NotSupportedException("Unsupported platform.");
     }
 
+    public static async Task<string> CallCommandWithReturn(string cmd)
+    {
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+
+        using var process = new Process();
+        Console.WriteLine(sw.ElapsedMilliseconds);
+        process.StartInfo.FileName = shell[0];
+        process.StartInfo.Arguments = $"{shell[1]} \"{cmd}\"";
+        process.StartInfo.UseShellExecute = false;
+
+        process.StartInfo.RedirectStandardOutput = true;
+        process.Start();
+        Console.WriteLine(sw.ElapsedMilliseconds);
+        var res = await process.StandardOutput.ReadToEndAsync();
+        Console.WriteLine(sw.ElapsedMilliseconds);
+        await process.WaitForExitAsync();
+        Console.WriteLine(sw.ElapsedMilliseconds);
+        sw.Stop();
+        return res;
+    }
+
     /// <summary>
     /// Execute a shell command and return the output
     /// </summary>

@@ -48,8 +48,8 @@ public class YoutubeExplodeController : BaseController
     /// <summary>
     /// Get YoutubeExplode info of a youtube channel
     /// </summary>
-    [HttpGet("channel", Name = nameof(GetChannelInfo))]
-    public async Task<IActionResult> GetChannelInfo(string channelId)
+    [HttpGet("channel", Name = nameof(GetExplodeChannelInfo))]
+    public async Task<IActionResult> GetExplodeChannelInfo(string channelId)
     {
         _logger.LogInformation("Getting channel info for {ChannelId}", channelId);
         try

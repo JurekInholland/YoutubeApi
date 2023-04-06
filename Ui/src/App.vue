@@ -8,14 +8,6 @@ import TopBar from './components/TopBar.vue';
   <SignalR />
   <TopBar />
 
-  <div class="wrapper">
-
-    <nav>
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/about">About</RouterLink>
-    </nav>
-  </div>
-
   <RouterView />
 </template>
 

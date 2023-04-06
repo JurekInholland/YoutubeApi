@@ -42,6 +42,7 @@ public class YoutubeVideoController : BaseController
         try
         {
             video = await _youtubeExplodeService.GetVideo(videoId);
+            Task.Run(() => _youtubeExplodeService.GetChannel(video.YoutubeChannel.Id));
         }
         catch (VideoUnavailableException e)
         {

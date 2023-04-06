@@ -31,7 +31,6 @@ const props = defineProps<{
     color: rgba(255, 255, 255, .65);
     text-overflow: elipsis;
     white-space: normal;
-    text-decoration: none;
     margin-bottom: 2px;
 
 }
@@ -54,19 +53,21 @@ img {
     max-width: 168px;
     object-fit: cover;
 }
+
 .thumbnail {
     position: relative;
     display: flex;
     /* justify-content: center;
     align-items: center; */
 }
+
 .play-overlay {
     bottom: .25rem;
     right: .25rem;
     position: absolute;
     display: flex;
     flex-grow: 1;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0, 0, 0, 0.8);
     padding: 0 12px;
     /* background-color: red;
     width: 46px;
