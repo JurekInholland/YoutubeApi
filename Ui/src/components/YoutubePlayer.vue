@@ -5,39 +5,46 @@ const route = useRoute();
 
 const props = defineProps<{
     videoId: string,
-    startTime: number
+    startTime: number,
+    aspectRatio: number
 }>()
 </script>
 
 
 <template>
-    <div class="yotube-wrapper">
-    <youtube-iframe :preserveAspectRatio="true" :video-id="props.videoId" :player-vars="
-        {
-            // https://developers.google.com/youtube/player_parameters#Parameters
-            iv_load_policy: 3,
-            color: 'white',
-            start: props.startTime,
-            modestbranding: 1,
-            enablejsapi: 1,
-
-
-
-
-        }">
+    <div class="yotube-wrapper" :style="{ 'aspect-ratio': props.aspectRatio }">
+        <youtube-iframe :style="{ 'aspect-ratio': props.aspectRatio }" :preserveAspectRatio="true" :video-id="props.videoId"
+            :player-vars="
+                {
+                    // https://developers.google.com/youtube/player_parameters#Parameters
+                    iv_load_policy: 3,
+                    color: 'white',
+                    start: props.startTime,
+                    modestbranding: 1,
+                    enablejsapi: 1,
+                    rel: 0,
+                    autoplay: 1,
+                }">
         </youtube-iframe>
     </div>
 </template>
 
 <style >
-.yotube-wrapper {
-    aspect-ratio: 16/9;
+.youtube-wrapper {
+    background-color: transparent;
+    overflow: hidden;
+    /* max-width: calc(100vh - 12rem) !important; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 iframe {
     width: 100%;
-    /* height: auto; */
     height: 100%;
+
     max-width: unset;
-    aspect-ratio: 16/9;
+    margin: 0 auto;
+    /* aspect-ratio: 16/9; */
 }
 </style>

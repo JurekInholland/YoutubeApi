@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
-import { formatDateAgo, formatViews, formatDuration } from '@/utils';
+import { formatDateAgo, formatViews, formatDuration, formatDescription, formatTitle } from '@/utils';
 import { RouterLink } from 'vue-router'
 
 const props = defineProps<{
@@ -16,14 +16,22 @@ const props = defineProps<{
             <div class="play-overlay">{{ formatDuration(props.video.duration) }}</div>
         </div>
         <div class="details">
-            <h3>{{ props.video.title }}</h3>
-            <div>{{ props.video.youtubeChannel?.title }}</div>
-            <div>{{ formatViews(props.video.viewCount) }} views {{ formatDateAgo(new Date(props.video.uploadDate)) }}</div>
+            <h3 v-html="formatTitle(props.video.title)"></h3>
+            <p>{{ props.video.youtubeChannel?.title }}</p>
+            <p>{{ formatViews(props.video.viewCount) }} views {{ formatDateAgo(props.video.uploadDate) }}</p>
         </div>
     </router-link>
 </template>
 
 <style scoped>
+.details p {
+    max-height: 18px;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+    overflow: hidden;
+    min-width: 133px;
+}
+
 .video {
     display: flex;
     gap: 6px;

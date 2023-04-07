@@ -261,6 +261,7 @@ public class QueueService : BackgroundService, IQueueService
 
         if (existing is not null)
         {
+            _unitOfWork.YoutubeChannels.Delete(existing.YoutubeChannel);
             _unitOfWork.YoutubeVideos.Delete(existing);
             await _unitOfWork.Save();
         }
@@ -290,6 +291,7 @@ public class QueueService : BackgroundService, IQueueService
         }
         catch (Exception e)
         {
+            Console.WriteLine("ERROR");
             Console.WriteLine(e);
         }
 

@@ -96,7 +96,7 @@ export const useYoutubeStore = defineStore({
       } else this.queue = res
     },
     async fetchSearchResults(query: string) {
-      const res = await apiService.GetSearchResults(query)
+      const res = await apiService.getSearchResults(query)
       if (res instanceof Error) {
         console.log(res)
       } else {

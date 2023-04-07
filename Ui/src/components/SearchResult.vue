@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
-import { formatDateAgo, formatViews } from '@/utils';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { formatDateAgo, formatDescription, formatViews } from '@/utils';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 
 const props = defineProps<{
@@ -35,7 +35,7 @@ const onPointerUp = (e: PointerEvent) => {
         <router-link class="result" :to="'/watch?v=' + video.id">
 
             <div class="thumbnail">
-                <img :src="video.thumbnail" alt="">
+                <img :src="video.youtubeThumbnailUrl" alt="">
             </div>
             <div class="infos">
                 <h3>{{ video.title }}</h3>
@@ -47,7 +47,7 @@ const onPointerUp = (e: PointerEvent) => {
                     <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="">
                     <p>{{ video.youtubeChannel?.title }}</p>
                 </router-link>
-                <p class="description">{{ video.description }}</p>
+                <p v-html="formatDescription(video.description)" class="description"></p>
             </div>
         </router-link>
     </div>

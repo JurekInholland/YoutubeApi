@@ -57,6 +57,14 @@ const router = createRouter({
       path: '/@:username',
       name: 'channel',
       component: () => import('../views/ChannelView.vue')
+    },
+    {
+      path: '/playlist',
+      name: 'playlist',
+      props: (route) => ({
+        list: route.query.list
+      }),
+      component: () => import('../views/PlaylistView.vue')
     }
   ],
   scrollBehavior() {

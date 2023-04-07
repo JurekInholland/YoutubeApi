@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import type { YoutubeVideo } from '@/types';
-import { formatViews } from '@/utils';
-import { Icon } from '@iconify/vue';
 import { computed, ref, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { Vue3ToggleButton } from 'vue3-toggle-button'
+import '../../node_modules/vue3-toggle-button/dist/style.css'
+
+import { Icon } from '@iconify/vue';
+
+import type { YoutubeVideo } from '@/types';
+import { formatDateAgo, formatDescription, formatViews, formatDate } from '@/utils';
 import SvgButton from './buttons/SvgButton.vue';
+import ToggleButton from "@/components/ToggleButton.vue";
+
 const router = useRouter();
-const props = defineProps<{ video: YoutubeVideo }>();
+const props = defineProps<{ video: YoutubeVideo, modelValue: boolean }>();
 
 const isDescriptionExpanded: Ref<boolean> = ref(false);
 
@@ -14,14 +20,20 @@ watch(router.currentRoute, (val) => {
     isDescriptionExpanded.value = false;
 })
 
-const cleanedDescription = computed(() => {
-    return props.video.description
-        .replace(/(?<!&)#([\w-]+)/g, '<span class="tag">#$1</span>')
-        .replace(/@(\w+)/g, '<span class="tag"><a href="@$1" target="_blank"> @$1 </a></span>')
+// const formatDescription = computed(() => {
+//     const baseUrl = window.location.origin;
 
-        .replace(/(\\n)/gm, ' <br>')
-        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
-});
+//     return props.video.description
+//         .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag">#$1</span>')
+//         .replaceAll("https://www.youtube.com/", baseUrl + "/")
+//         .replaceAll("https://youtu.be/", baseUrl + "/")
+//         .replaceAll(/@(\w+)/g, '<span class="tag"><a href="@$1" target="_blank"> @$1 </a></span>')
+
+//         .replaceAll(/(\\n)/gm, ' <br>')
+//         .replaceAll(/(\\r)/gm, '')
+//         .replaceAll(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+//         .replaceAll('\\"', '"')
+// });
 
 const cleanedTitle = computed(() => {
     return props.video.title
@@ -38,6 +50,17 @@ const toggleDescription = () => {
 const toggleDescriptionButton = () => {
     isDescriptionExpanded.value = !isDescriptionExpanded.value;
 }
+
+const emits = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void
+}>();
+
+const toggleCinema = () => {
+    console.log('toggleCinema', props.modelValue);
+    // props.cinema = !props.cinema;
+    emits('update:modelValue', !props.modelValue);
+}
+const tog = ref(false);
 </script>
 
 <template>
@@ -64,23 +87,41 @@ const toggleDescriptionButton = () => {
                     <p>{{ formatViews(props.video.likeCount) }}</p>
                 </div>
             </div>
-            <div>
-                <button>
-                    <Icon icon="ph:floppy-disk" />
-                    Backup
+            <div class="buttons">
+                <!-- <button>
+                                                                                                <Icon icon="maki:cinema" />
+                                                                                                Kino mode
+                                                                                            </button>
+                                                                                            <button>
+                                                                                                <Icon icon="ph:floppy-disk" />
+                                                                                                Backup
+                                                                                            </button> -->
+
+                <ToggleButton v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}</ToggleButton>
+
+                <!-- <Vue3ToggleButton v-model="tog" :handleColor="'#cc00cc'"> </Vue3ToggleButton> -->
+                <button class="download-button">
+                    <Icon icon="material-symbols:cloud-download-rounded" />
+
+                </button>
+
+                <button class="cinema-button" @click="toggleCinema">
+                    <Icon icon="maki:cinema" />
                 </button>
                 <!-- <SvgButton class="dlbtn" text="Download" view-box="0 0 24 24"
-                                path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
+                                                                                                                                                                path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
                 <!-- <button>
-                                                                                                                                                                                                                                                                                                                                                                                    <Icon icon="clarity:download-line" />
-                                                                                                                                                                                                                                                                                                                                                                                    Download
-                                                                                                                                                                                                                                                                                                                                                                                </button> -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <Icon icon="clarity:download-line" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Download
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </button> -->
             </div>
         </div>
         <div :class="isDescriptionExpanded ? 'expanded' : 'collapsed'" id="description" @click.stop="toggleDescription">
-            <div class="info">{{ formatViews(props.video.viewCount) }} views 1 year ago</div>
+            <div class="info">{{ formatViews(props.video.viewCount) }} views &nbsp;{{
+                isDescriptionExpanded ? formatDate(props.video.uploadDate) : formatDateAgo(props.video.uploadDate)
+            }}</div>
             <div class="desc">
-                <span v-html="cleanedDescription"></span>
+                <span v-html="formatDescription(props.video.description)"></span>
             </div>
             <button @click.stop="toggleDescriptionButton">{{ isDescriptionExpanded ? 'Show less' : 'Show more' }}</button>
         </div>
@@ -88,6 +129,16 @@ const toggleDescriptionButton = () => {
 </template>
 
 <style scoped lang="scss">
+.buttons {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+
+    button {
+        white-space: nowrap;
+    }
+}
+
 .collapsed {
     max-height: 136px;
     cursor: pointer;
@@ -113,11 +164,15 @@ const toggleDescriptionButton = () => {
 .expanded {
     max-height: 100%;
     cursor: default;
-    overflow: hidden;
+
+    span {
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
 }
 
 .likes {
-    // color: white;
+    color: rgba(255, 255, 255, 0.8);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -140,12 +195,14 @@ const toggleDescriptionButton = () => {
     // align-items: center;
     overflow: hidden;
 
-    p {
+
+    p,
+    span {
         max-height: 100%;
         overflow-wrap: break-word;
-        overflow: auto;
         white-space: pre-wrap;
     }
+
 }
 
 #avatar {
@@ -172,8 +229,9 @@ h3 {
     /* font-size: 1.25rem; */
     font-weight: 500;
     color: rgb(245, 245, 245);
-    height: 22px;
+    // height: 22px;
     line-height: 22px;
+    white-space: pre-wrap;
 }
 
 #top-row {
@@ -189,7 +247,7 @@ h3 {
     align-items: center;
     gap: 0.7rem;
     flex-basis: 100%;
-    margin-bottom: -.2rem;
+    // margin-bottom: -.2rem;
 
 }
 
@@ -204,6 +262,7 @@ h3 {
     p {
         color: rgba(255, 255, 255, 0.6);
         height: 18px;
+        white-space: nowrap;
     }
 }
 
@@ -279,15 +338,65 @@ button {
     line-height: 36px;
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
-    padding-left: 1rem;
-    padding-right: 19px;
+
     border-radius: 18px;
     height: 36px;
     transition: border-color .75s ease;
-
     /* gap: .5rem; */
     /* background-color: red; */
 
+}
+
+.download-button {
+    width: 114px;
+
+    svg {
+        left: 6px;
+    }
+}
+
+.cinema-button {
+    width: 100px;
+
+    svg {
+        left: 6px;
+    }
+}
+
+.download-button::after {
+    aspect-ratio: 1;
+    padding-left: 5px;
+    // padding-left: 1rem;
+    // padding-right: 19px;
+    content: 'Download';
+    max-height: 2rem;
+    white-space: nowrap;
+}
+.cinema-button::after {
+    aspect-ratio: 1;
+    padding-left: 5px;
+    // padding-left: 1rem;
+    // padding-right: 19px;
+    content: 'Cinema';
+    max-height: 2rem;
+    white-space: nowrap;
+}
+
+@media screen and (max-width: 620px) {
+
+    .download-button {
+        width: 36px;
+
+        svg {
+            left: 5px;
+        }
+    }
+
+    .download-button::after {
+        aspect-ratio: unset;
+        content: '';
+        padding: 0;
+    }
 }
 
 button:active {
@@ -322,4 +431,7 @@ button:hover {
     background-color: rgba(255, 255, 255, .2);
 }
 
+.cinema #description,.cinema #top-row {
+    max-width: calc(1280px + 1rem);
+}
 </style>

@@ -7,10 +7,13 @@ public class YoutubeVideo : BaseEntity
     public string Title { get; set; } = "";
     public string Thumbnail { get; set; } = "";
 
-    public string YoutubeThumbnailUrl => $"https://i.ytimg.com/vi/{Id}/maxresdefault.jpg";
+    public string YoutubeThumbnailUrl => $"https://i.ytimg.com/vi/{Id}/hqdefault.jpg";
 
     public string Description { get; set; } = "";
     // public string Uploader { get; set; } = "";
+
+    public int Width { get; set; }
+    public int Height { get; set; }
 
     public DateTime DateAdded { get; set; }
     public DateTime LastUpdated { get; set; }

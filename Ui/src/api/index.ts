@@ -22,7 +22,7 @@ export default class ApiService {
     })
   }
 
-  public async GetSearchResults(query: string) {
+  public async getSearchResults(query: string) {
     const res = await this.request<YoutubeVideo[]>({
       method: 'GET',
       url: apiUrls.getSearchResults,
@@ -47,6 +47,18 @@ export default class ApiService {
       url: apiUrls.getVideos
     })
     console.log(res)
+    return res
+  }
+
+  public async getRelatedVideos(videoIds: string[]): Promise<YoutubeVideo[]> {
+    const res = await this.request<YoutubeVideo[]>({
+      method: 'POST',
+      url: apiUrls.getRelatedVideos,
+      data: videoIds
+    })
+    if (res instanceof Error) {
+      return []
+    }
     return res
   }
 

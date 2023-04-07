@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import PlayPause from '@/components/PlayPause.vue';
 import YoutubePlayer from '@/components/YoutubePlayer.vue';
-import {computed} from 'vue'
+import {computed, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 
 
@@ -18,20 +18,22 @@ const parsedId = computed(() => {
     if (split.length === 11) return split
     return route.query.v ? route.query.v as string : null
 })
-
+onMounted(() => {
+    document.title = "Youtube Clone"
+})
 </script>
 
 <template>
     <main>
         <h1>home</h1>
-        <h1 v-if="!parsedId">Did not find video id in url</h1>
+        <!-- <h1 v-if="!parsedId">Did not find video id in url</h1>
         <p>Route: {{ route }}</p>
         <p v-if="startTime > 0">StartTime:{{ startTime }}</p>
         <p>Path: {{ path }}</p>
-        <p>parseD: {{ parsedId }}</p>
+        <p>parseD: {{ parsedId }}</p> -->
 
-        <YoutubePlayer v-if="parsedId" :videoId="parsedId" :startTime="startTime" playerParameters="color=#333"/>
-        <PlayPause/>
+        <!-- <YoutubePlayer v-if="parsedId" :videoId="parsedId" :startTime="startTime" playerParameters="color=#333"/> -->
+        <!-- <PlayPause/> -->
     </main>
 </template>
 <style scoped>

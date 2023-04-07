@@ -39,6 +39,8 @@ export interface YoutubeVideo {
   title: string
   thumbnail: string
   youtubeThumbnailUrl: string
+  width: number
+  height: number
   description: string
   dateAdded: Date
   lastUpdated: Date

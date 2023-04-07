@@ -1,4 +1,5 @@
 ﻿using Domain.Context;
+using Domain.Repositories.ChannelRepo;
 using Domain.Repositories.LocalVideoRepo;
 using Domain.Repositories.QueuedDownloadRepo;
 using Domain.Repositories.SettingsRepo;
@@ -14,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     private IApplicationSettingsRepository? _applicationSettingsRepository;
     private ILocalVideoRepository? _localVideoRepository;
 
+    private IYoutubeChannelRepository? _youtubeChannelRepository;
 
     public IYoutubeVideoRepository YoutubeVideos => _youtubeVideoRepository ??= new YoutubeVideoRepository(_context);
     public IQueuedDownloadRepository QueuedDownloads => _queuedDownloadRepository ??= new QueuedDownloadRepository(_context);
@@ -22,6 +24,8 @@ public class UnitOfWork : IUnitOfWork
         _applicationSettingsRepository ??= new ApplicationSettingsRepository(_context);
 
     public ILocalVideoRepository LocalVideos => _localVideoRepository ??= new LocalVideoRepository(_context);
+
+    public IYoutubeChannelRepository YoutubeChannels => _youtubeChannelRepository ??= new YoutubeChannelRepository(_context);
 
     public UnitOfWork(YoutubeAppContext context)
     {

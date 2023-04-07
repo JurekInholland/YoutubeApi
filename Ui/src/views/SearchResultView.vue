@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SearchResult from '@/components/SearchResult.vue';
+import Spinner from '@/components/Spinner.vue';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import { onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -19,6 +20,7 @@ watch(() => route.query.search_query, async (newVal, oldVal) => {
     }
 });
 onMounted(async () => {
+    document.title = searchQuery + " - YouTube"
     store.searchQuery = searchQuery;
 
     if (store.searchResults[searchQuery]) {
@@ -32,9 +34,12 @@ onMounted(async () => {
 
 <template >
     <section class="search-results">
-        <div class="result-list">
+        <div class="result-list"
+            v-if="store.searchResults[store.searchQuery] && store.searchResults[store.searchQuery].length > 0">
             <SearchResult v-for="result in store.searchResults[store.searchQuery]" :video="result" />
-
+        </div>
+        <div v-auto-animate v-else class="loading">
+            <Spinner />
         </div>
     </section>
 </template>

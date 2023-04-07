@@ -299,7 +299,8 @@ const onFocusOut = () => {
     z-index: 200;
     border-radius: 12px;
     box-shadow: 0px 5px 12px 0px rgba(0, 0, 0, 0.5);
-
+    min-width: 340px;
+    overflow: hidden;
 
     ul {
         color: black;
@@ -307,11 +308,11 @@ const onFocusOut = () => {
 
         svg {
             color: black;
+            flex-shrink: 0;
         }
 
         li {
-            background-color: aqua;
-
+            white-space: nowrap;
             div {
                 gap: 1.25rem;
                 line-height: 1.5rem;
@@ -457,7 +458,7 @@ display: block;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    min-width: 500px;
+    // min-width: 500px;
     position: sticky;
     top: 0;
     z-index: 1000;

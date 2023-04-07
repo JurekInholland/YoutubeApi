@@ -9,6 +9,7 @@ const youtubeStore = useYoutubeStore();
 const queueInput = ref("");
 
 onMounted(async () => {
+    document.title = "Download Queue"
     await youtubeStore.fetchQueue();
 });
 
