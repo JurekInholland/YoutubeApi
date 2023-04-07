@@ -253,14 +253,14 @@ watch(cinemaMode, (newVal) => {
     flex-direction: column;
     gap: 6px;
 }
-
+.default #secondary {
+    max-width: 402px;
+}
 @media screen and (max-width: 1280px) {
     .default #secondary {
         max-width: unset;
     }
 }
 
-.default #secondary {
-    max-width: 402px;
-}
+
 </style>

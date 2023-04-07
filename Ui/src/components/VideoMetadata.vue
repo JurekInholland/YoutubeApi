@@ -432,6 +432,6 @@ button:hover {
 }
 
 .cinema #description,.cinema #top-row {
-    max-width: calc(1280px + 1rem);
+    max-width: calc(960px);
 }
 </style>
