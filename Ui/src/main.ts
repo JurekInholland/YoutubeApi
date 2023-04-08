@@ -16,7 +16,6 @@ import { useYoutubeStore } from './stores/youtubeStore'
 
 const app = createApp(App)
 app.use(vueClickOutsideElement)
-
 const pinia = createPinia()
 pinia.use(
   createPersistedState({

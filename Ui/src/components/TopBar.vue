@@ -138,13 +138,13 @@ const onFocusOut = () => {
     <div class="ytd-mmasthead">
         <div class="left">
             <!-- <div class="yt-icon">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <g class="style-scope yt-icon">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <path d="M21,6H3V5h18V6z M21,11H3v1h18V11z M21,17H3v1h18V17z" class="style-scope yt-icon"></path>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </g>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </svg>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </div> -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    style="pointer-events: none; display: block; width: 100%; height: 100%;">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <g class="style-scope yt-icon">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <path d="M21,6H3V5h18V6z M21,11H3v1h18V11z M21,17H3v1h18V17z" class="style-scope yt-icon"></path>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </g>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </svg>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div> -->
             <button class="menu-button">
                 <Icon class="menu" icon="mdi-light:menu" @click="menuOpen = !menuOpen" />
             </button>
@@ -181,13 +181,13 @@ const onFocusOut = () => {
                             </li>
 
                             <!-- <li>
-                                                                                                                                                                                                                                                                                                                                                                                                    <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                                                                                                                                                                                                                                                                                                                                                                                    <p>this is a test</p>
-                                                                                                                                                                                                                                                                                                                                                                                                </li>
-                                                                                                                                                                                                                                                                                                                                                                                                <li>
-                                                                                                                                                                                                                                                                                                                                                                                                    <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                                                                                                                                                                                                                                                                                                                                                                                    <p>this is a test</p>
-                                                                                                                                                                                                                                                                                                                                                                                                </li> -->
+                                                                                                                                                                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                                                                                                                                                                                                                                                                                                                                                                                            <p>this is a test</p>
+                                                                                                                                                                                                                                                                                                                                                                                                        </li>
+                                                                                                                                                                                                                                                                                                                                                                                                        <li>
+                                                                                                                                                                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                                                                                                                                                                                                                                                                                                                                                                                            <p>this is a test</p>
+                                                                                                                                                                                                                                                                                                                                                                                                        </li> -->
                         </ul>
                     </div>
                 </div>
@@ -218,6 +218,7 @@ const onFocusOut = () => {
         </div>
     </div>
 
+
     <div class="side-nav" :class="menuOpen ? 'open' : ''">
         <div class="left">
             <button class="menu-button" @click="menuOpen = false">
@@ -232,14 +233,29 @@ const onFocusOut = () => {
         </div>
         <!-- <h1>side</h1> -->
     </div>
+    <!-- <div class="nav-bg">
+    </div> -->
 </template>
 
 
 <style scoped lang="scss">
+.nav-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    z-index: 1000;
+    opacity: .5;
+    transition: opacity .2s ease;
+    pointer-events: none;
+}
+
 .side-nav {
     position: absolute;
     width: 240px;
-    height: 100vh;
+    min-height: 100%;
     left: 0;
     top: 0;
     background-color: black;
@@ -313,6 +329,7 @@ const onFocusOut = () => {
 
         li {
             white-space: nowrap;
+
             div {
                 gap: 1.25rem;
                 line-height: 1.5rem;
@@ -558,3 +575,5 @@ input:focus-within+.results {
 //     display: block;
 // }
 </style>
+
+<style></style>

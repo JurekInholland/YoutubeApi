@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {RouterView} from 'vue-router'
+import { RouterView } from 'vue-router'
 import SignalR from './components/SignalR.vue';
 import TopBar from './components/TopBar.vue';
 </script>
 
 <template>
-    <SignalR/>
-    <TopBar/>
+  <SignalR />
+  <TopBar />
 
-    <RouterView/>
+  <RouterView />
 </template>
 
 <style lang="scss">

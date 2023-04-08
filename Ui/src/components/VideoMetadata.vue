@@ -89,13 +89,13 @@ const tog = ref(false);
             </div>
             <div class="buttons">
                 <!-- <button>
-                                                                                                <Icon icon="maki:cinema" />
-                                                                                                Kino mode
-                                                                                            </button>
-                                                                                            <button>
-                                                                                                <Icon icon="ph:floppy-disk" />
-                                                                                                Backup
-                                                                                            </button> -->
+                                                                                                    <Icon icon="maki:cinema" />
+                                                                                                    Kino mode
+                                                                                                </button>
+                                                                                                <button>
+                                                                                                    <Icon icon="ph:floppy-disk" />
+                                                                                                    Backup
+                                                                                                </button> -->
 
                 <ToggleButton v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}</ToggleButton>
 
@@ -109,11 +109,11 @@ const tog = ref(false);
                     <Icon icon="maki:cinema" />
                 </button>
                 <!-- <SvgButton class="dlbtn" text="Download" view-box="0 0 24 24"
-                                                                                                                                                                path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
+                                                                                                                                                                    path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
                 <!-- <button>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <Icon icon="clarity:download-line" />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Download
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </button> -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <Icon icon="clarity:download-line" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Download
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </button> -->
             </div>
         </div>
         <div :class="isDescriptionExpanded ? 'expanded' : 'collapsed'" id="description" @click.stop="toggleDescription">
@@ -372,6 +372,7 @@ button {
     max-height: 2rem;
     white-space: nowrap;
 }
+
 .cinema-button::after {
     aspect-ratio: 1;
     padding-left: 5px;
@@ -431,7 +432,8 @@ button:hover {
     background-color: rgba(255, 255, 255, .2);
 }
 
-.cinema #description,.cinema #top-row {
+.cinema #description,
+.cinema #top-row {
     max-width: calc(960px);
 }
 </style>

@@ -3,7 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import DefaultLayout from '../layouts/DefaultLayout.vue'
 const router = createRouter({
   history: createWebHistory(),
-  
+
   routes: [
     {
       path: '/',
@@ -65,10 +65,15 @@ const router = createRouter({
         list: route.query.list
       }),
       component: () => import('../views/PlaylistView.vue')
+    },
+    {
+      path: '/new',
+      name: 'new',
+      component: () => import('../views/NewPlayerPage.vue')
     }
   ],
   scrollBehavior() {
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0)
   }
 })
 
