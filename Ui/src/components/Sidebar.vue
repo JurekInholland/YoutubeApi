@@ -16,18 +16,18 @@ const relatedVideos: Ref<Array<YoutubeVideo>> = ref([])
 
 onMounted(async () => {
     console.log("mounted")
-    relatedVideos.value = await store.fetchRelatedVideos();
+    await store.fetchRelatedVideos();
 })
 
 watch(() => store.currentVideo, async () => {
-    relatedVideos.value = await store.fetchRelatedVideos();
+    await store.fetchRelatedVideos();
 }, { immediate: true })
 </script>
 
 <template>
-    <div v-if="relatedVideos.length > 0">
+    <div v-if="store.relatedVideos.length > 0">
         <Teleport :to="props.toggled ? '#primary' : '#tele'">
-            <SidebarVideo v-for="vid of relatedVideos" :video="vid" :key="vid.id" />
+            <SidebarVideo v-for="vid of store.relatedVideos" :video="vid" :key="vid.id" />
         </Teleport>
     </div>
 </template>

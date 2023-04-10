@@ -17,13 +17,15 @@ export const useYoutubeStore = defineStore({
     searchQuery: string
     currentVideo: YoutubeVideo | undefined
     searchSuggestions: string[]
+    relatedVideos: YoutubeVideo[]
   } => ({
     queue: [],
     videos: [],
     searchResults: {},
     searchQuery: '',
     currentVideo: undefined,
-    searchSuggestions: []
+    searchSuggestions: [],
+    relatedVideos: []
   }),
 
   getters: {
@@ -39,6 +41,7 @@ export const useYoutubeStore = defineStore({
     getVideoById:
       (state) =>
       (id: string): YoutubeVideo | undefined => {
+        console.log('getVideoById')
         const video = state.videos.find((video) => video.id === id)
         if (video !== undefined) return video
         const searchResult = Object.values(state.searchResults)
@@ -51,23 +54,29 @@ export const useYoutubeStore = defineStore({
     clearSearchResults() {
       // this.searchResults = {}
     },
-    async fetchRelatedVideos(): Promise<YoutubeVideo[]> {
+    async fetchRelatedVideos() {
+      this.relatedVideos = [];
       let results: YoutubeVideo[] = []
+      let notFound: string[] = []
 
       for (const id of this.currentVideo?.relatedVideos || []) {
         let vid = this.getVideoById(id)
         if (vid) {
-          results.push(vid)
+          this.relatedVideos.push(vid)
           continue
         }
-        var res = await apiService.GetVideoInfo(id)
-        if (res instanceof Error) {
-          continue
-        }
-        this.videos.push(res)
-        results.push(res)
+        notFound.push(id)
       }
-      return results
+      if (notFound.length > 0) {
+        var res = await apiService.getRelatedVideos(notFound)
+        for (const related of res) {
+          this.videos.push(related)
+          this.relatedVideos.push(related)
+        }
+      } else {
+        console.log('no related videos found')
+      }
+      // return results
     },
 
     async setSearchQuery(query: string) {
