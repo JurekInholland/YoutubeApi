@@ -15,6 +15,12 @@ public class ApplicationSettingsRepository : RepositoryBase<ApplicationSettings>
 
     public async Task<ApplicationSettings> GetSettings()
     {
-        return await YoutubeContext.ApplicationSettings.FirstOrDefaultAsync() ?? new ApplicationSettings();
+        return await YoutubeContext.ApplicationSettings.OrderBy(x => x.Id).FirstOrDefaultAsync() ?? new ApplicationSettings();
+    }
+
+    public async Task SetSettings(ApplicationSettings settings)
+    {
+        var existing = await GetSettings();
+        Context.Entry(existing).CurrentValues.SetValues(settings);
     }
 }

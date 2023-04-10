@@ -82,6 +82,7 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task ProcessQueue(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Processing queue");
         try
         {
             await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Started);

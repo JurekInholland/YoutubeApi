@@ -3,6 +3,7 @@ using System;
 using Domain.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(YoutubeAppContext))]
-    partial class YoutubeAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230410030607_SettingsIntervals")]
+    partial class SettingsIntervals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -21,12 +24,6 @@ namespace Domain.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
-
-                    b.Property<long>("BackupIntervalSeconds")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("CheckForNewVideosIntervalSeconds")
-                        .HasColumnType("INTEGER");
 
                     b.Property<long>("CleanUpInterval")
                         .HasColumnType("INTEGER");
@@ -42,12 +39,6 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("UpdateChannelsIntervalSeconds")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UpdateVideosIntervalSeconds")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long>("WorkInterval")
                         .HasColumnType("INTEGER");
 
@@ -59,14 +50,10 @@ namespace Domain.Migrations
                         new
                         {
                             Id = "1",
-                            BackupIntervalSeconds = 0L,
-                            CheckForNewVideosIntervalSeconds = 0L,
                             CleanUpInterval = 5000L,
                             DownloadPath = "data/videos",
                             MaxVideoDuration = new TimeSpan(0, 1, 0, 0, 0),
                             NamingFormat = "{id} - {title}s{ext}",
-                            UpdateChannelsIntervalSeconds = 0L,
-                            UpdateVideosIntervalSeconds = 0L,
                             WorkInterval = 1000L
                         });
                 });

@@ -1,4 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Models;
+using Models.Requests;
+using Services;
 
 namespace App.Controllers;
 
@@ -7,12 +11,21 @@ namespace App.Controllers;
 /// </summary>
 public class SettingsController : BaseController
 {
+    private readonly ISettingsManager _settingsManager;
+
+    public SettingsController(ISettingsManager settingsManager)
+    {
+        _settingsManager = settingsManager;
+    }
+    
     /// <summary>
     ///    Update the settings
     /// </summary>
     [HttpPut("", Name = nameof(UpdateSettings))]
-    public IActionResult UpdateSettings()
+    public async Task<IActionResult> UpdateSettings([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] UpdateSettingsRequest settingsRequest)
     {
+
+        await _settingsManager.SetSettings(settingsRequest);
         return Ok();
     }
 }

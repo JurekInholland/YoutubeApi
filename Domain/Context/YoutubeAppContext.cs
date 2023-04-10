@@ -29,6 +29,8 @@ public class YoutubeAppContext : DbContext
                 DownloadPath = @"data/videos",
                 NamingFormat = "{id} - {title}s{ext}",
                 MaxVideoDuration = TimeSpan.FromMinutes(60),
+                CleanUpInterval = 5000,
+                WorkInterval = 1000
             });
         // modelBuilder.Entity<RelatedVideo>().Property(e => e.Tags)
         //     .HasConversion(
