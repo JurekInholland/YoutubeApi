@@ -116,15 +116,10 @@ const startTime = computed(() => {
 watch(() => route.path, async () => {
     console.log("watch parsedId", parsedId.value)
     store.fetchCurrentVideo(parsedId.value!)
-    // vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${store.currentVideo.id}`,).then(res => res.json())
 }, { immediate: true })
 
 watch(() => store.currentVideo, async () => {
     document.title = formatTitle(store.currentVideo!.title)
-
-    // if (store.currentVideo != undefined) {
-    //     vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${store.currentVideo.id}`,).then(res => res.json())
-    // }
 }, { immediate: true })
 
 onMounted(async () => {

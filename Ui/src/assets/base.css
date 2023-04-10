@@ -36,6 +36,8 @@
     --ytd-searchbox-legacy-border-color: hsl(0, 0%, 18.82%);
     --input-focus-color: rgb(25, 88, 166);
     --darkreader-bg--yt-spec-static-overlay-touch-response: #181a1b;
+    /* CUSTOM */
+    --link-color: #3EA6FF;
 }
 
 

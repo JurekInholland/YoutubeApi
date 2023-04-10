@@ -14,7 +14,7 @@ const searchQuery: Ref<string> = ref('');
 
 const oldQuery: Ref<string> = ref('');
 
-const suggestions: Ref<string[]> = ref([]);
+// const suggestions: Ref<string[]> = ref([]);
 
 const activeIndex: Ref<number> = ref(-1);
 
@@ -54,13 +54,14 @@ const clearSearch = () => {
 
 const onChange = async () => {
 
-    const res = await apiService.GetSearchCompletion(store.searchQuery);
-    if (res instanceof Error) {
-        console.log("ERROR", res)
-    }
-    else {
-        suggestions.value = res;
-    }
+    // const res = await apiService.GetSearchCompletion(store.searchQuery);
+    // if (res instanceof Error) {
+    //     console.log("ERROR", res)
+    // }
+    // else {
+    //     suggestions.value = res;
+    // }
+    store.setSearchQuery(store.searchQuery);
     oldQuery.value = store.searchQuery;
     // console.log("CHANGE", e)
     // store.searchQuery = (e.target as HTMLInputElement).value;
@@ -70,20 +71,20 @@ const onKeyPress = (e: KeyboardEvent) => {
     console.log("KEYPRESS", e.key)
 
     if (e.key === "ArrowDown") {
-        activeIndex.value = (activeIndex.value + 1) % (suggestions.value.length + 1);
-        store.searchQuery = suggestions.value[activeIndex.value] ?? oldQuery.value;
+        activeIndex.value = (activeIndex.value + 1) % (store.searchSuggestions.length + 1);
+        store.searchQuery = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
 
 
     }
     else if (e.key === "ArrowUp") {
-        activeIndex.value = (activeIndex.value - 1 + suggestions.value.length + 1) % (suggestions.value.length + 1);        // activeIndex.value = (activeIndex.value - 1) % (suggestions.value.length + 1);
-        store.searchQuery = suggestions.value[activeIndex.value] ?? oldQuery.value;
+        activeIndex.value = (activeIndex.value - 1 + store.searchSuggestions.length + 1) % (store.searchSuggestions.length + 1);        // activeIndex.value = (activeIndex.value - 1) % (store.searchSuggestions.length + 1);
+        store.searchQuery = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
 
     }
     else if (e.key === "Enter") {
         if (activeIndex.value !== -1) {
-            store.searchQuery = suggestions.value[activeIndex.value];
-            suggestions.value = [];
+            store.searchQuery = store.searchSuggestions[activeIndex.value];
+            store.searchSuggestions = [];
         }
         else {
             store.searchQuery = oldQuery.value;
@@ -123,7 +124,7 @@ const onSearchSuggestionClick = (e: Event) => {
     console.log("SUGGESTION CLICKED")
     const suggestion = (e.target as HTMLDivElement).innerText;
     store.searchQuery = suggestion;
-    suggestions.value = [];
+    store.searchSuggestions = [];
     onSearch();
 }
 
@@ -137,14 +138,6 @@ const onFocusOut = () => {
 <template>
     <div class="ytd-mmasthead">
         <div class="left">
-            <!-- <div class="yt-icon">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    style="pointer-events: none; display: block; width: 100%; height: 100%;">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <g class="style-scope yt-icon">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <path d="M21,6H3V5h18V6z M21,11H3v1h18V11z M21,17H3v1h18V17z" class="style-scope yt-icon"></path>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </g>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </svg>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </div> -->
             <button class="menu-button">
                 <Icon class="menu" icon="mdi-light:menu" @click="menuOpen = !menuOpen" />
             </button>
@@ -167,29 +160,19 @@ const onFocusOut = () => {
                         <Icon style="font-size: 1.5rem;" icon="clarity:close-line" />
 
                     </button>
-                    <div class="results" v-if="searchFocs && suggestions.length > 0 && store.searchQuery.length > 0">
-                        <ul @mouseleave="onMouseLeave">
+                </div>
+                <div class="results" v-if="searchFocs && store.searchSuggestions.length > 0 && store.searchQuery.length > 0">
+                    <ul @mouseleave="onMouseLeave">
+                        <li v-for="(suggestion, index) in store.searchSuggestions" key="index"
+                            :class="{ selected: index === activeIndex }" @mouseover="onResultMouseover(index)"
+                            @click="onSearchSuggestionClick">
+                            <div>
+                                <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
+                                <p>{{ suggestion }}</p>
 
-                            <li v-for="(suggestion, index) in suggestions" key="index"
-                                :class="{ selected: index === activeIndex }" @mouseover="onResultMouseover(index)"
-                                @click="onSearchSuggestionClick">
-                                <div>
-                                    <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                    <p>{{ suggestion }}</p>
-
-                                </div>
-                            </li>
-
-                            <!-- <li>
-                                                                                                                                                                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                                                                                                                                                                                                                                                                                                                                                                                            <p>this is a test</p>
-                                                                                                                                                                                                                                                                                                                                                                                                        </li>
-                                                                                                                                                                                                                                                                                                                                                                                                        <li>
-                                                                                                                                                                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="simple-line-icons:magnifier" />
-                                                                                                                                                                                                                                                                                                                                                                                                            <p>this is a test</p>
-                                                                                                                                                                                                                                                                                                                                                                                                        </li> -->
-                        </ul>
-                    </div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
                 <button class="search-button" @click="onSearch">
                     <Icon style="font-size: 1.1rem;" icon="simple-line-icons:magnifier" />
@@ -231,10 +214,7 @@ const onFocusOut = () => {
                 .juri.lol
             </span>
         </div>
-        <!-- <h1>side</h1> -->
     </div>
-    <!-- <div class="nav-bg">
-    </div> -->
 </template>
 
 
@@ -310,9 +290,9 @@ const onFocusOut = () => {
     top: 2.75rem;
     left: 0;
     // height: 400px;
-    width: 100%;
+    width: calc(100% - 3rem);
     background-color: white;
-    z-index: 200;
+    z-index: 2000;
     border-radius: 12px;
     box-shadow: 0px 5px 12px 0px rgba(0, 0, 0, 0.5);
     min-width: 340px;
@@ -541,6 +521,7 @@ display: block;
     display: flex;
     flex-grow: 1;
     align-items: center;
+    overflow: hidden;
 }
 
 .search {

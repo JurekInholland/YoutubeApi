@@ -82,21 +82,21 @@ const tog = ref(false);
                     <!-- <p>{{ props.video.youtubeChannel?.id }}</p> -->
                     <!-- <p>{{ props.video.channel_follower_count }} subscribers</p> -->
                 </div>
+
+            </div>
+            <div class="buttons">
+                <!-- <button>
+                                                                                                        <Icon icon="maki:cinema" />
+                                                                                                        Kino mode
+                                                                                                    </button>
+                                                                                                    <button>
+                                                                                                        <Icon icon="ph:floppy-disk" />
+                                                                                                        Backup
+                                                                                                    </button> -->
                 <div class="likes">
                     <Icon icon="iconoir:thumbs-up" />
                     <p>{{ formatViews(props.video.likeCount) }}</p>
                 </div>
-            </div>
-            <div class="buttons">
-                <!-- <button>
-                                                                                                    <Icon icon="maki:cinema" />
-                                                                                                    Kino mode
-                                                                                                </button>
-                                                                                                <button>
-                                                                                                    <Icon icon="ph:floppy-disk" />
-                                                                                                    Backup
-                                                                                                </button> -->
-
                 <ToggleButton v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}</ToggleButton>
 
                 <!-- <Vue3ToggleButton v-model="tog" :handleColor="'#cc00cc'"> </Vue3ToggleButton> -->
@@ -109,11 +109,11 @@ const tog = ref(false);
                     <Icon icon="maki:cinema" />
                 </button>
                 <!-- <SvgButton class="dlbtn" text="Download" view-box="0 0 24 24"
-                                                                                                                                                                    path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
+                                                                                                                                                                        path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
                 <!-- <button>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <Icon icon="clarity:download-line" />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Download
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </button> -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <Icon icon="clarity:download-line" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Download
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </button> -->
             </div>
         </div>
         <div :class="isDescriptionExpanded ? 'expanded' : 'collapsed'" id="description" @click.stop="toggleDescription">
@@ -133,7 +133,9 @@ const tog = ref(false);
     display: flex;
     gap: .5rem;
     align-items: center;
-
+    margin-top: 1rem;
+    flex-basis: 100px;
+    flex-grow: 1;
     button {
         white-space: nowrap;
     }
@@ -214,7 +216,9 @@ const tog = ref(false);
 }
 
 .metadata {
-    margin-top: 12px;
+    // margin-top: 12px;
+    width: 100%;
+
 }
 
 h1 {
@@ -239,6 +243,8 @@ h3 {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+
 }
 
 #owner {
@@ -246,7 +252,6 @@ h3 {
     flex-direction: row;
     align-items: center;
     gap: 0.7rem;
-    flex-basis: 100%;
     // margin-bottom: -.2rem;
 
 }
@@ -284,8 +289,9 @@ h3 {
     font-size: 14px;
     position: relative;
     box-sizing: border-box;
-    transition: border-color 1s ease;
+    transition: border-color 1.5s ease;
     border: 1px solid transparent;
+
 
     button {
         border: 1px solid transparent;
@@ -383,7 +389,7 @@ button {
     white-space: nowrap;
 }
 
-@media screen and (max-width: 620px) {
+@media screen and (max-width: 680px) {
 
     .download-button {
         width: 36px;
@@ -409,7 +415,7 @@ button:active {
 <style>
 .tag,
 a {
-    color: #3EA6FF;
+    color: var(--link-color);
 }
 
 .dlbtn {
@@ -432,8 +438,8 @@ button:hover {
     background-color: rgba(255, 255, 255, .2);
 }
 
-.cinema #description,
+/* .cinema #description,
 .cinema #top-row {
     max-width: calc(960px);
-}
+} */
 </style>

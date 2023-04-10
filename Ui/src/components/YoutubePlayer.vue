@@ -29,6 +29,7 @@ const youtube = ref();
         enablejsapi: 1,
         rel: 0,
         autoplay: 1,
+        
 
     }">
         </youtube-iframe>

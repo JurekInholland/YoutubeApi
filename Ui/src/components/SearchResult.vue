@@ -32,24 +32,28 @@ const onPointerUp = (e: PointerEvent) => {
 
 <template>
     <div class="main" :class="isDown ? 'active' : ''" @pointerdown.prevent="onPointerDown">
-        <router-link class="result" :to="'/watch?v=' + video.id">
-
-            <div class="thumbnail">
+        <!-- <router-link class="result" :to="'/watch?v=' + video.id"> -->
+        <div class="result">
+            <router-link :to="'/watch?v=' + video.id" class="thumbnail">
                 <img :src="video.youtubeThumbnailUrl" alt="">
-            </div>
+            </router-link>
             <div class="infos">
-                <h3>{{ video.title }}</h3>
-                <p class="view-count">{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new
-                    Date(video.uploadDate)) }}</p>
+                <router-link :to="'/watch?v=' + video.id">
 
-                <router-link class="author" :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+                    <h3>{{ video.title }}</h3>
+                    <p class="view-count">{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new
+                        Date(video.uploadDate)) }}</p>
 
-                    <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="">
-                    <p>{{ video.youtubeChannel?.title }}</p>
+                    <div class="author" :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+
+                        <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="">
+                        <p>{{ video.youtubeChannel?.title }}</p>
+                    </div>
                 </router-link>
-                <p v-html="formatDescription(video.description)" class="description"></p>
+                <div v-html="formatDescription(video.description)" class="description"></div>
             </div>
-        </router-link>
+            <!-- </router-link> -->
+        </div>
     </div>
 </template>
 
@@ -96,6 +100,8 @@ a:hover {
     line-height: 1rem;
     max-height: 2rem;
     color: rgba(255, 255, 255, .7);
+
+
 }
 
 .result {
@@ -103,7 +109,7 @@ a:hover {
     // background-color: green;
     gap: 1rem;
     color: unset;
-
+    z-index: 1;
 
 }
 
@@ -159,5 +165,15 @@ a:hover {
         height: 100%;
         object-fit: cover;
     }
+}
+</style>
+<style>
+.description {
+    z-index: 100;
+}
+
+.description a {
+    color: var(--link-color);
+    z-index: 100;
 }
 </style>

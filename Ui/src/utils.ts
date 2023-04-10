@@ -18,6 +18,7 @@ export function formatDescription(description: string): string {
   return description
     .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag">#$1</span>')
     .replaceAll('https://www.youtube.com/', baseUrl + '/')
+    .replaceAll('https://youtube.com/', baseUrl + '/')
     .replaceAll('https://youtu.be/', baseUrl + '/')
     .replaceAll(/@(\w+)/g, '<span class="tag"><a href="@$1" target="_blank"> @$1 </a></span>')
 

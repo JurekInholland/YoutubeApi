@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using Models.DomainModels;
+using Moq;
 using Services.ScrapeService;
 
 namespace Tests.Services;
@@ -12,7 +13,10 @@ public class ScrapeServiceTests
     public void Setup()
     {
         var logger = new NullLogger<ScrapeService>();
-        _scraper = new ScrapeService(logger);
+        var clientFactoryMock = new Mock<IHttpClientFactory>(MockBehavior.Strict);
+        clientFactoryMock.Setup(x => x.CreateClient()).Returns(new HttpClient());
+
+        _scraper = new ScrapeService(logger, clientFactoryMock.Object);
     }
 
     /// <summary>

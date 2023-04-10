@@ -14,14 +14,10 @@ const router = createRouter({
     {
       path: '/:videoId',
       name: 'video',
-      component: () => import('../views/VideoPage.vue'),
+      component: () => import('../views/NewPlayerPage.vue'),
       meta: { layout: DefaultLayout }
     },
-    {
-      path: '/videotest',
-      name: 'videotest',
-      component: () => import('../views/LocalPlayerTest.vue')
-    },
+
     {
       path: '/about',
       name: 'about',
@@ -53,11 +49,19 @@ const router = createRouter({
       name: 'settings',
       component: () => import('../views/SettingsView.vue')
     },
+
+    // Channel routes
     {
       path: '/@:username',
       name: 'channel',
       component: () => import('../views/ChannelView.vue')
     },
+    {
+      path: '/c/@:username',
+      name: 'channel',
+      component: () => import('../views/ChannelView.vue')
+    },
+
     {
       path: '/playlist',
       name: 'playlist',

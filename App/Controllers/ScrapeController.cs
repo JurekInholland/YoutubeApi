@@ -55,6 +55,7 @@ public class ScrapeController : BaseController
     [HttpPost("multiple", Name = nameof(ScrapeMultiple))]
     public async Task<IActionResult> ScrapeMultiple([FromBody] string[] videoIds)
     {
+        _logger.LogInformation("Scraping {IdCount} videos", videoIds.Length);
         Task<YoutubeVideo?>[] tasks = new Task<YoutubeVideo?>[videoIds.Length];
         for (int i = 0; i < videoIds.Length; i++)
         {

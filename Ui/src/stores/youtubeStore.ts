@@ -16,12 +16,14 @@ export const useYoutubeStore = defineStore({
     searchResults: { [key: string]: YoutubeVideo[] }
     searchQuery: string
     currentVideo: YoutubeVideo | undefined
+    searchSuggestions: string[]
   } => ({
     queue: [],
     videos: [],
     searchResults: {},
     searchQuery: '',
-    currentVideo: undefined
+    currentVideo: undefined,
+    searchSuggestions: []
   }),
 
   getters: {
@@ -48,6 +50,35 @@ export const useYoutubeStore = defineStore({
   actions: {
     clearSearchResults() {
       // this.searchResults = {}
+    },
+    async fetchRelatedVideos(): Promise<YoutubeVideo[]> {
+      let results: YoutubeVideo[] = []
+
+      for (const id of this.currentVideo?.relatedVideos || []) {
+        let vid = this.getVideoById(id)
+        if (vid) {
+          results.push(vid)
+          continue
+        }
+        var res = await apiService.GetVideoInfo(id)
+        if (res instanceof Error) {
+          continue
+        }
+        this.videos.push(res)
+        results.push(res)
+      }
+      return results
+    },
+
+    async setSearchQuery(query: string) {
+      console.log('set search query')
+      this.searchQuery = query
+      const res = await apiService.GetSearchCompletion(query)
+      if (res instanceof Error) {
+        console.log('ERROR', res)
+      } else {
+        this.searchSuggestions = res
+      }
     },
 
     async fetchCurrentVideo(videoId: string) {

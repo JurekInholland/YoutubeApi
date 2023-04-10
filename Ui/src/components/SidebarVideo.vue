@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
 import { formatDateAgo, formatViews, formatDuration, formatDescription, formatTitle } from '@/utils';
-import { RouterLink } from 'vue-router'
 
 const props = defineProps<{
     video: YoutubeVideo

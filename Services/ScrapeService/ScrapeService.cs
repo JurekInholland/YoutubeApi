@@ -18,35 +18,6 @@ public partial class ScrapeService : IScrapeService
         _httpClient = httpClientFactory.CreateClient();
     }
 
-    public static long ConvertNumberStringToLong(string numberString)
-    {
-        var suffixes = new Dictionary<char, long>
-        {
-            {'K', 1000},
-            {'M', 1000000},
-            {'B', 1000000000},
-            {'T', 1000000000000}
-        };
-
-        char suffix = numberString.Last();
-        long multiplier = 1;
-        if (suffixes.TryGetValue(suffix, out var suffix1))
-        {
-            multiplier = suffix1;
-            numberString = numberString[..^1];
-        }
-
-        if (!double.TryParse(numberString, out double number))
-        {
-            throw new ArgumentException("Invalid number string format");
-        }
-
-        return (long) (number * multiplier);
-    }
-
-    [GeneratedRegex(@"<title>([^&]+(?:&quot;[^&]+)*|[^&]+(?:""[^""]+)*?) - YouTube</title>")]
-    private static partial Regex VideoTitle();
-
     [GeneratedRegex(@"description"":\{""simpleText"":""([^&]+(?:&quot;[^&]+)*|[^&]+(?:""[^""]+)*?)""\},""lengthSeconds")]
     private static partial Regex Description();
 
@@ -68,7 +39,6 @@ public partial class ScrapeService : IScrapeService
     [GeneratedRegex("""accessibilityData":{"label":"([^"]+) likes"}""")]
     private static partial Regex LikeCount();
 
-    // [GeneratedRegex("""owner":{"videoOwnerRenderer":{"thumbnail":{"thumbnails":\[{"url":"(.*?)""")]
     [GeneratedRegex(@"""owner"":\{""videoOwnerRenderer"":\{""thumbnail"":\{""thumbnails"":\[\{""url"":""(.*?)""")]
     private static partial Regex AvatarUrl();
 
@@ -148,11 +118,6 @@ public partial class ScrapeService : IScrapeService
 
         var result = await Task.WhenAll(tasks);
         Console.WriteLine($"ScrapeYoutubeVideo: {stopwatch.ElapsedMilliseconds}ms");
-        // foreach (Match match in matches)
-        // {
-        //     string videoId = match.Value;
-        //     // do something with the video id
-        // }
 
 
         return result.Where(x => x != null).Select(x => x!).ToArray();
@@ -173,7 +138,6 @@ public partial class ScrapeService : IScrapeService
 
         string sourceCode = document.DocumentNode.OuterHtml;
 
-        // string title = VideoTitle().Match(sourceCode).Groups[1].Value;
         string title = document.DocumentNode.SelectSingleNode("//title")?.InnerText.Trim().Replace(" - YouTube", "") ?? "Not found";
 
         string description = Description().Match(sourceCode).Groups[1].Value;
@@ -186,7 +150,7 @@ public partial class ScrapeService : IScrapeService
         string avatarUrl = AvatarUrl().Match(sourceCode).Groups[1].Value;
         string uploadDate = UploadDate().Match(sourceCode).Groups[1].Value;
         string[] keywords = Keywords().Match(sourceCode).Groups[1].Value.Split(", ");
-        string[] relatedVideos = RelatedVideos().Matches(sourceCode).Select(m => m.Groups[1].Value).ToHashSet().ToArray();
+        string[] relatedVideoIds = RelatedVideos().Matches(sourceCode).Select(m => m.Groups[1].Value).ToHashSet().ToArray();
 
         string width = VideoResolution().Match(sourceCode).Groups[1].Value;
         string height = VideoResolution().Match(sourceCode).Groups[2].Value;
@@ -214,7 +178,7 @@ public partial class ScrapeService : IScrapeService
                 LikeCount = long.Parse(likeCount, NumberStyles.AllowThousands, CultureInfo.InvariantCulture),
                 Categories = keywords,
                 Comments = null!,
-                RelatedVideos = relatedVideos.Skip(1).ToArray(),
+                RelatedVideos = relatedVideoIds.Skip(1).ToArray(),
                 YoutubeChannel = new YoutubeChannel
                 {
                     Id = externalChannelId,
@@ -230,8 +194,7 @@ public partial class ScrapeService : IScrapeService
         catch (Exception e)
         {
             Console.WriteLine("EXCEPTION: " + e.Message);
+            return null;
         }
-
-        return null;
     }
 }
