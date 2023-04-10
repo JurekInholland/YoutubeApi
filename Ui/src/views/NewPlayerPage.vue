@@ -5,16 +5,16 @@
             <div class="layout">
                 <div class="player-box">
                     <YoutubePlayer v-if="store.currentVideo" ref="playerEl" v-bind="$attrs" class="player" id="player"
-                        :videoId="store.currentVideo.id" :start-time="30" :aspect-ratio="16 / 9" />
+                        :videoId="store.currentVideo.id" :start-time="startTime" :aspect-ratio="16 / 9" />
 
                 </div>
                 <div class="meta-cont">
                     <VideoMetadata v-if="store.currentVideo" class="metadata" @update:model-value="toggle = !toggle"
                         :modelValue="toggle" :video="store.currentVideo" />
-                    <div id="primary"></div>
+                    <div id="primary" v-auto-animate></div>
                 </div>
             </div>
-            <div id="tele">
+            <div id="tele" v-auto-animate>
             </div>
 
             <!-- <teleport v-if="mounted" :to="toggle ? '#primary' : '#tele'">
@@ -231,6 +231,7 @@ const calculateHeight = (width: number) => {
         // margin: 0 1rem;
         max-width: 1754px;
         flex-basis: 300px;
+        width: 100%;
     }
 
     #regular,

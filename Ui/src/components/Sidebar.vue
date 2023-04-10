@@ -32,5 +32,8 @@ watch(() => store.currentVideo, async () => {
     </div>
 </template>
 
-<style scoped lang="ts">
+<style scoped lang="scss">
+p {
+    width: 100%;
+}
 </style>

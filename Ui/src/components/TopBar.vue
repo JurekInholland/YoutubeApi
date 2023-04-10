@@ -52,24 +52,16 @@ const clearSearch = () => {
     store.searchQuery = '';
 }
 
-const onChange = async () => {
-
-    // const res = await apiService.GetSearchCompletion(store.searchQuery);
-    // if (res instanceof Error) {
-    //     console.log("ERROR", res)
-    // }
-    // else {
-    //     suggestions.value = res;
-    // }
-    store.setSearchQuery(store.searchQuery);
+async function onChange() {
+    console.log("onchange")
     oldQuery.value = store.searchQuery;
+    await store.setSearchQuery(searchQuery.value);
     // console.log("CHANGE", e)
     // store.searchQuery = (e.target as HTMLInputElement).value;
 }
 
-const onKeyPress = (e: KeyboardEvent) => {
+const onKeyPress = async (e: KeyboardEvent) => {
     console.log("KEYPRESS", e.key)
-
     if (e.key === "ArrowDown") {
         activeIndex.value = (activeIndex.value + 1) % (store.searchSuggestions.length + 1);
         store.searchQuery = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
@@ -94,6 +86,7 @@ const onKeyPress = (e: KeyboardEvent) => {
         }
         onSearch();
     }
+
 
 }
 const onResultMouseover = (idx: number) => {
@@ -153,7 +146,7 @@ const onFocusOut = () => {
             <div class="search" :class="searchFocs ? 'active' : ''">
                 <div class="ytd-searchbox">
                     <Icon v-if="searchFocs" style="font-size: 1.5rem;" class="search-icon" icon="system-uicons:search" />
-                    <input @input="onChange" @focusin="searchFocs = true" @focusout="onFocusOut" v-model="store.searchQuery"
+                    <input @input="onChange" @focusin="searchFocs = true" @focusout="onFocusOut" v-model="searchQuery"
                         placeholder="Search" type="text" @keydown="onKeyPress">
 
                     <button class="close" v-if="store.searchQuery !== ''" @click="clearSearch">
@@ -161,7 +154,8 @@ const onFocusOut = () => {
 
                     </button>
                 </div>
-                <div class="results" v-if="searchFocs && store.searchSuggestions.length > 0 && store.searchQuery.length > 0">
+                <div class="results"
+                    v-if="searchFocs && store.searchSuggestions.length > 0 && store.searchQuery.length > 0">
                     <ul @mouseleave="onMouseLeave">
                         <li v-for="(suggestion, index) in store.searchSuggestions" key="index"
                             :class="{ selected: index === activeIndex }" @mouseover="onResultMouseover(index)"
