@@ -160,6 +160,7 @@ const calculateHeight = (width: number) => {
     // height: calc(100vw * 9 / 16);
     // max-height: v-bind(calcH);
     // max-height: calc(100% - 2 * var(--gutter-width));
+    max-height: var(--max-p-height);
     flex-basis: 100%;
     // width: 100%;
     // height: auto;
