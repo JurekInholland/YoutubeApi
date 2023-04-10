@@ -12,16 +12,15 @@ const props = defineProps<{
 
 <template>
     <div class="video-container">
-        <router-link class="outer" :to="{ name: 'video', params: { videoId: video.id ? video.id : '' } }">
+        <router-link v-if="video.id" class="outer" :to="{ name: 'video', params: { videoId: video.id ? video.id : '' } }">
             <div class="thumbnail">
                 <div class="runtime">34:56</div>
-                <img :src="video.thumbnail" alt="">
+                <img :src="video.youtubeThumbnailUrl" alt="">
             </div>
 
             <div class="infos">
                 <a href="">
-                    <img src="https://yt3.ggpht.com/ytc/AL5GRJUgyRA46lbtnS4Iz8N7ZCpwRCDxnKynEsPMVCka=s68-c-k-c0x00ffffff-no-rj"
-                        alt="" />
+                    <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" />
                 </a>
                 <div class="text">
                     <h3 class="title">{{ video.title }}</h3>

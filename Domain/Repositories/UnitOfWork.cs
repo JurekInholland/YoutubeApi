@@ -3,7 +3,7 @@ using Domain.Repositories.ChannelRepo;
 using Domain.Repositories.LocalVideoRepo;
 using Domain.Repositories.QueuedDownloadRepo;
 using Domain.Repositories.SettingsRepo;
-using Domain.Repositories.YoutubeVideo;
+using Domain.Repositories.YoutubeVideoRepo;
 
 namespace Domain.Repositories;
 

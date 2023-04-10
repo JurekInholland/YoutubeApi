@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Repositories.YoutubeVideo;
+namespace Domain.Repositories.YoutubeVideoRepo;
 
 public class YoutubeVideoRepository : RepositoryBase<Models.DomainModels.YoutubeVideo>, IYoutubeVideoRepository
 {

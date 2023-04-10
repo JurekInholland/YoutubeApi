@@ -13,4 +13,5 @@ public interface IYoutubeService
 
     public Task<string?[]> GetSearchCompletion(string query);
     public Task<string> GetMetadata(string id);
+    public Task<IEnumerable<YoutubeVideo>> GetLocalVideos();
 }

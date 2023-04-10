@@ -95,6 +95,14 @@ public class YoutubeService : IYoutubeService
         return res;
     }
 
+    public async Task<IEnumerable<YoutubeVideo>> GetLocalVideos()
+    {
+        return await _unitOfWork.YoutubeVideos.All().Where(y => y.LocalVideo != null)
+            .Include(y => y.LocalVideo)
+            .Include(y => y.YoutubeChannel)
+            .ToListAsync();
+    }
+
 
     public async Task<dynamic?> GetFullInfo(string id)
     {

@@ -9,4 +9,6 @@ public interface IQueuedDownloadRepository : IRepositoryBase<QueuedDownload>
     public Task<IEnumerable<QueuedDownload>> GetByStatus(Enums.DownloadStatus status);
 
     public Task DeleteByStatus(Enums.DownloadStatus status);
+
+    public Task EnqueueDownload(QueuedDownload queuedDownload);
 }

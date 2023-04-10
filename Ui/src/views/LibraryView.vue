@@ -6,7 +6,7 @@ import { onMounted } from 'vue';
 const store = useYoutubeStore();
 
 onMounted(() => {
-    store.fetchVideos();
+    // store.fetchVideos();
 })
 
 </script>
@@ -14,7 +14,7 @@ onMounted(() => {
 <template>
     <div class="container">
         <div class="content">
-            <VideoLink v-for="video in store.orderedVideos" :video="video" />
+            <VideoLink v-for="video of store.orderedVideos" :video="video" />
         </div>
     </div>
 </template>
@@ -22,20 +22,23 @@ onMounted(() => {
 <style scoped lang="scss">
 .container {
     display: flex;
+    flex-grow: 1;
     // overflow: hidden;
-    justify-content: center;
+    // justify-content: center;
 
     padding: 1rem;
-    max-width: 2256px;
+    // max-width: 2256px;
+    width: 100vw;
     // background-color: red;
-    margin: 0 auto;
+    // margin: 0 auto;
 
     .content {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         flex-direction: row;
-
+        width: 100%;
         gap: 1rem;
+        margin: 1rem;
     }
 
 

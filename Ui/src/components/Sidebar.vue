@@ -16,7 +16,7 @@ const relatedVideos: Ref<Array<YoutubeVideo>> = ref([])
 
 onMounted(async () => {
     console.log("mounted")
-    await store.fetchRelatedVideos();
+    // await store.fetchRelatedVideos();
 })
 
 watch(() => store.currentVideo, async () => {

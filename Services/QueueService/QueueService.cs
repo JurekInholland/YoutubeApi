@@ -17,8 +17,8 @@ namespace Services.QueueService;
 public class QueueService : BackgroundService, IQueueService
 {
     private readonly ILogger<QueueService> _logger;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IYoutubeExplodeService _youtubeExplodeService;
+    private IUnitOfWork _unitOfWork;
+    // private readonly IYoutubeExplodeService _youtubeExplodeService;
     private readonly YoutubeHub _hub;
     private readonly IScrapeService _scrapeService;
 
@@ -31,15 +31,14 @@ public class QueueService : BackgroundService, IQueueService
 
 
     private DateTime _lastExecution = DateTime.MinValue;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public QueueService(ILogger<QueueService> logger, IServiceScopeFactory serviceScopeFactory,
         YoutubeHub hub, IScrapeService scrapeService)
     {
-        IServiceScope scope = serviceScopeFactory.CreateScope();
-
+        _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
-        _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        _youtubeExplodeService = scope.ServiceProvider.GetRequiredService<IYoutubeExplodeService>();
+        // _youtubeExplodeService = scope.ServiceProvider.GetRequiredService<IYoutubeExplodeService>();
         _hub = hub;
         _scrapeService = scrapeService;
     }
@@ -58,7 +57,8 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task<IEnumerable<QueuedDownload>> GetQueuedDownloads()
     {
-        return await _unitOfWork.QueuedDownloads.All().Include(q => q.Video).ToListAsync();
+        _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
+        return await _unitOfWork.QueuedDownloads.All().Include(q => q.Video).ThenInclude(v => v.YoutubeChannel).ToListAsync();
     }
 
     public async Task ClearQueue()
@@ -75,6 +75,7 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task DeleteFromQueue(string videoId)
     {
+        _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
         _unitOfWork.QueuedDownloads.DeleteById(videoId);
         await _unitOfWork.Save();
     }
@@ -119,9 +120,13 @@ public class QueueService : BackgroundService, IQueueService
         // var settings = await _unitOfWork.ApplicationSettings.GetSettings();
 
         var jsonPath =
-            $"data/videos/{queuedDownload.Video.YoutubeChannel.Title}/{queuedDownload.Id} - {queuedDownload.Video.Title}.info.json"
-                .Replace(":", "_");
+            Path.GetFullPath(
+                $"data/videos/{queuedDownload.Video.YoutubeChannel.Title}/{queuedDownload.Id} - {queuedDownload.Video.Title}.info.json"
+                    .Replace(":", "_")
+                    .Replace("|", "｜")
+                );
 
+        ;
         var jsonFile = await File.ReadAllTextAsync(jsonPath);
         var doc = JsonDocument.Parse(jsonFile);
 
@@ -252,6 +257,8 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task<QueuedDownload> EnqueueDownload(string videoId)
     {
+        _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
+
         var queued = _unitOfWork.QueuedDownloads.Where(x => x.Id == videoId);
         if (queued.Any())
         {
@@ -285,10 +292,11 @@ public class QueueService : BackgroundService, IQueueService
         };
 
 
-        await _unitOfWork.QueuedDownloads.Create(queuedDownload);
+        // await _unitOfWork.QueuedDownloads.Create(queuedDownload);
         try
         {
-            await _unitOfWork.Save();
+            await _unitOfWork.QueuedDownloads.EnqueueDownload(queuedDownload);
+            // await _unitOfWork.Save();
         }
         catch (Exception e)
         {
@@ -302,13 +310,19 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task<QueuedDownload?> DequeueDownload()
     {
-        var queuedDownloads = _unitOfWork.QueuedDownloads.All().Include(q => q.Video).ThenInclude(v => v.YoutubeChannel);
+        _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var queuedDownloads = _unitOfWork.QueuedDownloads.All();
+        Console.WriteLine("brk");
         if (!queuedDownloads.Any())
         {
             return null;
         }
 
-        QueuedDownload? queuedDownload = await queuedDownloads.Include(q => q.Video).ThenInclude(v => v.LocalVideo)
+        QueuedDownload? queuedDownload = await queuedDownloads
+            .Include(q => q.Video)
+            .ThenInclude(v => v.LocalVideo)
+            .Include(q => q.Video)
+            .ThenInclude(v => v.YoutubeChannel)
             .OrderBy(x => x.QueuedAt)
             .FirstOrDefaultAsync(x => x.Status == Enums.DownloadStatus.Queued);
 
