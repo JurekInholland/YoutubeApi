@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Models;
+using Models.DomainModels;
 
 namespace Services;
 
@@ -34,5 +35,10 @@ public class YoutubeHub : Hub
     {
         // _logger.LogInformation("Sending object to {User}", user);
         await Clients.All.SendAsync(callbackName, obj);
+    }
+
+    public async Task SendLocalVideo(LocalVideo local)
+    {
+        await Clients.All.SendAsync("localVideo", local);
     }
 }

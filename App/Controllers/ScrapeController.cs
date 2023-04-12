@@ -27,10 +27,24 @@ public class ScrapeController : BaseController
     /// <summary>
     /// Scrape a youtube channel for videos
     /// </summary>
-    [HttpGet("channel", Name = nameof(ScrapeYoutubeChannel))]
-    public async Task<IActionResult> ScrapeYoutubeChannel(string channelId)
+    [HttpGet(nameof(YoutubeChannelById))]
+    public async Task<IActionResult> YoutubeChannelById(string channelId)
     {
-        var yt = await _scrapeService.ScrapeYoutubeChannel(channelId);
+        var yt = await _scrapeService.ScrapeChannelById(channelId);
+
+        // await _unitOfWork.YoutubeChannels.Create(yt);
+
+        Response.Headers.Add("Count", yt.Length.ToString());
+        return Ok(yt);
+    }
+
+    /// <summary>
+    /// Scrape a youtube channel for videos via handle
+    /// </summary>
+    [HttpGet(nameof(YoutubeChannelByHandle))]
+    public async Task<IActionResult> YoutubeChannelByHandle(string handle)
+    {
+        var yt = await _scrapeService.ScrapeChannelByHandle(handle);
 
         // await _unitOfWork.YoutubeChannels.Create(yt);
 
@@ -41,8 +55,8 @@ public class ScrapeController : BaseController
     /// <summary>
     /// Scrape youtube search results for a given query
     /// </summary>
-    [HttpGet("search", Name = nameof(ScrapeSearchResults))]
-    public async Task<IActionResult> ScrapeSearchResults(string query)
+    [HttpGet(nameof(SearchResults))]
+    public async Task<IActionResult> SearchResults(string query)
     {
         var res = await _scrapeService.ScrapeYoutubeSearchResults(query);
         return Ok(res);
@@ -52,8 +66,8 @@ public class ScrapeController : BaseController
     /// <summary>
     /// Scrape multiple youtube videos from a list of urls
     /// </summary>
-    [HttpPost("multiple", Name = nameof(ScrapeMultiple))]
-    public async Task<IActionResult> ScrapeMultiple([FromBody] string[] videoIds)
+    [HttpPost(nameof(Multiple))]
+    public async Task<IActionResult> Multiple([FromBody] string[] videoIds)
     {
         _logger.LogInformation("Scraping {IdCount} videos", videoIds.Length);
         Task<YoutubeVideo?>[] tasks = new Task<YoutubeVideo?>[videoIds.Length];
@@ -69,8 +83,8 @@ public class ScrapeController : BaseController
     /// <summary>
     /// Scrape a youtube video from a url via regex patterns
     /// </summary>
-    [HttpGet("video", Name = nameof(ScrapeYoutubeVideo))]
-    public async Task<IActionResult> ScrapeYoutubeVideo(string videoId)
+    [HttpGet(nameof(YoutubeVideo))]
+    public async Task<IActionResult> YoutubeVideo(string videoId)
     {
         var yt = await _scrapeService.ScrapeYoutubeVideo(videoId);
 
@@ -82,8 +96,8 @@ public class ScrapeController : BaseController
     /// <summary>
     /// Return raw html from a url to debug custom parsers
     /// </summary>
-    [HttpGet("html", Name = nameof(ScrapeRawHtml))]
-    public async Task<IActionResult> ScrapeRawHtml(string url)
+    [HttpGet(nameof(RawHtml))]
+    public async Task<IActionResult> RawHtml(string url)
     {
         var html = await _scrapeService.GetRawHtml(url);
         return Ok(html);

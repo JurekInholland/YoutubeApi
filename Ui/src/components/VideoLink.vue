@@ -42,19 +42,25 @@ const props = defineProps<{
     opacity: 0;
 }
 
+.text {
+
+    text-overflow: ellipsis;
+}
+
 .infos {
     display: flex;
     gap: 1rem;
     // justify-content: center;
     align-items: center;
+    max-width: 100%;
 
     h3 {
         font-weight: bold;
         max-height: 32px;
         overflow: hidden;
-        text-overflow: clip;
         margin-bottom: .5rem;
         color: white;
+        text-overflow: ellipsis;
     }
 
     p {
@@ -109,7 +115,7 @@ const props = defineProps<{
 .video-container {
     display: flex;
     height: auto;
-
+    overflow: hidden;
     img {
         border-radius: 12px;
 
@@ -131,5 +137,4 @@ const props = defineProps<{
     a:hover {
         color: white;
     }
-}
-</style>
+}</style>

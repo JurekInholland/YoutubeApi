@@ -1,65 +1,66 @@
-<script setup lang="ts">
+<script setup lang='ts'>
 import YoutubePlayer from '@/components/YoutubePlayer.vue';
 import VideoMetadata from '@/components/VideoMetadata.vue';
 import SidebarVideo from '@/components/SidebarVideo.vue';
 import Spinner from '@/components/Spinner.vue';
 import type { IRelatedVideo } from '@/models';
-import { computed, onMounted, ref, type Ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref, type Ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { apiService } from '@/constants';
 import type { YoutubeVideo } from '@/types';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import { formatDescription, formatTitle } from '@/utils';
-const route = useRoute()
-const store = useYoutubeStore()
 
-const relatedVideos: Ref<Array<YoutubeVideo>> = ref([])
+const route = useRoute();
+const store = useYoutubeStore();
+
+const relatedVideos: Ref<Array<YoutubeVideo>> = ref([]);
 
 const cinemaMode = ref(true);
 
 const aspectRatio = computed(() => {
     if (store.currentVideo == undefined) return 16 / 9;
     // if (store.currentVideo.height > store.currentVideo.width) return 1;
-    return Number(store.currentVideo.width) / Number(store.currentVideo.height)
-})
+    return Number(store.currentVideo.width) / Number(store.currentVideo.height);
+});
 
 watch(() => store.currentVideo, async (newId, oldId) => {
-    console.log("trigger watch:")
+    console.log('trigger watch:');
     if (store.currentVideo == undefined) return;
     if (newId == oldId) {
-        console.log("ids are the same")
+        console.log('ids are the same');
         return;
     }
-    console.log("processing")
-    relatedVideos.value = []
+    console.log('processing');
+    relatedVideos.value = [];
 
-    let tempList: YoutubeVideo[] = []
+    let tempList: YoutubeVideo[] = [];
 
-    const relatedIds = [...store.currentVideo.relatedVideos]
+    const relatedIds = [...store.currentVideo.relatedVideos];
 
     for (const id of relatedIds) {
-        const storedVid = store.getVideoById(id)
+        const storedVid = store.getVideoById(id);
         if (storedVid != undefined) {
-            relatedIds.splice(relatedIds.indexOf(id), 1)
-            relatedVideos.value.push(storedVid)
-            tempList.push(storedVid)
+            relatedIds.splice(relatedIds.indexOf(id), 1);
+            relatedVideos.value.push(storedVid);
+            tempList.push(storedVid);
 
         }
     }
 
-    console.log("current video changed", newId?.id, oldId?.id)
-    const related = await apiService.getRelatedVideos(relatedIds)
+    console.log('current video changed', newId?.id, oldId?.id);
+    const related = await apiService.getRelatedVideos(relatedIds);
     for (const vid of related) {
-        tempList.push(vid)
-        store.videos.push(vid)
+        tempList.push(vid);
+        store.videos.push(vid);
     }
     relatedVideos.value = tempList.sort((a, b) => {
         const indexA = relatedIds.indexOf(a.id);
         const indexB = relatedIds.indexOf(b.id);
         return indexA - indexB;
-    })
+    });
     // store.videos.push(...relatedVideos.value)
-})
+});
 
 // todo: comapre
 // watch(() => store.currentVideo, async () => {
@@ -89,14 +90,14 @@ watch(() => store.currentVideo, async (newId, oldId) => {
 // }, { immediate: true })
 
 const parsedId = computed(() => {
-    const split = route.path.substring(1).split("?")[0]
-    if (split.length === 11) return split
-    return route.query.v ? route.query.v as string : null
-})
+    const split = route.path.substring(1).split('?')[0];
+    if (split.length === 11) return split;
+    return route.query.v ? route.query.v as string : null;
+});
 
 const startTime = computed(() => {
-    return route.query.t ? parseInt(route.query.t as string) : 0
-})
+    return route.query.t ? parseInt(route.query.t as string) : 0;
+});
 
 // const fetchVideo = async (id: string): Promise<YoutubeVideo | undefined> => {
 //     const vid = await apiService.GetVideoInfo(id);
@@ -114,76 +115,74 @@ const startTime = computed(() => {
 
 
 watch(() => route.path, async () => {
-    console.log("watch parsedId", parsedId.value)
-    store.fetchCurrentVideo(parsedId.value!)
-}, { immediate: true })
+    console.log('watch parsedId', parsedId.value);
+    store.fetchCurrentVideo(parsedId.value!);
+}, { immediate: true });
 
 watch(() => store.currentVideo, async () => {
-    document.title = formatTitle(store.currentVideo!.title)
-}, { immediate: true })
+    document.title = formatTitle(store.currentVideo!.title);
+}, { immediate: true });
 
 onMounted(async () => {
-    document.title = "Video"
+    document.title = 'Video';
     if (store.currentVideo === undefined) {
-        console.log("VIDEO IS NULL")
+        console.log('VIDEO IS NULL');
 
         // store.currentVideo = await fetch(`/api/Info/GetVideoInfo?videoId=${parsedId.value}`,).then(res => res.json())
-    }
-    else {
-        console.log("VIDEO IS NOT NULL", store.currentVideo)
-        document.title = formatTitle(store.currentVideo!.title)
+    } else {
+        console.log('VIDEO IS NOT NULL', store.currentVideo);
+        document.title = formatTitle(store.currentVideo!.title);
     }
     // vids.value = await fetch(`/api/Info/GetRelatedYoutubeVideos?videoId=${video.id}`,).then(res => res.json())
-})
+});
 
 const toggleCinema = () => {
     cinemaMode.value = !cinemaMode.value;
-}
+};
 watch(cinemaMode, (newVal) => {
-    console.log("cine moide", newVal)
-})
+    console.log('cine moide', newVal);
+});
 </script>
 
 <template>
-    <div id="container" :class="cinemaMode ? 'cinema' : 'default'">
-        <div id="primary">
-            <YoutubePlayer class="player" v-if="parsedId" :video-id="parsedId" :start-time="startTime"
-                :aspect-ratio="aspectRatio" />
+    <div id='container' :class="cinemaMode ? 'cinema' : 'default'">
+        <div id='primary'>
+            <YoutubePlayer class='player' v-if='parsedId' :video-id='parsedId' :start-time='startTime'
+                           :aspect-ratio='aspectRatio' />
             <!-- <VideoPlayer src="./vid.webm" color="green" /> -->
-            <VideoMetadata v-if="store.currentVideo" :video="store.currentVideo" v-model="cinemaMode" />
-            <div v-auto-animate v-else class="loading">
+            <VideoMetadata v-if='store.currentVideo' :video='store.currentVideo' v-model='cinemaMode' />
+            <div v-auto-animate v-else class='loading'>
                 <Spinner />
             </div>
-            <button @click="toggleCinema">CINEMA</button>
+            <button @click='toggleCinema'>CINEMA</button>
 
         </div>
 
-        <div v-if="relatedVideos.length > 0" v-auto-animate id="secondary">
-            <SidebarVideo v-for="vid in relatedVideos" :video="vid" :key="vid.id" />
+        <div v-if='relatedVideos.length > 0' v-auto-animate id='secondary'>
+            <SidebarVideo v-for='vid in relatedVideos' :video='vid' :key='vid.id' />
         </div>
-        <div v-auto-animate v-else class="loading">
+        <div v-auto-animate v-else class='loading'>
             <Spinner />
         </div>
     </div>
 </template>
 
-<style scoped >
+<style scoped>
 .default .player {
     /* margin: 0 auto; */
     max-height: calc(100vh - 16rem);
-    max-width: calc(100vw -3rem);
+    max-width: calc(100vw - 3rem);
 }
 
 .cinema .player {
     margin: 0;
     width: 100vw;
-    display:  flex;
+    display: flex;
     justify-content: center;
     align-items: center;
     background-color: black;
     /* margin: 0 auto; */
 }
-
 
 
 #container.default {
@@ -224,7 +223,6 @@ watch(cinemaMode, (newVal) => {
 }
 
 
-
 /* .cinema #secondary {
     flex-basis: 100%;
     margin: 1rem;
@@ -253,9 +251,11 @@ watch(cinemaMode, (newVal) => {
     flex-direction: column;
     gap: 6px;
 }
+
 .default #secondary {
     max-width: 402px;
 }
+
 @media screen and (max-width: 1280px) {
     .default #secondary {
         max-width: unset;

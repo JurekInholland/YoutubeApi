@@ -65,6 +65,40 @@ public class QueuedDownloadRepository : RepositoryBase<QueuedDownload>, IQueuedD
         }
     }
 
+    public async Task UpdateQueueVideo(QueuedDownload queuedDownload)
+    {
+        var existing = YoutubeContext.QueuedDownloads.Find(queuedDownload.Id);
+
+        if (existing is null)
+        {
+            throw new("Queued download not found");
+        }
+
+        YoutubeContext.Entry(existing).CurrentValues.SetValues(queuedDownload);
+
+        var video = YoutubeContext.YoutubeVideos.Find(queuedDownload.Video.Id);
+        if (video is not null)
+        {
+            YoutubeContext.Entry(video).CurrentValues.SetValues(queuedDownload.Video);
+        }
+        else
+        {
+            await YoutubeContext.YoutubeVideos.AddAsync(queuedDownload.Video);
+        }
+
+        var localVideo = YoutubeContext.LocalVideos.Find(queuedDownload.Video.LocalVideo.Id);
+        if (localVideo is not null)
+        {
+            YoutubeContext.Entry(localVideo).CurrentValues.SetValues(queuedDownload.Video.LocalVideo);
+        }
+        else
+        {
+            await YoutubeContext.LocalVideos.AddAsync(queuedDownload.Video.LocalVideo);
+        }
+
+        await YoutubeContext.SaveChangesAsync();
+    }
+
     // public async Task Enqueue(Models.DomainModels.QueuedDownload queuedDownload)
     // {
     //     if (await YoutubeContext.YoutubeVideos.FindAsync(queuedDownload.Video.Id) == null)

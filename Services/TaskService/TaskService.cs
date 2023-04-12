@@ -93,7 +93,7 @@ public class TaskService : BackgroundService, ITaskService
 
         ApplicationSettings settings = await _unitOfWork.ApplicationSettings.GetSettings();
         _logger.LogInformation("Doing cleanup {Duration} in {Time}", settings.MaxVideoDuration, sw.ElapsedTicks);
-        await _queueService.ClearQueue();
+        // await _queueService.ClearQueue();
         // await Task.Delay(2000, stoppingToken);
     }
 

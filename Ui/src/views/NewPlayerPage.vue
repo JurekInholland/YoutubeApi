@@ -5,12 +5,12 @@
             <div class="layout">
                 <div class="player-box">
                     <YoutubePlayer v-if="store.currentVideo" ref="playerEl" v-bind="$attrs" class="player" id="player"
-                        :videoId="store.currentVideo.id" :start-time="startTime" :aspect-ratio="16 / 9" />
+                                   :videoId="store.currentVideo.id" :start-time="startTime" :aspect-ratio="16 / 9" />
 
                 </div>
                 <div class="meta-cont">
                     <VideoMetadata v-if="store.currentVideo" class="metadata" @update:model-value="toggle = !toggle"
-                        :modelValue="toggle" :video="store.currentVideo" />
+                                   :modelValue="toggle" :video="store.currentVideo" />
                     <div id="primary" v-auto-animate></div>
                 </div>
             </div>
@@ -22,23 +22,24 @@
                 this is the secondary
             </div>
         </teleport> -->
-            <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="toggle" />
         </div>
+        <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="toggle" />
     </div>
 </template>
 <script async setup lang="ts">
-import VideoMetadata from '@/components/VideoMetadata.vue';
-import YoutubePlayer from '@/components/YoutubePlayer.vue';
-import { useYoutubeStore } from '@/stores/youtubeStore';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useResizeObserver } from '@vueuse/core'
-import Sidebar from '@/components/Sidebar.vue';
-import { useRoute } from 'vue-router';
-import { formatTitle } from '@/utils';
-const toggle = ref(false);
+import VideoMetadata from "@/components/VideoMetadata.vue"
+import YoutubePlayer from "@/components/YoutubePlayer.vue"
+import { useYoutubeStore } from "@/stores/youtubeStore"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { useResizeObserver } from "@vueuse/core"
+import Sidebar from "@/components/Sidebar.vue"
+import { useRoute } from "vue-router"
+import { formatTitle } from "@/utils"
 
-const route = useRoute();
-const store = useYoutubeStore();
+const toggle = ref(false)
+
+const route = useRoute()
+const store = useYoutubeStore()
 const calcH = ref("100%")
 const startTime = computed(() => {
     return route.query.t ? parseInt(route.query.t as string) : 0
@@ -56,14 +57,14 @@ watch(() => route.path, async () => {
 }, { immediate: true })
 
 watch(() => store.currentVideo, async () => {
-    await nextTick();
+    await nextTick()
     document.title = formatTitle(store.currentVideo!.title)
     calculateHeight(playerEl.value?.$el.offsetWidth)
 }, { immediate: true })
 
 
-const playerEl = ref<HTMLDivElement | null>(null) as any;
-const mounted = ref(false);
+const playerEl = ref<HTMLDivElement | null>(null) as any
+const mounted = ref(false)
 
 const isDisabled = () => {
     const res = !mounted.value || !toggle.value
@@ -79,14 +80,14 @@ useResizeObserver(playerEl, (entries) => {
 //     mounted.value = false;
 // })
 onMounted(() => {
-    mounted.value = true;
+    mounted.value = true
     calculateHeight(playerEl.value?.$el.offsetWidth)
     // setTimeout(() => {
     //     mounted.value = true;
     // }, 1000)
 })
 onBeforeUnmount(() => {
-    mounted.value = false;
+    mounted.value = false
 })
 
 const calculateHeight = (width: number) => {
@@ -119,17 +120,18 @@ const calculateHeight = (width: number) => {
 
 <style scoped lang="scss">
 .outer {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
+
 }
 
 .meta-cont {
-    height: 100%;
-    flex-grow: 1;
-    width: 100%;
-    max-width: var(--max-content-width);
-    display: flex;
-    flex-wrap: wrap;
+  height: 100%;
+  flex-grow: 1;
+  width: 100%;
+  max-width: var(--max-content-width);
+  display: flex;
+  flex-wrap: wrap;
 }
 
 // .sidebar {
@@ -138,149 +140,153 @@ const calculateHeight = (width: number) => {
 // }
 
 #tele {
-    flex-basis: 200px;
-    flex-grow: 1;
+  flex-basis: 300px;
+  flex-grow: 1;
 }
 
 .player-box {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--gutter-width);
-    height: v-bind(calcH);
-    max-width: var(--max-player-width);
-    max-height: var(--max-p-height);
-    min-width: 360px;
-
-    // max-height: var(--max-player-height);
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gutter-width);
+  height: v-bind(calcH);
+  max-width: var(--max-player-width);
+  max-height: var(--max-p-height);
+  min-width: 360px;
+  // max-height: var(--max-player-height);
 }
 
 .player {
-    width: 100%;
-    // height: calc(100vw * 9 / 16);
-    // max-height: v-bind(calcH);
-    // max-height: calc(100% - 2 * var(--gutter-width));
-    max-height: var(--max-p-height);
-    flex-basis: 100%;
-    // width: 100%;
-    // height: auto;
+  width: 100%;
+  // height: calc(100vw * 9 / 16);
+  // max-height: v-bind(calcH);
+  // max-height: calc(100% - 2 * var(--gutter-width));
+  max-height: var(--max-p-height);
+  flex-basis: 100%;
+  // width: 100%;
+  // height: auto;
 }
 
 .container {
-    // background-color: darkblue;
-    // height: 100vh;
-    // width: 100vw;
-    // max-width: 100%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    // justify-content: center;
-    flex-grow: 1;
-    // gap: var(--gutter-width);
-    max-width: 1754px;
-    margin: 0 var(--gutter-width);
-    gap: var(--gutter-width);
+  // background-color: darkblue;
+  // height: 100vh;
+  // width: 100vw;
+  // max-width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  // justify-content: center;
+  flex-grow: 1;
+  // gap: var(--gutter-width);
+  max-width: 1754px;
+  margin: 0 var(--gutter-width);
+  gap: var(--gutter-width);
 
 }
 
 .cinema {
+  justify-content: center;
+  width: 100%;
+  align-items: center;
+  max-width: 100vw;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+
+  display: block;
+
+  .metadata {
+    flex-basis: 640px;
+    flex-grow: 1;
+    flex-grow: 1;
+  }
+
+  .meta-cont {
+    max-width: 1754px;
+    gap: var(--gutter-width);
+    margin: 0 var(--gutter-width);
+
+
+  }
+
+  .layout {
     justify-content: center;
+  }
+
+  .player {
+    max-height: var(--max-p-height);
+  }
+
+  // .layout {
+  //     max-width: calc(1280px + var(--sidebar-width) + 3 * var(--gutter-width));
+  // }
+  #primary {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    // justify-content: center;
+    // flex-direction: row;
+    // flex-wrap: wrap;
+    // margin: 0 1rem;
+    gap: calc(var(--gutter-width) / 3);
+    // margin: 0 1rem;
+    max-width: 1754px;
+    flex-basis: 300px;
     width: 100%;
-    align-items: center;
-    max-width: 100vw;
-    gap: 0;
-    padding: 0;
-    margin: 0;
+  }
 
-    display: block;
+  #regular,
+  .secondary {
+    display: flex;
+    flex-grow: 1;
+  }
 
-    .metadata {
-        flex-basis: 640px;
-        flex-grow: 1;
-        flex-grow: 1;
-    }
-
-    .meta-cont {
-        max-width: 1754px;
-        gap: var(--gutter-width);
-        margin: 0 var(--gutter-width);
-
-
-    }
-
-    .layout {
-        justify-content: center;
-    }
-
-    .player {
-        max-height: var(--max-p-height);
-    }
-
-    // .layout {
-    //     max-width: calc(1280px + var(--sidebar-width) + 3 * var(--gutter-width));
-    // }
-    #primary {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        // justify-content: center;
-        // flex-direction: row;
-        // flex-wrap: wrap;
-        // margin: 0 1rem;
-        gap: var(--gutter-width);
-        // margin: 0 1rem;
-        max-width: 1754px;
-        flex-basis: 300px;
-        width: 100%;
-    }
-
-    #regular,
-    .secondary {
-        display: flex;
-        flex-grow: 1;
-    }
-
-    .secondary {
-        flex-basis: 200px;
-    }
+  .secondary {
+    flex-basis: 300px;
+  }
 
 
 }
 
 .layout {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    flex-basis: 640px;
-    flex-grow: 1;
-    gap: var(--gutter-width);
-    // margin-right: 1rem;
+  display: flex;
+  //flex-direction: row;
+  flex-wrap: wrap;
+  flex-basis: 640px;
+  flex-grow: 1;
+  gap: var(--gutter-width);
+  transition: all .5s ease;
+  max-height: calc(100% - 50vh);
+  // margin-right: 1rem;
 }
 
 #primary {
-    flex-grow: 1;
-    flex: 1;
-    height: 100%;
+  flex-grow: 1;
+  flex: 1;
+  height: 100%;
 }
 
 .secondary {
-    background-color: green;
-    flex-grow: .5;
-    flex: 1;
-    min-width: 300px;
+  background-color: green;
+  flex-grow: .5;
+  flex: 1;
+  min-width: 300px;
 }
 
 @media screen and (min-width: 1036px) {
 
-    #tele {
-        flex-basis: 0;
-        flex-grow: 0.5;
-        max-width: 402px;
-    }
+  #tele {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 300px;
+    flex-grow: 1;
+    max-width: 402px;
+    gap: calc(var(--gutter-width) / 3);
+  }
 
-    .cinema #primary {
-        max-width: 402px;
-    }
+  .cinema #primary {
+    max-width: 402px;
+  }
 }
 </style>
 

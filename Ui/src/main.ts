@@ -26,7 +26,7 @@ app.use(pinia)
 
 const youtubeStore = useYoutubeStore()
 app.provide('youtubeStore', youtubeStore)
-app.use(VueSignalR, { url: 'api/signalr' })
+app.use(VueSignalR, { url: '/api/signalr' })
 app.use(autoAnimatePlugin)
 app.use(router)
 app.use(createManager())

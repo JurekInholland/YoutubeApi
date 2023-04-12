@@ -1,41 +1,64 @@
-import axios, {AxiosError, type AxiosInstance, type AxiosRequestConfig} from 'axios'
-import type {QueuedDownload, YoutubeVideo} from '@/types'
-import {apiUrls} from '@/constants'
+import { apiUrls } from "@/constants"
+import type { QueuedDownload, YoutubeVideo } from "@/types"
+import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from "axios"
 
 export default class ApiService {
     private axiosInstance: AxiosInstance
 
     constructor() {
         this.axiosInstance = axios.create({
-            baseURL: '/api',
+            baseURL: "/api",
             //   timeout: 5000,
             headers: {
-                'Content-Type': 'application/json'
-            }
+                "Content-Type": "application/json",
+            },
         })
+    }
+
+    public async getChannelByHandle(handle: string): Promise<YoutubeVideo[]> {
+        const res = await this.request<YoutubeVideo[]>({
+            method: "GET",
+            url: apiUrls.getChannelByHandle,
+            params: { handle: handle },
+        })
+        if (res instanceof Error) {
+            return []
+        }
+        return res
+    }
+
+    public async getLocalVideos(): Promise<YoutubeVideo[]> {
+        const res = await this.request<YoutubeVideo[]>({
+            method: "GET",
+            url: apiUrls.getLocalVideos,
+        })
+        if (res instanceof Error) {
+            return []
+        }
+        return res
     }
 
     public async processQueue() {
         return await this.request({
-            method: 'GET',
-            url: apiUrls.processQueue
+            method: "GET",
+            url: apiUrls.processQueue,
         })
     }
 
     public async getSearchResults(query: string) {
         const res = await this.request<YoutubeVideo[]>({
-            method: 'GET',
+            method: "GET",
             url: apiUrls.getSearchResults,
-            params: {query: query}
+            params: { query: query },
         })
         return res
     }
 
     public async GetSearchCompletion(query: string): Promise<string[]> {
         const res = await this.request<string[]>({
-            method: 'GET',
+            method: "GET",
             url: apiUrls.getSearchCompletion,
-            params: {query: query}
+            params: { query: query },
         })
         if (res instanceof Error) {
             return []
@@ -46,8 +69,8 @@ export default class ApiService {
 
     public async GetVideos(): Promise<YoutubeVideo[] | AxiosError> {
         const res = await this.request<YoutubeVideo[]>({
-            method: 'GET',
-            url: apiUrls.getVideos
+            method: "GET",
+            url: apiUrls.getVideos,
         })
         console.log(res)
         return res
@@ -55,9 +78,9 @@ export default class ApiService {
 
     public async getRelatedVideos(videoIds: string[]): Promise<YoutubeVideo[]> {
         const res = await this.request<YoutubeVideo[]>({
-            method: 'POST',
+            method: "POST",
             url: apiUrls.getRelatedVideos,
-            data: videoIds
+            data: videoIds,
         })
         if (res instanceof Error) {
             return []
@@ -67,51 +90,58 @@ export default class ApiService {
 
     public async GetVideoInfo(videoId: string): Promise<YoutubeVideo | AxiosError> {
         const res = await this.request<YoutubeVideo>({
-            method: 'GET',
+            method: "GET",
             url: `${apiUrls.getVideoInfo}`,
-            params: {videoId: videoId}
+            params: { videoId: videoId },
         })
         console.log(res)
         return res
     }
 
-    public async GetQueuedDownloads(): Promise<QueuedDownload[] | AxiosError> {
+    public async getQueuedDownloads(): Promise<QueuedDownload[]> {
         const res = await this.request<QueuedDownload[]>({
-            method: 'GET',
-            url: apiUrls.getAllQueuedDownloads
+            method: "GET",
+            url: apiUrls.getAllQueuedDownloads,
         })
-        console.log(res)
+        if (res instanceof Error) {
+            return []
+        }
         return res
     }
 
-    public async ClearQueue(): Promise<void> {
+    public async deleteQueue(): Promise<void> {
         await this.request({
-            method: 'DELETE',
-            url: apiUrls.clearQueue
+            method: "DELETE",
+            url: apiUrls.deleteQueue,
+        })
+    }
+    public async resetQueue(): Promise<void> {
+        await this.request({
+            url: apiUrls.resetQueue,
         })
     }
 
     public async DeleteFromQueue(videoId: string): Promise<void> {
         await this.request({
-            method: 'DELETE',
-            url: `${apiUrls.deleteFromQueue}/${videoId}`
+            method: "DELETE",
+            url: `${apiUrls.deleteFromQueue}/${videoId}`,
         })
     }
 
     public async EnqueueDownload(videoId: string): Promise<QueuedDownload | AxiosError> {
         const res = await this.request<QueuedDownload>({
-            method: 'POST',
+            method: "POST",
             url: apiUrls.addToQueue,
             data: {
-                videoId: videoId
-            }
+                videoId: videoId,
+            },
         })
         return res
     }
 
     private async request<T>(config: AxiosRequestConfig): Promise<T | AxiosError> {
         try {
-            const {data} = await this.axiosInstance.request<T>(config)
+            const { data } = await this.axiosInstance.request<T>(config)
             return data
         } catch (error) {
             return error as AxiosError

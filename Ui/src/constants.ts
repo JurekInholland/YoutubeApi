@@ -2,7 +2,8 @@ import ApiService from './api'
 
 export const apiUrls = {
   getAllQueuedDownloads: 'Queue/all',
-  clearQueue: 'Queue/clear',
+  deleteQueue: 'Queue/clear',
+  resetQueue: 'Queue/reset',
   deleteFromQueue: 'Queue/',
   addToQueue: 'Queue/add',
   getVideoInfo: 'YoutubeVideo',
@@ -10,7 +11,11 @@ export const apiUrls = {
   getSearchCompletion: 'Youtube/searchCompletion',
   getSearchResults: 'Scrape/search',
   processQueue: 'Queue/process',
-  getRelatedVideos: 'Scrape/multiple'
+  getRelatedVideos: 'Scrape/multiple',
+  getLocalVideos: 'LocalVideo',
+
+  getChannelByHandle: 'Scrape/handle',
+  getChannelById: 'Scrape/channelId',
 }
 
 export const apiService: ApiService = new ApiService()

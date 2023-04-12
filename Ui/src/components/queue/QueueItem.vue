@@ -28,13 +28,13 @@ const removeFromQueue = async () => {
             <p>{{ formatDateAgo(item.queuedAt) }}</p>
             <p>{{ DownloadStatus[item.status] }}</p>
             <!-- <p>{{ item.id }}</p> -->
-            <ProgressBar v-if="item.progress" :value="item.progress!.progress" :text="item.progress!.status" />
+            <ProgressBar v-if="item.progress" :value="item.progress!.progress" :text="`${item.progress!.eta}`" />
         </div>
         <!-- <div v-if="item.progress" class="progress">
-                <div>{{ item.progress.status }}</div>
-                <div>{{ item.progress.progress }}%</div>
-                <div>{{ item.progress.speed }}</div>
-            </div> -->
+                    <div>{{ item.progress.status }}</div>
+                    <div>{{ item.progress.progress }}%</div>
+                    <div>{{ item.progress.speed }}</div>
+                </div> -->
         <button @click="removeFromQueue">
             <Icon icon="ic:round-delete" />
         </button>

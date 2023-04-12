@@ -81,7 +81,6 @@ public class QueueController : BaseController
     /// <summary>
     /// Enqueue a video for download
     /// </summary>
-    [OpenApiRequestBody("application/json", typeof(string), Description = "Youtube video id")]
     [HttpPost("add", Name = nameof(AddToQueue))]
     public async Task<IActionResult> AddToQueue([FromBody] EnqueueDownloadRequest request)
     {

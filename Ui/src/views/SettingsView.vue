@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang='ts'>
 import type { ApplicationSettings } from '@/types';
 import { ref, type Ref } from 'vue';
 
@@ -6,7 +6,7 @@ import { ref, type Ref } from 'vue';
 const settings: Ref<ApplicationSettings> = ref({
     showRelatedVideos: true,
     showComments: true,
-    autoplay: true,
+    autoplay: true
 
 } as ApplicationSettings);
 
@@ -14,15 +14,15 @@ const settings: Ref<ApplicationSettings> = ref({
 
 <template>
     <h1>Settings</h1>
-    <section class="settings">
-        <label for="">
+    <section class='settings'>
+        <label for=''>
             Show related videos
-            <input type="checkbox" v-model="settings.showRelatedVideos" name="" id="">
+            <input type='checkbox' v-model='settings.showRelatedVideos' name='' id=''>
         </label>
 
-        <label for="">
+        <label for=''>
             Show comments
-            <input type="checkbox" v-model="settings.showComments" name="" id="">
+            <input type='checkbox' v-model='settings.showComments' name='' id=''>
         </label>
     </section>
 </template>
@@ -36,12 +36,14 @@ const settings: Ref<ApplicationSettings> = ref({
     background-color: brown;
     margin: 0 auto;
 }
+
 label {
     display: flex;
     align-items: center;
     gap: 1rem;
     font-weight: bold;
 }
+
 input[type="checkbox"] {
     width: 1.25rem;
     height: 1.25rem;

@@ -18,6 +18,9 @@ public partial class ScrapeService : IScrapeService
         _httpClient = httpClientFactory.CreateClient();
     }
 
+    [GeneratedRegex("(?<=watch\\?v=)[\\w-]+")]
+    private static partial Regex VideoIdRegex();
+
     [GeneratedRegex(@"description"":\{""simpleText"":""([^&]+(?:&quot;[^&]+)*|[^&]+(?:""[^""]+)*?)""\},""lengthSeconds")]
     private static partial Regex Description();
 
@@ -75,23 +78,39 @@ public partial class ScrapeService : IScrapeService
         return htmlDocument;
     }
 
-    public async Task<YoutubeVideo?[]> ScrapeYoutubeChannel(string channelId)
+
+    public async Task<YoutubeVideo[]> ScrapeChannelByHandle(string userName)
+    {
+
+
+        var url = $"https://www.youtube.com/@{userName}";
+        return await ScrapeYoutubeChannel(url);
+    }
+
+    public async Task<YoutubeVideo[]> ScrapeChannelById(string channelId)
     {
         var url = $"https://www.youtube.com/channel/{channelId}";
+        return await ScrapeYoutubeChannel(url);
+    }
+
+
+    private async Task<YoutubeVideo[]> ScrapeYoutubeChannel(string url)
+    {
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
-        Regex regex = new Regex(@"(?<=watch\?v=)[\w-]+");
-        MatchCollection matches = regex.Matches(sourceCode);
+        MatchCollection matches = VideoIdRegex().Matches(sourceCode);
 
         var videoIds = matches.Select(m => m.Value).ToHashSet().ToArray();
-        Task<YoutubeVideo?>[] tasks = new Task<YoutubeVideo?>[videoIds.Length];
+        var tasks = new Task<YoutubeVideo?>[videoIds.Length];
         for (int i = 0; i < videoIds.Length; i++)
         {
             tasks[i] = ScrapeYoutubeVideo(videoIds[i]);
         }
 
         var res = await Task.WhenAll(tasks);
-        return res;
+
+
+        return res.Select(y => y!).ToArray();
     }
 
 

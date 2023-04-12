@@ -12,7 +12,7 @@ const props = defineProps<{
 
         <div class="bar"
             :style="{ 'background': `linear-gradient(to right, red 0%, red ${value}%, transparent ${value}%, transparent 100%)` }">
-            <p>Prgress</p>
+            <p>{{text}}</p>
         </div>
     </div>
 </template>

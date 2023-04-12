@@ -7,6 +7,7 @@ const store = useYoutubeStore();
 
 onMounted(() => {
     // store.fetchVideos();
+    store.fetchLocalVideos();
 })
 
 </script>
@@ -14,7 +15,7 @@ onMounted(() => {
 <template>
     <div class="container">
         <div class="content">
-            <VideoLink v-for="video of store.orderedVideos" :video="video" />
+            <VideoLink v-for="video of store.localVideos" :video="video" />
         </div>
     </div>
 </template>

@@ -61,8 +61,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<ISettingsManager, SettingsManager>();
 
-builder.Services.AddTransient<IScrapeService, ScrapeService>();
-builder.Services.AddTransient<IQueueService, QueueService>();
+builder.Services.AddScoped<IScrapeService, ScrapeService>();
+builder.Services.AddScoped<IQueueService, QueueService>();
 builder.Services.AddTransient<ITaskService, TaskService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ITaskService>());
 
@@ -70,16 +70,12 @@ builder.Services.AddHttpClient();
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<YoutubeHub>();
-builder.Services.AddControllers(o =>
-    {
-        o.AllowEmptyInputInBodyModelBinding = true;
-    })
+builder.Services.AddControllers(o => { o.AllowEmptyInputInBodyModelBinding = true; })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
-
 
 
 // builder.Services.AddFluentValidation();
