@@ -16,11 +16,17 @@ body {
   color: rgba(255, 255, 255, 0.87);
 }
 
+#app {
+  min-height: 100vh;
+}
+
 html {
   -webkit-font-smoothing: antialiased;
   font-family: Roboto, Noto, sans-serif;
 }
-
+span {
+  font-family: Roboto, Noto, sans-serif;
+}
 input {
   writing-mode: horizontal-tb !important;
   text-rendering: auto;
@@ -73,5 +79,30 @@ button:focus {
   flex-grow: 1;
   justify-content: center;
   margin-top: 2rem;
-  opacity: .5;
+  opacity: 0.5;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease;
+  margin-bottom: 1rem;
+
+  img {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.lock-scrollbar {
+  overflow-y: scroll !important;
+  position: fixed;
+  top: 0;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
 }

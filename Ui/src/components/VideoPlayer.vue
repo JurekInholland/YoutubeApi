@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, type Ref } from 'vue';
+import { ref, onMounted, computed, type Ref, nextTick, onBeforeUnmount } from 'vue';
 import type { IPlayerState } from '@/models';
 import VolumeButton from '@/components/buttons/VolumeButton.vue';
 import FullscreenButton from '@/components/buttons/FullScreenButton.vue';
@@ -39,30 +39,29 @@ const timeline = ref<HTMLDivElement>();
 const thumb = ref<HTMLDivElement>();
 // const settings = ref(false)
 
-const duration: Ref<number> = ref(0);
-// const duration = computed(() => {
-//     return video.value?.duration ? formatTime(video.value.duration) : '0:00';
-// });
 const currentTime: Ref<number> = ref(0);
-
-// const formattedDuration = computed(() => {
-//     return duration ? formatTime(duration.value) : '0:00';
-// });
-
-// const formattedCurrentTime = computed(() => {
-//     return currentTime ? formatTime(currentTime.value) : '0:00';
-// });
 
 const volume = computed(() => {
     return video.value?.volume ? video.value.volume : 0;
 });
 
-const handleBuffer = (e: Event) => {
+const handleBuffer = async (evt: Event) => {
     if (video.value == null) return;
+    await nextTick();
     // if (video.value.buffered.length == 0) return;
     // console.log(video.value.buffered.length)
-    let duration = Math.round((video.value.buffered.end(0) / video.value.duration) * 100) + 1;
+    let test1 = video.value.duration;
+    try {
+        test1 = video.value.buffered.end(0);
+    } catch (e) {
+        console.log("error", e)
+    }
+    // let test1 = video.value.buffered.end(0);
+    let test2 = video.value.duration;
+    let duration = Math.round((test1 / video.value.duration) * 100) + 1;
+    // debugger;
     // console.log("handleBuffer", video.value.buffered.end(0), video.value.duration, duration, "buffered")
+
     timeline_container.value?.style.setProperty('--buffered', duration.toString() + "%");
 
 }
@@ -72,15 +71,22 @@ onMounted(() => {
     if (video.value != null) {
         video.value.volume = parseFloat(playerState.value.volume);
 
+        video.value.play()
         // video.value.onplaying = () => {
         //     console.log("playing")
         // }
-        video.value.onplay = () => {
+
+        video.value.onplaying = async () => {
+            console.log("onplaying")
             playerState.value.isPlaying = true;
             // console.log("play", this)
             startTime.value = video.value?.currentTime
             startDate.value = Date.now()
             smoothUpdate();
+        }
+
+        video.value.onplay = async () => {
+            console.log("onplay")
             // this.lastUpdate = Date.now();
         }
         video.value.onpause = () => {
@@ -130,7 +136,9 @@ onMounted(() => {
         }
     }
 });
-
+onBeforeUnmount(() => {
+    window.removeEventListener('keyup', handleKeyUp);
+});
 const toggleMute = (e: Event) => {
     (document.activeElement as HTMLElement).blur();
     // let target = e.target as HTMLButtonElement;
@@ -147,6 +155,17 @@ const toggleMute = (e: Event) => {
 }
 
 const handleKeyUp = (e: KeyboardEvent) => {
+
+    let testEl = document.activeElement as HTMLInputElement;
+
+    if (testEl.type === "text") {
+        return;
+    }
+
+    // if (document.activeElement instanceof HTMLInputElement) {
+    //     return;
+    // }
+
     if (e.key === ' ' || e.key === 'k') {
         onPlayPause(e);
     }
@@ -159,8 +178,6 @@ const onDoubleClick = (e: Event) => {
     console.log("onDoubleClicke", e)
     if (!playerState.value.isFullscreen && video.value) {
         video_container.value?.requestFullscreen();
-        // video.value.controls = false;
-        // video.value.removeAttribute("controls");
     }
     else
         document.exitFullscreen();
@@ -198,6 +215,48 @@ const onMouseMove = (e: MouseEvent) => {
     previewPos.value = percent;
     timeline_container.value?.style.setProperty('--preview', percent.toString());
 }
+
+const onTimelineClick = async (e: MouseEvent) => {
+
+    let isPlaying = false;
+    if (playerState.value.isPlaying) {
+        isPlaying = true;
+    }
+
+    // cancelAnimationFrame(animationId.value);
+    const rect = timeline_container.value?.getBoundingClientRect();
+    if (rect == null || video.value == null)
+        return;
+    video.value.pause();
+    let percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+    // let percent = Math.round(video.value.currentTime / video.value.duration * 100000) / 1000;
+    console.log("perc" + percent)
+    video.value.currentTime = percent * video.value.duration;
+    console.log("timeline click" + percent)
+    previewPos.value = percent;
+    // timeline_container.value?.style.setProperty('--preview', percent.toString());
+    const barWidth = timeline.value!.getBoundingClientRect().width * (percent);
+
+    timeline_container.value?.style.setProperty('--bar', barWidth.toString() + "px");
+
+    if (isPlaying) {
+        video.value.play();
+    }
+    //     await nextTick();
+    //     smoothUpdate();
+    //     await nextTick();
+    //     cancelAnimationFrame(animationId.value);
+    //     await nextTick();
+    //     video.value.pause()
+
+    //     // video.value.pause();
+    // }
+    // else {
+    // }
+    // animationId.value = requestAnimationFrame(smoothUpdate);
+
+}
+
 const formatTime = (duration: number) => {
     return Math.floor(duration / 60) + ':' + ('0' + Math.floor(duration % 60)).slice(-2);
 }
@@ -209,25 +268,17 @@ const progress = computed(() => {
 })
 
 const smoothUpdate = () => {
+    console.log("smoothUpdate")
     const elapsed = (Date.now() - startDate.value) / 1000;
     const currentTime = startTime.value! + elapsed;
-    // console.log("elapsed", elapsed, "currentTime", currentTime)
+
     if (currentTime < playerState.value.duration) {
-        // playerState.value.currentTime = currentTime;
-        // startTime.value = Date.now();
-        // console.log("WIDTH", timeline.value!.getBoundingClientRect().width)
-        // console.log("elapsed:", elapsed, "total", playerState.value.duration, "current", currentTime)
-        // console.log("percent", (playerState.value.currentTime / playerState.value.duration))
         const barWidth = timeline.value!.getBoundingClientRect().width * (currentTime / playerState.value.duration);
-        // const barPercent = Math.round(currentTime / playerState.value.duration * 100 * 100) / 100;
-        // console.log("smoothUpdate", barWidth)
         if (!thumb.value) {
             console.log("no thumb ref");
             return;
         }
-        // thumb.value.style.transform = `translateX(${barWidth}px)`;
         timeline_container.value?.style.setProperty('--bar', barWidth.toString() + "px");
-
         animationId.value = requestAnimationFrame(smoothUpdate);
     }
 
@@ -240,33 +291,21 @@ const smoothUpdate = () => {
         :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '']"
         @dblclick.stop="onDoubleClick" @click="onPlayPause">
         <div class="video-controls-container">
-            <div ref="timeline_container" class="timeline-container" @mousemove="onMouseMove" @mousedown="">
+            <div ref="timeline_container" class="timeline-container" @mousemove="onMouseMove" @click.stop="onTimelineClick"
+                @mousedown="">
                 <div ref="timeline" class="timeline">
                     <div class="buffered"></div>
                 </div>
                 <div ref="thumb" class="thumb-indicator"></div>
             </div>
             <div class="controls">
-                <!-- <button class="play-pause-btn" @click.stop="onPlayPause">
-                                                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" :icon="paused ? 'mdi:play' : 'mdi:pause'" />
-                                                                                                                                                                                                                                                        </button> -->
-                <PlayPauseButton @click.stop="onPlayPause" :is-paused="!playerState.isPlaying" />
+                <PlayPauseButton class="playPause" @click.stop="onPlayPause" :is-paused="!playerState.isPlaying" />
                 <SvgButton path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z" />
-                <!-- <button>
-                                                                                                                                                                                                                    <Icon style="font-size: 1rem;" icon="mdi:skip-next" @click.stop="" />
-                                                                                                                                                                                                                </button> -->
                 <div class="volume-container">
-                    <!-- <button>
-                                                                                                                                                                                                                                                                                                    <Icon style="font-size: 1rem;" icon="mdi:volume-high" />
-                                                                                                                                                                                                                                                                                                </button> -->
-                    <!-- <div class="volume-input"> -->
                     <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="parseFloat(playerState.volume)" />
                     <input class="volume-input" @click.stop="" @input="onVolumeChange"
                         :style="{ 'background-size': Math.round(parseFloat(playerState.volume) * 100) + '% 100%' }" :min="0"
                         :max="1" step="any" v-model="playerState.volume" type="range">
-                    <!-- </div> -->
-
-
                 </div>
 
 
@@ -290,39 +329,11 @@ const smoothUpdate = () => {
                         <li>set2</li>
                     </ul>
                 </div>
-
-                <!-- <button>
-                                                                                                                                                                                                                                            <Icon @click.stop="onDoubleClick" style="font-size: 1rem;" icon="mdi:fullscreen" />
-                                                                                                                                                                                                                                        </button> -->
-                <!-- <button>
-                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:settings" />
-                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                        <button>
-                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:download" />
-                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                        <button>
-                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:share" />
-                                                                                                                                                                                                                        </button>
-                                                                                                                                                                                                                        <button>
-                                                                                                                                                                                                                            <Icon style="font-size: 1rem;" icon="mdi:playlist-plus" />
-                                                                                                                                                                                                                        </button> -->
-
             </div>
         </div>
-        <video id="vid" aria-description="video" src="http://media.w3.org/2010/05/sintel/trailer.mp4" ref="video">
+        <video class="player" id="vid" aria-description="video" :src="$props.src" ref="video">
         </video>
     </div>
-
-
-    <!-- <ExitFullscreenButton :is-hovered="settings" @click="settings = !settings" /> -->
-<!-- 
-    <p>
-        {{ playerState.currentTime }}<br />
-        {{ playerState.duration }}<br />
-        {{ playerState.isPlaying }}<br />
-        {{ playerState.isFullscreen }}<br />
-        {{ playerState.volume }}<br />
-    </p> -->
 </template>
 
 <style scoped>
@@ -332,29 +343,12 @@ const smoothUpdate = () => {
     box-sizing: border-box;
 }
 
-/* button::before {
-    content: "";
-    display: block;
-    width: 12px;
-    position: absolute;
-    top: 5px;
-    bottom: 0;
-    left: -12px;
-} */
+#vid {}
 
 .video-container {
-    position: relative;
-    /* width: 100%; */
-    
+    width: 100%;
+    flex-basis: 100%;
     display: flex;
-    justify-content: center;
-    margin-inline: auto;
-    /* margin: 0 24px; */
-    /* margin-left: 24px;
-    margin-right: 24px; */
-    /* padding-right: 24px; */
-    background-color: black;
-    overflow: hidden;
 }
 
 .video-container.theater,
@@ -413,6 +407,10 @@ video {
     opacity: 1;
 }
 
+.playPause {
+    scale: .85;
+}
+
 button {
     background: none;
     border: none;
@@ -426,10 +424,11 @@ button {
 .video-controls-container .controls {
     display: flex;
     gap: 4px;
-    padding: 0 .5rem;
+    padding: 0 .75rem;
     align-items: center;
     font-size: 1.1rem;
     padding-bottom: 2px;
+    height: 36px;
 }
 
 .controls button {
@@ -456,6 +455,7 @@ button {
     gap: .5rem;
     flex-grow: 1;
     flex-direction: column;
+    white-space: nowrap;
 }
 
 
@@ -599,7 +599,7 @@ input[type=range]::-webkit-slider-runnable-track {
     top: 0;
     left: -100%;
     /* background-color: lime; */
-    background-color: red;
+    background-color: v-bind(color);
     /* content: "";
     position: absolute;
     top: 0;
@@ -619,20 +619,13 @@ input[type=range]::-webkit-slider-runnable-track {
     position: absolute;
     left: -2px;
     top: 8px;
-    /* transform: translateX(-50%) scale(var(--scale)); */
     height: 13px;
-    /* top: -50%; */
-    /* left: -.3rem; */
-    /* left: var(--progress);
-    transition: left 100ms ease; */
-    /* transition: none; */
     transition: opacity 150ms ease;
     transform: translateX(var(--bar));
 
-    background-color: red;
+    background-color: v-bind(color);
     border-radius: 50%;
-    /* transition: transform 150ms ease; */
-    aspect-ratio: 1 / 1 !important;
+    aspect-ratio: 1;
     z-index: 2;
     pointer-events: none;
 }
@@ -649,5 +642,9 @@ input[type=range]::-webkit-slider-runnable-track {
     margin: 0;
     padding: 1rem;
     line-height: 2rem;
+}
+
+.player {
+    max-height: 100%;
 }
 </style>

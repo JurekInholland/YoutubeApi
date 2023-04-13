@@ -1,30 +1,35 @@
 <template>
-    <!-- <button @click="inputChange" style="color: white;">test btn</button> -->
-    <div class="outer">
-        <div class="container" :class="toggle ? 'cinema' : ''" id="container1" ref="container">
-            <div class="layout">
-                <div class="player-box">
-                    <YoutubePlayer v-if="store.currentVideo" ref="playerEl" v-bind="$attrs" class="player" id="player"
-                                   :videoId="store.currentVideo.id" :start-time="startTime" :aspect-ratio="16 / 9" />
+  <!-- <button @click="inputChange" style="color: white;">test btn</button> -->
+  <div class="outer" v-if="found">
+    <div class="container" :class="toggle ? 'cinema' : ''" id="container1" ref="container">
+      <div class="layout">
+        <div class="player-box">
+          <YoutubePlayer v-if="store.currentVideo && !useLocalPlayer" ref="playerEl" v-bind="$attrs" class="player"
+            id="player" :videoId="store.currentVideo.id" :start-time="startTime" :aspect-ratio="16 / 9" />
 
-                </div>
-                <div class="meta-cont">
-                    <VideoMetadata v-if="store.currentVideo" class="metadata" @update:model-value="toggle = !toggle"
-                                   :modelValue="toggle" :video="store.currentVideo" />
-                    <div id="primary" v-auto-animate></div>
-                </div>
-            </div>
-            <div id="tele" v-auto-animate>
-            </div>
+          <VideoPlayer v-else ref="playerEl" :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`"
+            color="green">
 
-            <!-- <teleport v-if="mounted" :to="toggle ? '#primary' : '#tele'">
+          </VideoPlayer>
+        </div>
+        <div class="meta-cont">
+          <VideoMetadata v-if="store.currentVideo" class="metadata" @update:model-value="toggle = !toggle"
+            :modelValue="toggle" :video="store.currentVideo" @update:custom-player="togglePlayer" />
+          <div id="primary" v-auto-animate></div>
+        </div>
+      </div>
+      <div id="tele" v-auto-animate>
+      </div>
+
+      <!-- <teleport v-if="mounted" :to="toggle ? '#primary' : '#tele'">
             <div class="secondary">
                 this is the secondary
             </div>
         </teleport> -->
-        </div>
-        <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="toggle" />
     </div>
+    <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="toggle" />
+  </div>
+  <NotFound v-else />
 </template>
 <script async setup lang="ts">
 import VideoMetadata from "@/components/VideoMetadata.vue"
@@ -35,85 +40,89 @@ import { useResizeObserver } from "@vueuse/core"
 import Sidebar from "@/components/Sidebar.vue"
 import { useRoute } from "vue-router"
 import { formatTitle } from "@/utils"
+import VideoPlayer from "@/components/VideoPlayer.vue"
+import NotFound from "@/components/NotFound.vue"
 
 const toggle = ref(false)
 
+const useLocalPlayer = ref(false)
+const found = ref(false)
 const route = useRoute()
 const store = useYoutubeStore()
 const calcH = ref("100%")
 const startTime = computed(() => {
-    return route.query.t ? parseInt(route.query.t as string) : 0
+  return route.query.t ? parseInt(route.query.t as string) : 0
 })
-const parsedId = computed(() => {
-    const split = route.path.substring(1).split("?")[0]
-    if (split.length === 11) return split
-    return route.query.v ? route.query.v as string : null
-})
-watch(() => route.path, async () => {
-    console.log("watch parsedId", parsedId.value)
-    await store.fetchCurrentVideo(parsedId.value!)
 
+const togglePlayer = (val: boolean) => {
+  console.log("toggle player" + val)
+  useLocalPlayer.value = val
+}
+
+const parsedId = computed(() => {
+  const split = route.path.substring(1).split("?")[0]
+  if (split.length === 11) return split
+  return route.query.v ? route.query.v as string : null
+})
+
+watch(() => route.path, async () => {
+  console.log("watch parsedId", parsedId.value)
+  
+  await store.fetchCurrentVideo(parsedId.value!)
+  if (store.currentVideo !== null) found.value = true;
 
 }, { immediate: true })
 
 watch(() => store.currentVideo, async () => {
-    await nextTick()
-    document.title = formatTitle(store.currentVideo!.title)
-    calculateHeight(playerEl.value?.$el.offsetWidth)
+  await nextTick()
+  if (!store.currentVideo) return
+  document.title = formatTitle(store.currentVideo!.title)
+  calculateHeight(playerEl.value?.$el.offsetWidth)
 }, { immediate: true })
 
+
+watch(() => toggle.value, async () => {
+  console.log("Toggle")
+}, { immediate: true })
 
 const playerEl = ref<HTMLDivElement | null>(null) as any
 const mounted = ref(false)
 
 const isDisabled = () => {
-    const res = !mounted.value || !toggle.value
-    console.log("is disabled", res, mounted.value, toggle.value)
-    return res
+  const res = !mounted.value || !toggle.value
+  console.log("is disabled", res, mounted.value, toggle.value)
+  return res
 }
 useResizeObserver(playerEl, (entries) => {
-    console.log("RESIZE OBSERVER", entries[0].contentRect.width)
-    calculateHeight(entries[0].contentRect.width)
+  console.log("RESIZE OBSERVER", entries[0].contentRect.width)
+  calculateHeight(entries[0].contentRect.width)
 })
 
 // onBeforeMount(() => {
 //     mounted.value = false;
 // })
 onMounted(() => {
-    mounted.value = true
-    calculateHeight(playerEl.value?.$el.offsetWidth)
-    // setTimeout(() => {
-    //     mounted.value = true;
-    // }, 1000)
+  mounted.value = true
+  // if (store.currentVideo !== null) found.value = true;
+  calculateHeight(playerEl.value?.$el.offsetWidth)
+  // setTimeout(() => {
+  //     mounted.value = true;
+  // }, 1000)
 })
 onBeforeUnmount(() => {
-    mounted.value = false
+  mounted.value = false
 })
 
 const calculateHeight = (width: number) => {
-    // let h = `calc(${width}px * (${store.currentVideo!.height} / ${store.currentVideo!.width}))`
-    let h = `${Math.floor(width * (store.currentVideo!.height / store.currentVideo!.width))}px`
-    if (toggle.value) {
-        h = "100%"
-    }
-    console.log("CALCULATING HEIGHT", h, toggle.value)
-    calcH.value = h
-    // return h
+  if (!store.currentVideo) return
+  // let h = `calc(${width}px * (${store.currentVideo!.height} / ${store.currentVideo!.width}))`
+  let h = `${Math.floor(width * (store.currentVideo!.height / store.currentVideo!.width))}px`
+  if (toggle.value) {
+    h = "100%"
+  }
+  console.log("CALCULATING HEIGHT", h, toggle.value)
+  calcH.value = h
 }
-// const elWidth = ref(playerEl.value?.$el.offsetWidth);
-
-// playerEl.onRes
-// const height = computed(() => {
-//     let h = `calc(100vw * ${store.currentVideo!.height} / ${store.currentVideo!.width})`
-//     if (!toggle.value && elWidth.value != undefined) {
-//         console.log(elWidth.value)
-//         h = "calc(" + elWidth.value + "px * 9 / 16)";
-//     }
-//     console.log("CALCULATING HEIGHT", h, toggle.value)
-
-//     return h
-// })
-
 
 </script>
 
@@ -150,9 +159,11 @@ const calculateHeight = (width: number) => {
   flex-wrap: wrap;
   gap: var(--gutter-width);
   height: v-bind(calcH);
-  max-width: var(--max-player-width);
+  // max-width: var(--max-player-width);
   max-height: var(--max-p-height);
   min-width: 360px;
+  flex-grow: 1;
+
   // max-height: var(--max-player-height);
 }
 
@@ -293,19 +304,23 @@ const calculateHeight = (width: number) => {
 <style>
 :root {
 
-    --nav-height: 56px;
-    --max-p-height: calc(100vh - 172px);
-    /* --max-player-width: calc(100vw - (var(var(--nav-height)) + 2 * var(--gutter-width))); */
+  --nav-height: 56px;
+  --max-p-height: calc(100vh - 172px);
+  /* --max-player-width: calc(100vw - (var(var(--nav-height)) + 2 * var(--gutter-width))); */
 
 
-    --max-player-width: calc(100vw);
+  --max-player-width: calc(100vw);
 
-    --max-player-height: calc(100vh - (var(--nav-height) + 2 * var(--gutter-width)));
+  --max-player-height: calc(100vh - (var(--nav-height) + 2 * var(--gutter-width)));
 
-    --max-content-width: calc(1280px + var(--sidebar-width) + 3 * var(--gutter-width));
+  --max-content-width: calc(1280px + var(--sidebar-width) + 3 * var(--gutter-width));
 
-    --min-player-height: 480px;
-    --sidebar-width: 402px;
-    --gutter-width: 1.5rem;
+  --min-player-height: 480px;
+  --sidebar-width: 402px;
+  --gutter-width: 1.5rem;
+}
+
+.video-container {
+  max-height: var(--max-p-height);
 }
 </style>

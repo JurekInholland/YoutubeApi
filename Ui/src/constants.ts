@@ -9,7 +9,7 @@ export const apiUrls = {
   getVideoInfo: 'YoutubeVideo',
   getVideos: 'YoutubeVideo/all',
   getSearchCompletion: 'Youtube/searchCompletion',
-  getSearchResults: 'Scrape/search',
+  getSearchResults: 'Scrape/SearchResults',
   processQueue: 'Queue/process',
   getRelatedVideos: 'Scrape/multiple',
   getLocalVideos: 'LocalVideo',

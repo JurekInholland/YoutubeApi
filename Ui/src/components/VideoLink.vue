@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
-import { formatViews } from '@/utils';
+import { formatViews, formatTitle, formatDuration } from '@/utils';
 
 
 const props = defineProps<{
@@ -14,17 +14,18 @@ const props = defineProps<{
     <div class="video-container">
         <router-link v-if="video.id" class="outer" :to="{ name: 'video', params: { videoId: video.id ? video.id : '' } }">
             <div class="thumbnail">
-                <div class="runtime">34:56</div>
+                <div class="runtime">{{ formatDuration(video.duration) }}</div>
                 <img :src="video.youtubeThumbnailUrl" alt="">
             </div>
 
             <div class="infos">
-                <a href="">
+                <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
                     <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" />
-                </a>
+                </router-link>
                 <div class="text">
-                    <h3 class="title">{{ video.title }}</h3>
-                    <router-link to="">{{ video.youtubeChannel!.handle }}</router-link>
+                    <h3 v-html="formatTitle(video.title)" class="title"></h3>
+                    <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">{{
+                        video.youtubeChannel!.handle }}</router-link>
                     <!-- <p>pannenkoek2012</p> -->
                     <p>{{ formatViews(video.viewCount) }} views <span class="separator"> 2 days ago</span></p>
                 </div>
@@ -56,11 +57,12 @@ const props = defineProps<{
 
     h3 {
         font-weight: bold;
-        max-height: 32px;
+        max-height: 42px;
         overflow: hidden;
         margin-bottom: .5rem;
         color: white;
         text-overflow: ellipsis;
+        line-height: 22px;
     }
 
     p {
@@ -116,6 +118,7 @@ const props = defineProps<{
     display: flex;
     height: auto;
     overflow: hidden;
+
     img {
         border-radius: 12px;
 
@@ -137,4 +140,5 @@ const props = defineProps<{
     a:hover {
         color: white;
     }
-}</style>
+}
+</style>

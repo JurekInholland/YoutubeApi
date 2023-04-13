@@ -9,7 +9,11 @@ export const addSeperators = (num: number, separator: string = ','): string => {
   })
 }
 export function formatTitle(title: string): string {
-  return title.replaceAll('&#39;', "'").replaceAll('&quot;', '"').replaceAll("''", "'")
+  return title
+    .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag"><a href="/tags/$1"> #$1</a></span> ')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&quot;', '"')
+    .replaceAll("''", "'")
 }
 
 export function formatDescription(description: string): string {
@@ -20,7 +24,7 @@ export function formatDescription(description: string): string {
     .replaceAll('https://www.youtube.com/', baseUrl + '/')
     .replaceAll('https://youtube.com/', baseUrl + '/')
     .replaceAll('https://youtu.be/', baseUrl + '/')
-    .replaceAll(/@(\w+)/g, '<span class="tag"><a href="@$1" target="_blank"> @$1 </a></span>')
+    .replaceAll(/@(\w+)/g, '<span class="tag"><a href="@$1" target="_blank">@$1</a></span>')
 
     .replaceAll(/(\\n)/gm, ' <br>')
     .replaceAll(/(\\r)/gm, '')

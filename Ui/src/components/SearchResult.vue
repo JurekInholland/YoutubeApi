@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
-import { formatDateAgo, formatDescription, formatViews } from '@/utils';
+import { formatDateAgo, formatDescription, formatTitle, formatViews } from '@/utils';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 
@@ -40,7 +40,7 @@ const onPointerUp = (e: PointerEvent) => {
             <div class="infos">
                 <router-link :to="'/watch?v=' + video.id">
 
-                    <h3>{{ video.title }}</h3>
+                    <h3 v-html="formatTitle(video.title)"></h3>
                     <p class="view-count">{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new
                         Date(video.uploadDate)) }}</p>
 
@@ -74,21 +74,6 @@ a:hover {
     color: white;
 }
 
-.author {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    color: rgba(255, 255, 255, .7);
-    transition: color .2s ease;
-    margin-bottom: 1rem;
-
-    img {
-        width: 1.5rem;
-        height: 1.5rem;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-}
 
 
 
@@ -123,6 +108,7 @@ a:hover {
     width: 100%;
     overflow: hidden;
     font-size: 12px;
+    text-overflow: ellipsis;
 
     h3 {
         font-size: 18px;
@@ -152,7 +138,6 @@ a:hover {
 // }
 
 .thumbnail {
-    aspect-ratio: 16/9;
     max-width: 33%;
     // flex-basis: 300px;
     flex: 2 0 auto;
@@ -162,8 +147,11 @@ a:hover {
     img {
         border-radius: 12px;
         width: 100%;
-        height: 100%;
+        min-width: 240px;
+        height: auto;
         object-fit: cover;
+        aspect-ratio: 16/9 !important;
+
     }
 }
 </style>

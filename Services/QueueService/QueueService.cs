@@ -164,10 +164,8 @@ public class QueueService : BackgroundService, IQueueService
         string ext = doc.RootElement.GetProperty("ext").GetString()!;
         int size = doc.RootElement.GetProperty("filesize_approx").GetInt32();
 
-        var videoPath =
-            $"data/videos/{queuedDownload.Video.YoutubeChannel.Title}/{queuedDownload.Video.Id} - {queuedDownload.Video.Title}.{ext}";
-
-        LocalVideo localVideo = new()
+        var videoPath = file.Replace(".info.json", $".{ext}");
+            LocalVideo localVideo = new()
         {
             Id = queuedDownload.Video.Id,
             Path = videoPath,

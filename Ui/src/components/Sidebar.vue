@@ -20,6 +20,10 @@ onMounted(async () => {
 })
 
 watch(() => store.currentVideo, async () => {
+    if (store.currentVideo === null || store.currentVideo === undefined) {
+        return;
+    }
+    console.log("FETCHING RELATED VIDEOS")
     await store.fetchRelatedVideos();
 }, { immediate: true })
 </script>

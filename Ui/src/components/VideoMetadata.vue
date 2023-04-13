@@ -7,7 +7,7 @@ import '../../node_modules/vue3-toggle-button/dist/style.css'
 import { Icon } from '@iconify/vue';
 
 import type { YoutubeVideo } from '@/types';
-import { formatDateAgo, formatDescription, formatViews, formatDate } from '@/utils';
+import { formatDateAgo, formatDescription, formatViews, formatDate, formatTitle } from '@/utils';
 import SvgButton from './buttons/SvgButton.vue';
 import ToggleButton from "@/components/ToggleButton.vue";
 
@@ -20,27 +20,6 @@ watch(router.currentRoute, (val) => {
     isDescriptionExpanded.value = false;
 })
 
-// const formatDescription = computed(() => {
-//     const baseUrl = window.location.origin;
-
-//     return props.video.description
-//         .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag">#$1</span>')
-//         .replaceAll("https://www.youtube.com/", baseUrl + "/")
-//         .replaceAll("https://youtu.be/", baseUrl + "/")
-//         .replaceAll(/@(\w+)/g, '<span class="tag"><a href="@$1" target="_blank"> @$1 </a></span>')
-
-//         .replaceAll(/(\\n)/gm, ' <br>')
-//         .replaceAll(/(\\r)/gm, '')
-//         .replaceAll(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
-//         .replaceAll('\\"', '"')
-// });
-
-const cleanedTitle = computed(() => {
-    return props.video.title
-        .replace(/(?<!&)#([\w-]+)/g, '<span class="tag"><a href="@$1" target="_blank">#$1</a></span>')
-        .replace(/@(\w+)/g, '<span class="tag"><a href="@$1" target="_blank"> @$1 </a></span>')
-        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
-})
 
 const toggleDescription = () => {
     if (!isDescriptionExpanded.value) {
@@ -52,7 +31,8 @@ const toggleDescriptionButton = () => {
 }
 
 const emits = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void
+    (e: 'update:modelValue', value: boolean): void,
+    (e: 'update:customPlayer', value: boolean): void,
 }>();
 
 const toggleCinema = () => {
@@ -60,12 +40,20 @@ const toggleCinema = () => {
     // props.cinema = !props.cinema;
     emits('update:modelValue', !props.modelValue);
 }
-const tog = ref(false);
+
+const tog: Ref<boolean> = ref(false);
+
+watch(tog, (val) => {
+    console.log('watch tog' + val)
+    emits('update:customPlayer', val)
+
+})
+
 </script>
 
 <template>
     <div class="metadata">
-        <h1 v-html="cleanedTitle" />
+        <h1 v-html="formatTitle(props.video.title)" ></h1>
 
         <div id="top-row">
             <div id="owner">
@@ -86,18 +74,18 @@ const tog = ref(false);
             </div>
             <div class="buttons">
                 <!-- <button>
-                                                                                                        <Icon icon="maki:cinema" />
-                                                                                                        Kino mode
-                                                                                                    </button>
-                                                                                                    <button>
-                                                                                                        <Icon icon="ph:floppy-disk" />
-                                                                                                        Backup
-                                                                                                    </button> -->
+                                                                                                                        <Icon icon="maki:cinema" />
+                                                                                                                        Kino mode
+                                                                                                                    </button>
+                                                                                                                    <button>
+                                                                                                                        <Icon icon="ph:floppy-disk" />
+                                                                                                                        Backup
+                                                                                                                    </button> -->
                 <div class="likes">
                     <Icon icon="iconoir:thumbs-up" />
                     <p>{{ formatViews(props.video.likeCount) }}</p>
                 </div>
-                <ToggleButton v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}</ToggleButton>
+                <ToggleButton v-if="props.video.localVideo" v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}</ToggleButton>
 
                 <!-- <Vue3ToggleButton v-model="tog" :handleColor="'#cc00cc'"> </Vue3ToggleButton> -->
                 <button class="download-button">
@@ -109,11 +97,11 @@ const tog = ref(false);
                     <Icon icon="maki:cinema" />
                 </button>
                 <!-- <SvgButton class="dlbtn" text="Download" view-box="0 0 24 24"
-                                                                                                                                                                        path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
+                                                                                                                                                                                        path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
                 <!-- <button>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <Icon icon="clarity:download-line" />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Download
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </button> -->
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <Icon icon="clarity:download-line" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Download
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </button> -->
             </div>
         </div>
         <div :class="isDescriptionExpanded ? 'expanded' : 'collapsed'" id="description" @click.stop="toggleDescription">
@@ -136,6 +124,7 @@ const tog = ref(false);
     margin-top: 1rem;
     flex-basis: 100px;
     flex-grow: 1;
+
     button {
         white-space: nowrap;
     }
@@ -414,7 +403,7 @@ button:active {
 </style>
 <style>
 .tag,
-a {
+.desc a {
     color: var(--link-color);
 }
 

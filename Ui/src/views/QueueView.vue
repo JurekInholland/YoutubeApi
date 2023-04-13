@@ -34,54 +34,64 @@ const enqueue = async () => {
         queueInput.value = '';
     }
 };
+const onPaste = (e: ClipboardEvent) => {
+    console.log('paste' + e);
+}
 </script>
 
-<template>
-    <h1>Queue</h1>
-    <div class='item-container'>
-        <QueueItem v-for='item in youtubeStore.queue' :key='item.id' :item='item' />
-    </div>
-    <div class='controls'>
-        <button @click='clearQueue'>
-            Clear Queue
-        </button>
-        <button @click="deleteQueue">
-          Delete Queue
-        </button>
-        <input type='text' v-model='queueInput' name='' id=''>
-        <button @click='enqueue'>
-            Enqueue
-        </button>
-        <button @click='processQueue'>
-            Process Queue
-        </button>
+<template >
+    <div class="container">
+
+
+        <div class='controls'>
+            <button @click='clearQueue'>
+                Clear Queue
+            </button>
+            <button @click="deleteQueue">
+                Delete Queue
+            </button>
+            <input type='text' v-model='queueInput' name='' id=''>
+            <button @click='enqueue'>
+                Enqueue
+            </button>
+            <button @click='processQueue'>
+                Process Queue
+            </button>
+        </div>
+        <div class='item-container' @paste="onPaste">
+            <QueueItem v-for='item in youtubeStore.queue' :key='item.id' :item='item' />
+        </div>
     </div>
 </template>
 
 <style scoped lang='scss'>
+.container {
+    max-width: 1920px;
+    margin: 0 auto;
+}
 button {
-  background-color: rgba(255, 255, 255, .5);
-  padding: .5rem;
-  border-radius: .75rem;
-  color: white;
+    background-color: rgba(255, 255, 255, .5);
+    padding: .5rem;
+    border-radius: .75rem;
+    color: white;
 }
 
 .item-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem;
 }
 
 .controls {
-  display: flex;
-  gap: 1rem;
-  margin-left: 1rem;
+    display: flex;
+    gap: 1rem;
+    margin-left: 1rem;
 }
 
 
 input {
-  background-color: white;
-  color: black;
+    background-color: white;
+    color: black;
 }
 </style>
