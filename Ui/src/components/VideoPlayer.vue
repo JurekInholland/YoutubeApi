@@ -321,6 +321,7 @@ const smoothUpdate = () => {
     width: 100%;
     flex-basis: 100%;
     display: flex;
+    min-height: 320px;
 }
 
 .video-container.theater,
