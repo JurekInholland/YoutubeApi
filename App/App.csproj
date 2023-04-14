@@ -50,6 +50,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="data\videos\" />
       <Folder Include="Tasks" />
     </ItemGroup>
 

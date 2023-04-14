@@ -27,7 +27,7 @@ public static class YoutubeDownloader
     {
         Console.WriteLine("DownloadVideo: " + videoId);
         var cmd =
-            $"yt-dlp --merge-output-format \"mkv\" --embed-metadata --write-info-json -f bestvideo+bestaudio {videoId} -o \"{outputFormat}\"";
+            @$"yt-dlp --merge-output-format ""mkv"" --embed-metadata --write-info-json -f bestvideo+bestaudio {videoId} -o '{outputFormat}'";
 
 
         await CliCommand.CallCommand(cmd,

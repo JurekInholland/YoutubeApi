@@ -22,7 +22,7 @@ public class VideoController : BaseController
     [HttpGet("", Name = nameof(GetVideo))]
     public async Task<IActionResult> GetVideo(string videoId)
     {
-        var video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).Include(v => v.YoutubeChannel).FirstOrDefaultAsync();
+        var video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).Include(v => v.YoutubeChannel).Include(x => x.LocalVideo).FirstOrDefaultAsync();
         if (video?.LocalVideo is null) return NotFound();
 
         var videoFile = new FileInfo(video.LocalVideo.Path);

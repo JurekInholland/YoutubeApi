@@ -85,7 +85,7 @@ watch(() => store.currentVideo, async () => {
   if (!store.currentVideo) return
   useLocalPlayer.value = store.currentVideo?.localVideo !== undefined
 
-  document.title = formatTitle(store.currentVideo!.title)
+  document.title = formatTitle(store.currentVideo.title)
   calculateHeight(playerEl.value?.$el.offsetWidth)
 }, { immediate: true })
 
@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
 const calculateHeight = (width: number) => {
   if (!store.currentVideo) return
   // let h = `calc(${width}px * (${store.currentVideo!.height} / ${store.currentVideo!.width}))`
-  let h = `${Math.floor(width * (store.currentVideo!.height / store.currentVideo!.width))}px`
+  let h = `${Math.floor(width * (store.currentVideo.height / store.currentVideo.width))}px`
   if (toggle.value) {
     h = "100%"
   }
@@ -135,7 +135,7 @@ const calculateHeight = (width: number) => {
 
 const aspectRatio = computed(() => {
   if (!store.currentVideo) return 16 / 9
-  return store.currentVideo!.width / store.currentVideo!.height
+  return store.currentVideo.width / store.currentVideo.height
 })
 </script>
 
@@ -301,15 +301,15 @@ const aspectRatio = computed(() => {
 }
 
 #primary {
-  flex-grow: 1;
   flex: 1;
+  flex-grow: 1;
   height: 100%;
 }
 
 .secondary {
+  flex: 1;
   background-color: green;
   flex-grow: .5;
-  flex: 1;
   min-width: 300px;
 }
 

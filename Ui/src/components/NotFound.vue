@@ -29,7 +29,7 @@
     }
 
     a {
-        font-family: Roboto;
+        font-family: Roboto, sans-serif;
         color: var(--link-color);
         border: 1px solid rgba(255, 255, 255, .25);
         padding: .55rem .75rem;

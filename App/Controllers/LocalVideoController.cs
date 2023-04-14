@@ -1,15 +1,22 @@
 ﻿using Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.DomainModels;
 using Services.YoutubeService;
 
 namespace App.Controllers;
 
+/// <summary>
+/// Controller to access local videos
+/// </summary>
 public class LocalVideoController : BaseController
 {
     private readonly IYoutubeService _youtubeService;
     private readonly IUnitOfWork _unitOfWork;
 
+    /// <summary>
+    /// LocalVideoController Constructor
+    /// </summary>
     public LocalVideoController(IYoutubeService youtubeService, IUnitOfWork unitOfWork)
     {
         _youtubeService = youtubeService;
@@ -32,16 +39,13 @@ public class LocalVideoController : BaseController
     [HttpGet(nameof(GetVideoStream))]
     public async Task<IActionResult> GetVideoStream(string videoId)
     {
-        // var local = await _unitOfWork.LocalVideos.Where(l => l.Id == videoId).FirstOrDefaultAsync();
+        YoutubeVideo? video = await _unitOfWork.YoutubeVideos.Where(v => v.Id == videoId).Include(v => v.LocalVideo).FirstOrDefaultAsync();
 
-        var video = await _unitOfWork.YoutubeVideos.Where(v => v.Id == videoId).Include(v => v.LocalVideo).FirstOrDefaultAsync();
-
-        if (video?.LocalVideo is null)
+        if (video?.LocalVideo is null || !System.IO.File.Exists(video.LocalVideo.Path))
         {
             return NotFound("Video not found");
         }
 
-        var filestream = System.IO.File.OpenRead(video.LocalVideo.Path);
-        return File(filestream, "video/mkv", fileDownloadName: video.Id + "." + video.LocalVideo.Extension, enableRangeProcessing: true);
+        return PhysicalFile(video.LocalVideo.Path, "video/webm", Path.GetFileName(video.LocalVideo.Path), true);
     }
 }

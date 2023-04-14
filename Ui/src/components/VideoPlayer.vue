@@ -303,7 +303,7 @@ const smoothUpdate = () => {
                 </div>
             </div>
         </div>
-        <video class="player" id="vid" aria-description="video" :src="props.src"  ref="video">
+        <video class="player" id="vid" aria-description="video" :src="props.src" ref="video">
         </video>
     </div>
 </template>
@@ -402,17 +402,18 @@ button {
     font-size: 1.1rem;
     padding-bottom: 2px;
     height: 36px;
+    font-size: .85rem;
 }
 
 .controls button {
     opacity: 1;
-    fill: rgba(255,255,255,0.85);
+    fill: rgba(255, 255, 255, 0.85);
     transition: fill 50ms ease;
 }
 
 .video-controls-container .controls button:hover {
     /* opacity: 1; */
-    fill: rgba(255,255,255,1);
+    fill: rgba(255, 255, 255, 1);
 
 }
 
@@ -492,6 +493,18 @@ input[type=range]::-webkit-slider-runnable-track {
     margin-right: .25rem;
     transition: width 150ms ease-in-out, transform 150ms ease-in-out, margin-right 150ms ease-in-out;
 }
+
+.volume-container {
+    width: 42px;
+    transition: width 150ms ease-in-out;
+}
+
+.volume-container:hover, #volume-btn:focus-within .volume-container,
+.volume-container:focus-within {
+    width: 112px;
+
+}
+
 
 .volume-container:hover .volume-input,
 #volume-btn:focus-within .volume-input,

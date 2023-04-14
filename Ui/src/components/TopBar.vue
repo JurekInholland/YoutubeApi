@@ -73,7 +73,7 @@ const onKeyPress = async (e: KeyboardEvent) => {
 
     }
     else if (e.key === "ArrowUp") {
-        activeIndex.value = (activeIndex.value - 1 + store.searchSuggestions.length + 1) % (store.searchSuggestions.length + 1);        // activeIndex.value = (activeIndex.value - 1) % (store.searchSuggestions.length + 1);
+        activeIndex.value = (activeIndex.value - 1 + store.searchSuggestions.length + 1) % (store.searchSuggestions.length + 1);
         store.searchQuery = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
 
     }
@@ -176,7 +176,7 @@ const toggleSidebar = (val: boolean) => {
                     <input @input="onChange" @focusin="searchFocs = true" @focusout="onFocusOut" v-model="searchQuery"
                         placeholder="Search" type="text" @keydown="onKeyPress">
 
-                    <button class="close" v-if="store.searchQuery !== ''" @click="clearSearch">
+                    <button class="close" v-if="searchQuery !== ''" @click="clearSearch">
                         <Icon style="font-size: 1.5rem;" icon="clarity:close-line" />
 
                     </button>

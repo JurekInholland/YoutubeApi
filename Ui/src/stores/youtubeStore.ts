@@ -245,10 +245,10 @@ export const useYoutubeStore = defineStore({
       queueItem.progress = progress
 
       if (progress.status === 'download') {
-        queueItem!.status = DownloadStatus.Downloading
+        queueItem.status = DownloadStatus.Downloading
       } else if (progress.status === 'finished') {
-        queueItem!.status = DownloadStatus.Finished
-        queueItem!.progress = undefined
+        queueItem.status = DownloadStatus.Finished
+        queueItem.progress = undefined
       }
     },
     resetQueue() {

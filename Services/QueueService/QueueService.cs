@@ -26,8 +26,6 @@ public class QueueService : BackgroundService, IQueueService
 
     public IUnitOfWork UnitOfWork => _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-    // private IUnitOfWork UnitOfWork =>  _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
-
     private static readonly Regex DownloadProgressRegex =
         new(
             @"\[(?<kind>\w+)\]\s+(?<progress>\d+\.\d+)%\s+of\s+~\s+(?<size>\d+\.\d+)\s*(?<unit>[a-zA-Z]+)\s+at\s+(?<speed>\d+\.\d+)\s*(?<speedUnit>[a-zA-Z]+\/s)\s+ETA\s+(?<eta>\d{2}:\d{2})\s+\(frag\s+(?<frag>\d+\/\d+)\)");
@@ -41,11 +39,8 @@ public class QueueService : BackgroundService, IQueueService
     {
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
-        // _youtubeExplodeService = scope.ServiceProvider.GetRequiredService<IYoutubeExplodeService>();
         _hub = hub;
         _scrapeService = scrapeService;
-
-        // _unitOfWork = serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
     }
 
     public Task StopAsync()
@@ -68,7 +63,6 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task ClearQueue()
     {
-        // _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
         IUnitOfWork unitOfWork = UnitOfWork;
 
         unitOfWork.QueuedDownloads.DeleteAll();
@@ -86,8 +80,6 @@ public class QueueService : BackgroundService, IQueueService
     public async Task DeleteFromQueue(string videoId)
     {
         IUnitOfWork unitOfWork = UnitOfWork;
-
-        // _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
         unitOfWork.QueuedDownloads.DeleteById(videoId);
         await unitOfWork.Save();
     }
@@ -119,8 +111,6 @@ public class QueueService : BackgroundService, IQueueService
     public async Task ResetQueue()
     {
         IUnitOfWork unitOfWork = UnitOfWork;
-
-        // _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
         var done = await unitOfWork.QueuedDownloads.GetByStatus(Enums.DownloadStatus.Finished);
         foreach (var queuedDownload in done)
         {
@@ -132,8 +122,6 @@ public class QueueService : BackgroundService, IQueueService
 
     private static async Task<LocalVideo?> ReadDownloadedVideoJson(QueuedDownload queuedDownload)
     {
-        // var settings = await UnitOfWork.ApplicationSettings.GetSettings();
-
         Console.WriteLine("Reading json file");
 
         var targetDir = Path.GetFullPath($"data/videos/{queuedDownload.Video.YoutubeChannel.Title}");
@@ -145,13 +133,6 @@ public class QueueService : BackgroundService, IQueueService
         {
             throw new($"Could not find json file for video with id {queuedDownload.Id}");
         }
-
-        // var jsonPath =
-        //     Path.GetFullPath(
-        //         $"data/videos/{queuedDownload.Video.YoutubeChannel.Title}/{queuedDownload.Id} - {queuedDownload.Video.Title}.info.json"
-        //             .Replace(":", "_")
-        //             .Replace("|", "｜")
-        //     );
 
         var jsonFile = await File.ReadAllTextAsync(file);
         var doc = JsonDocument.Parse(jsonFile);
@@ -338,25 +319,20 @@ public class QueueService : BackgroundService, IQueueService
         };
 
 
-        // await unitOfWork.QueuedDownloads.Create(queuedDownload);
         try
         {
             await unitOfWork.QueuedDownloads.EnqueueDownload(queuedDownload);
-            // await UnitOfWork.Save();
         }
         catch (Exception e)
         {
             Console.WriteLine("ERROR");
             Console.WriteLine(e);
         }
-
-        // queuedDownload.Video = video;
         return queuedDownload;
     }
 
     public async Task<QueuedDownload?> DequeueDownload()
     {
-        // _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
         var queuedDownloads = UnitOfWork.QueuedDownloads.All();
         Console.WriteLine("brk");
         if (!queuedDownloads.Any())

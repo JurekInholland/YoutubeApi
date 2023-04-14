@@ -28,11 +28,11 @@ public class ScrapeServiceTests
     {
         const string videoId = "dQw4w9WgXcQ";
 
-        YoutubeVideo video = await _scraper.ScrapeYoutubeVideo(videoId);
+        YoutubeVideo? video = await _scraper.ScrapeYoutubeVideo(videoId);
         Assert.Multiple(() =>
         {
             Assert.That(video, Is.Not.Null);
-            Assert.That(video.Id, Is.EqualTo(videoId));
+            Assert.That(video!.Id, Is.EqualTo(videoId));
             Assert.That(video.Title, Is.EqualTo("Rick Astley - Never Gonna Give You Up (Official Music Video)"));
             Assert.That(video.Description, Does.StartWith("The official video for “Never Gonna Give You Up” by Rick Astley"));
             Assert.That(video.Duration, Is.EqualTo(TimeSpan.FromMinutes(3).Add(TimeSpan.FromSeconds(32))));
