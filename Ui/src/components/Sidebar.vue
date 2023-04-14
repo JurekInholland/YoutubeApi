@@ -11,11 +11,13 @@ const props = defineProps<{
     toggled: boolean,
 }>()
 
+const mounted = ref(false)
 
 const relatedVideos: Ref<Array<YoutubeVideo>> = ref([])
 
 onMounted(async () => {
     console.log("mounted")
+    mounted.value = true;
     // await store.fetchRelatedVideos();
 })
 
@@ -29,8 +31,8 @@ watch(() => store.currentVideo, async () => {
 </script>
 
 <template>
-    <div v-if="store.relatedVideos.length > 0">
-        <Teleport :to="props.toggled ? '#primary' : '#tele'">
+    <div v-if="store.relatedVideos !== null">
+        <Teleport v-if="mounted" :to="props.toggled ? '#primary' : '#tele'">
             <SidebarVideo v-for="vid of store.relatedVideos" :video="vid" :key="vid.id" />
         </Teleport>
     </div>

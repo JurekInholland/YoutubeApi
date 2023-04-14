@@ -86,7 +86,20 @@ public class ScrapeController : BaseController
     [HttpGet(nameof(YoutubeVideo))]
     public async Task<IActionResult> YoutubeVideo(string videoId)
     {
-        var yt = await _scrapeService.ScrapeYoutubeVideo(videoId);
+        YoutubeVideo? yt;
+        try
+        {
+            yt = await _scrapeService.ScrapeYoutubeVideo(videoId);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
+        if (yt is null)
+        {
+            return NotFound();
+        }
 
         await _unitOfWork.YoutubeVideos.Create(yt);
 

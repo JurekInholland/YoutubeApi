@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useYoutubeStore } from '@/stores/youtubeStore';
+
+
+const store = useYoutubeStore();
 
 const props = defineProps<{
     modelValue: boolean,
@@ -13,7 +17,7 @@ const updateValue = (event: Event) => {
     emits('update:modelValue', !props.modelValue);
 }
 
-
+const color = store.color;
 
 </script>
 
@@ -77,7 +81,8 @@ const updateValue = (event: Event) => {
 
 .on {
     transform: translateX(19px);
-    background-color: #3ea6ff;
+    // background-color: #3ea6ff;
+    background-color: v-bind(color);
 }
 
 .toggle {

@@ -65,7 +65,7 @@ onMounted(() => {
                 </clipPath>
             </defs>
             <path class="ytp-svg-fill ytp-svg-volume-animation-speaker" clip-path="url(#ytp-svg-volume-animation-mask)"
-                :d="path" fill="#fff" id="ytp-id-57" data-darkreader-inline-fill=""
+                :d="path" id="ytp-id-57" data-darkreader-inline-fill=""
                 style="--darkreader-inline-fill:#e8e6e3;">
             </path>
             <!-- <path  v-if="volume > 0" class="ytp-svg-fill ytp-svg-volume-animation-hider" clip-path="url(#ytp-svg-volume-animation-slash-mask)"

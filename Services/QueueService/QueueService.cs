@@ -162,10 +162,20 @@ public class QueueService : BackgroundService, IQueueService
         float vbr = doc.RootElement.GetProperty("vbr").GetSingle();
         float abr = doc.RootElement.GetProperty("abr").GetSingle();
         string ext = doc.RootElement.GetProperty("ext").GetString()!;
-        int size = doc.RootElement.GetProperty("filesize_approx").GetInt32();
+        long size = 0;
+
+        if (doc.RootElement.TryGetProperty("filesize_approx", out var fileSizeApprox))
+        {
+            fileSizeApprox.TryGetInt64(out size);
+        }
+
+        if (doc.RootElement.TryGetProperty("filesize", out var fileSize))
+        {
+            fileSize.TryGetInt64(out size);
+        }
 
         var videoPath = file.Replace(".info.json", $".{ext}");
-            LocalVideo localVideo = new()
+        LocalVideo localVideo = new()
         {
             Id = queuedDownload.Video.Id,
             Path = videoPath,

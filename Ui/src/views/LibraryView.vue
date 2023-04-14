@@ -29,7 +29,7 @@ onMounted(() => {
 
     padding: 1rem;
     // max-width: 2256px;
-    width: 100vw;
+    max-width: 100vw;
     // background-color: red;
     // margin: 0 auto;
 
@@ -38,7 +38,7 @@ onMounted(() => {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         flex-direction: row;
         width: 100%;
-        gap: 1rem;
+        gap: 1.5rem;
         margin: 1rem;
     }
 

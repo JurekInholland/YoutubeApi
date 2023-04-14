@@ -6,8 +6,10 @@ import {
   type QueuedDownload,
   type YoutubeVideo
 } from '@/types'
+import type { PlayerState } from '@vue-youtube/component'
 import type { AxiosError } from 'axios'
 import { defineStore } from 'pinia'
+import { type Ref, ref } from 'vue'
 
 export const useYoutubeStore = defineStore({
   id: 'youtubeStore',
@@ -19,6 +21,8 @@ export const useYoutubeStore = defineStore({
     currentVideo: YoutubeVideo | undefined
     searchSuggestions: string[]
     relatedVideos: YoutubeVideo[]
+    color: Ref<string>
+    // playerState: PlayerState
   } => ({
     queue: [],
     videos: [],
@@ -26,7 +30,9 @@ export const useYoutubeStore = defineStore({
     searchQuery: '',
     currentVideo: undefined,
     searchSuggestions: [],
-    relatedVideos: []
+    relatedVideos: [],
+    color: ref('red')
+    // playerState: {}
   }),
 
   getters: {
@@ -57,6 +63,9 @@ export const useYoutubeStore = defineStore({
         lst.push([key, value])
       }
       return lst.sort((a, b) => Number(b[1]) - Number(a[1]))
+    },
+    getQueueItem: (state) => (videoId: string) => {
+      return state.queue.find((item) => item.video.id === videoId)
     },
 
     getVideoById:
@@ -131,6 +140,10 @@ export const useYoutubeStore = defineStore({
       if (queueEntry?.video) {
         queueEntry.video.localVideo = localVideo
       }
+      const vid = this.videos.find((v) => v.id === localVideo.id)
+      if (vid) {
+        vid.localVideo = localVideo
+      }
     },
 
     async setSearchQuery(query: string) {
@@ -151,14 +164,14 @@ export const useYoutubeStore = defineStore({
       if (found) {
         console.log('returning search result')
         this.currentVideo = found
-        return;
+        return
       }
 
       const foundVideo = this.videos.find((video) => video.id === videoId)
       if (foundVideo) {
         console.log('returning video from videos')
         this.currentVideo = foundVideo
-        return;
+        return
       }
       // debugger;
 
@@ -225,9 +238,12 @@ export const useYoutubeStore = defineStore({
     },
     async updateDownloadProgress(progress: DownloadProgress) {
       const queueItem = this.queue.find((item) => item.id === progress.id)
-      if (queueItem) {
-        queueItem.progress = progress
+      if (queueItem === undefined) {
+        console.log("couldn't find queue item")
+        return
       }
+      queueItem.progress = progress
+
       if (progress.status === 'download') {
         queueItem!.status = DownloadStatus.Downloading
       } else if (progress.status === 'finished') {

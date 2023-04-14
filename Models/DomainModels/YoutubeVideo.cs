@@ -32,6 +32,7 @@ public class YoutubeVideo : BaseEntity
     public string[] Categories { get; set; } = {""};
     public string[] RelatedVideos { get; set; } = {""};
 
+    public bool playableInEmbed { get; set; }
     // public int Width { get; set; }
     // public int Height { get; set; }
     // public int Fps { get; set; }

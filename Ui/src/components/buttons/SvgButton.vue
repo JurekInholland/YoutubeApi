@@ -4,10 +4,10 @@ const props = defineProps({
         type: String,
         default: ''
     },
-    fill: {
-        type: String,
-        default: '#fff'
-    },
+    // fill: {
+    //     type: String,
+    //     default: 'rgba(255,255,255,0.7)'
+    // },
     style: {
         type: String,
         default: ''
@@ -27,8 +27,8 @@ const props = defineProps({
 <template>
     <button>
         <svg height="100%" version="1.1" :viewBox="props.viewBox" width="100%">
-            <path :d="props.path" :fill="props.fill" id="ytp-id-21" :style="style"></path>
+            <path :d="props.path" id="ytp-id-21" :style="style"></path>
         </svg>
-        <span v-if="props.text!=''">{{ props.text }}</span>
+        <span v-if="props.text != ''">{{ props.text }}</span>
     </button>
 </template>

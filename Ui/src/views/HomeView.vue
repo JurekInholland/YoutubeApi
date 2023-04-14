@@ -26,14 +26,7 @@ onMounted(() => {
 <template>
     <main>
         <h1>home</h1>
-        <!-- <h1 v-if="!parsedId">Did not find video id in url</h1>
-        <p>Route: {{ route }}</p>
-        <p v-if="startTime > 0">StartTime:{{ startTime }}</p>
-        <p>Path: {{ path }}</p>
-        <p>parseD: {{ parsedId }}</p> -->
 
-        <!-- <YoutubePlayer v-if="parsedId" :videoId="parsedId" :startTime="startTime" playerParameters="color=#333"/> -->
-        <!-- <PlayPause/> -->
     </main>
 </template>
 <style scoped>

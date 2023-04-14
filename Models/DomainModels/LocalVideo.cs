@@ -7,7 +7,7 @@ public class LocalVideo : BaseEntity
     public int Width { get; set; }
     public int Height { get; set; }
     public int Fps { get; set; }
-    public int Size { get; set; }
+    public long Size { get; set; }
     public float Vbr { get; set; }
     public float Abr { get; set; }
 }

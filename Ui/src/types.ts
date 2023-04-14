@@ -50,7 +50,7 @@ export interface YoutubeVideo {
   likeCount: number
   categories: string[]
   relatedVideos: string[]
-
+  playableInEmbed: boolean
   localVideo: LocalVideo | null
   youtubeChannel: YoutubeChannel | null
 }
@@ -91,4 +91,16 @@ export interface ApplicationSettings {
   showRelatedVideos: boolean
   showComments: boolean
   autoplay: boolean
+  color: string
+}
+
+export type PlayerState = {
+  isPlaying: boolean
+  volume: string
+  currentTime: number
+  duration: number
+  isFullscreen: boolean
+  storedVolume: number
+  settings: boolean
+  cinema: boolean
 }

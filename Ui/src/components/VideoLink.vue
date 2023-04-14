@@ -39,6 +39,16 @@ const props = defineProps<{
     content: "•";
 }
 
+.thumbnail {
+    width: 100%;
+    aspect-ratio: 16/9;
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
+}
+
 .thumbnail:hover .runtime {
     opacity: 0;
 }
@@ -78,6 +88,7 @@ const props = defineProps<{
         justify-content: flex-start;
         align-items: flex-start;
         height: 100%;
+        width: auto;
 
         // width: 36px;
         // height: 36px;
@@ -94,6 +105,7 @@ const props = defineProps<{
 }
 
 .outer {
+    width: 100%;
     // position: relative;
 }
 
@@ -112,6 +124,7 @@ const props = defineProps<{
     // margin: 4px;
     padding: 4px 3px;
     transition: opacity .25s ease;
+    width: auto;
 }
 
 .video-container {

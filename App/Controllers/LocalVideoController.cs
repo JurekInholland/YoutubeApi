@@ -32,14 +32,16 @@ public class LocalVideoController : BaseController
     [HttpGet(nameof(GetVideoStream))]
     public async Task<IActionResult> GetVideoStream(string videoId)
     {
-        var local = await _unitOfWork.LocalVideos.Where(l => l.Id == videoId).FirstOrDefaultAsync();
+        // var local = await _unitOfWork.LocalVideos.Where(l => l.Id == videoId).FirstOrDefaultAsync();
 
-        if (local is null)
+        var video = await _unitOfWork.YoutubeVideos.Where(v => v.Id == videoId).Include(v => v.LocalVideo).FirstOrDefaultAsync();
+
+        if (video?.LocalVideo is null)
         {
             return NotFound("Video not found");
         }
 
-        var filestream = System.IO.File.OpenRead(local.Path);
-        return File(filestream, "video/mkv", fileDownloadName: "videotest.mkv", enableRangeProcessing: true);
+        var filestream = System.IO.File.OpenRead(video.LocalVideo.Path);
+        return File(filestream, "video/mkv", fileDownloadName: video.Id + "." + video.LocalVideo.Extension, enableRangeProcessing: true);
     }
 }

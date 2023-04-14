@@ -18,6 +18,9 @@ public partial class ScrapeService : IScrapeService
         _httpClient = httpClientFactory.CreateClient();
     }
 
+    [GeneratedRegex(@"""playabilityStatus"":{""status"":""([^""]+)"",""messages"":\[""([^""]+)""")]
+    private static partial Regex PlayabilityStatus();
+
     [GeneratedRegex("(?<=watch\\?v=)[\\w-]+")]
     private static partial Regex VideoIdRegex();
 
@@ -61,6 +64,17 @@ public partial class ScrapeService : IScrapeService
     [GeneratedRegex("\"bitrate\":\\d+,\"width\":(\\d+),\"height\":(\\d+),\"initRange\"")]
     private static partial Regex VideoResolution();
 
+
+    [GeneratedRegex("/maxresdefault.jpg\",\"width\":(\\d+),\"height\":(\\d+)}]},\"allowRatings\":")]
+    private static partial Regex VideoResolution2();
+
+
+    [GeneratedRegex(@"""playableInEmbed"":(true|false)")]
+    private static partial Regex PlayableInEmbed();
+
+    [GeneratedRegex(@"""isLiveContent"":(true|false)},")]
+    private static partial Regex IsLiveContent();
+
     public async Task<string> GetRawHtml(string url)
     {
         var html = await _httpClient.GetStringAsync(url);
@@ -81,8 +95,6 @@ public partial class ScrapeService : IScrapeService
 
     public async Task<YoutubeVideo[]> ScrapeChannelByHandle(string userName)
     {
-
-
         var url = $"https://www.youtube.com/@{userName}";
         return await ScrapeYoutubeChannel(url);
     }
@@ -175,9 +187,36 @@ public partial class ScrapeService : IScrapeService
         string height = VideoResolution().Match(sourceCode).Groups[2].Value;
 
 
+        string width2 = VideoResolution2().Match(sourceCode).Groups[1].Value;
+        string height2 = VideoResolution2().Match(sourceCode).Groups[2].Value;
+
+        var isLiveContent = IsLiveContent().Match(sourceCode).Groups[1].Value;
+
+        var playableInEmbed = PlayableInEmbed().Match(sourceCode).Groups[1].Value;
+
+        if (isLiveContent == "true")
+        {
+            width = "1280";
+            height = "720";
+        }
+
+        if (width == "" && width2 != "" || height == "" && height2 != "")
+        {
+            width = width2;
+            height = height2;
+        }
+
         string channelName = YtChannelName().Match(sourceCode).Groups[1].Value;
 
+        string playabilityStatus = PlayabilityStatus().Match(sourceCode).Groups[1].Value;
+        string playabilityStatusMessage = PlayabilityStatus().Match(sourceCode).Groups[2].Value;
+
         if (likeCount is "No" or "") likeCount = "0";
+
+        if (playabilityStatus != "")
+        {
+            throw new ArgumentException(playabilityStatusMessage != "" ? playabilityStatusMessage : playabilityStatus);
+        }
 
         try
         {
@@ -198,6 +237,7 @@ public partial class ScrapeService : IScrapeService
                 Categories = keywords,
                 Comments = null!,
                 RelatedVideos = relatedVideoIds.Skip(1).ToArray(),
+                playableInEmbed = playableInEmbed == "true",
                 YoutubeChannel = new YoutubeChannel
                 {
                     Id = externalChannelId,

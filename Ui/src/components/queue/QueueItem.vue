@@ -13,7 +13,7 @@ const props = defineProps<{
 const removeFromQueue = async () => {
     await store.dequeue(props.item);
 }
-
+const color = store.color;
 </script>
 
 <template>
@@ -70,11 +70,11 @@ const removeFromQueue = async () => {
 button {
     display: block;
     font-size: 2rem;
-    color: red;
+    color: v-bind(color);
 }
 
 .queued-item.active {
-    border: 2px solid red;
+    border: 2px solid v-bind(color);
 
 }
 

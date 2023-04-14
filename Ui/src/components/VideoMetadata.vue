@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, type Ref } from 'vue';
+import { computed, ref, watch, type Ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { Vue3ToggleButton } from 'vue3-toggle-button'
 import '../../node_modules/vue3-toggle-button/dist/style.css'
@@ -10,9 +10,13 @@ import type { YoutubeVideo } from '@/types';
 import { formatDateAgo, formatDescription, formatViews, formatDate, formatTitle } from '@/utils';
 import SvgButton from './buttons/SvgButton.vue';
 import ToggleButton from "@/components/ToggleButton.vue";
+import ProgressBar from "@/components/ProgressBar.vue";
+import { useYoutubeStore } from '@/stores/youtubeStore';
+import { apiService } from '@/constants';
 
 const router = useRouter();
 const props = defineProps<{ video: YoutubeVideo, modelValue: boolean }>();
+const store = useYoutubeStore();
 
 const isDescriptionExpanded: Ref<boolean> = ref(false);
 
@@ -20,6 +24,9 @@ watch(router.currentRoute, (val) => {
     isDescriptionExpanded.value = false;
 })
 
+const queueItem = computed(() => {
+    return store.queue.find((item) => item.id === props.video.id);
+})
 
 const toggleDescription = () => {
     if (!isDescriptionExpanded.value) {
@@ -49,11 +56,29 @@ watch(tog, (val) => {
 
 })
 
+const downloadVideo = async () => {
+    await apiService.EnqueueDownload(props.video.id);
+    await store.fetchQueue();
+    await apiService.processQueue();
+}
+
+const runtimeSeconds = computed(() => {
+    const [hours, minutes, seconds] = props.video.duration.split(":").map(part => parseInt(part));
+    // console.log("runtimeSeconds", hours, minutes, seconds, hours * 3600 + minutes * 60 + seconds)
+    return hours * 3600 + minutes * 60 + seconds;
+})
+
 </script>
 
 <template>
     <div class="metadata">
-        <h1 v-html="formatTitle(props.video.title)" ></h1>
+        <div class="flex">
+            <h1 v-html="formatTitle(props.video.title)"></h1>
+            <ProgressBar v-if="queueItem?.progress" :value="queueItem.progress.progress"
+                :text="`${queueItem.progress!.eta}`" />
+
+        </div>
+
 
         <div id="top-row">
             <div id="owner">
@@ -72,38 +97,38 @@ watch(tog, (val) => {
                 </div>
 
             </div>
+
             <div class="buttons">
-                <!-- <button>
-                                                                                                                        <Icon icon="maki:cinema" />
-                                                                                                                        Kino mode
-                                                                                                                    </button>
-                                                                                                                    <button>
-                                                                                                                        <Icon icon="ph:floppy-disk" />
-                                                                                                                        Backup
-                                                                                                                    </button> -->
+
                 <div class="likes">
                     <Icon icon="iconoir:thumbs-up" />
                     <p>{{ formatViews(props.video.likeCount) }}</p>
                 </div>
-                <ToggleButton v-if="props.video.localVideo" v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}</ToggleButton>
+                <ToggleButton v-if="props.video.localVideo" v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}
+                </ToggleButton>
 
                 <!-- <Vue3ToggleButton v-model="tog" :handleColor="'#cc00cc'"> </Vue3ToggleButton> -->
-                <button class="download-button">
+                <button v-if="!props.video.localVideo" :disabled="runtimeSeconds > 3600" @click="downloadVideo"
+                    class="backup-button">
                     <Icon icon="material-symbols:cloud-download-rounded" />
-
                 </button>
 
+                <a v-else class="button" :href="'/api/LocalVideo/GetVideoStream?videoId=' + props.video.id">
+                    <Icon icon="material-symbols:cloud-download-rounded" />
+
+                    Download
+                </a>
+
+                <!-- <button v-else class="download-button">
+                                <Icon icon="material-symbols:cloud-download-rounded" />
+                            </button> -->
                 <button class="cinema-button" @click="toggleCinema">
                     <Icon icon="maki:cinema" />
                 </button>
-                <!-- <SvgButton class="dlbtn" text="Download" view-box="0 0 24 24"
-                                                                                                                                                                                        path="M17 18V19H6V18H17ZM16.5 11.4L15.8 10.7L12 14.4V4H11V14.4L7.2 10.6L6.5 11.3L11.5 16.3L16.5 11.4Z" /> -->
-                <!-- <button>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <Icon icon="clarity:download-line" />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Download
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </button> -->
+
             </div>
         </div>
+
         <div :class="isDescriptionExpanded ? 'expanded' : 'collapsed'" id="description" @click.stop="toggleDescription">
             <div class="info">{{ formatViews(props.video.viewCount) }} views &nbsp;{{
                 isDescriptionExpanded ? formatDate(props.video.uploadDate) : formatDateAgo(props.video.uploadDate)
@@ -117,6 +142,26 @@ watch(tog, (val) => {
 </template>
 
 <style scoped lang="scss">
+.flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    overflow: hidden;
+
+    div {
+        margin-bottom: .5rem;
+        min-width: 150px;
+        flex-shrink: 1;
+    }
+
+    h1 {
+        display: inline-flex;
+        // flex-shrink: 0;
+        line-height: 22px;
+    }
+}
+
 .buttons {
     display: flex;
     gap: .5rem;
@@ -207,7 +252,13 @@ watch(tog, (val) => {
 .metadata {
     // margin-top: 12px;
     width: 100%;
+    // flex-grow: 1;
 
+}
+
+.cinema .metadata {
+    width: auto;
+    flex-grow: 1;
 }
 
 h1 {
@@ -324,7 +375,12 @@ h3 {
     text-align: center;
 }
 
-button {
+.button {
+    padding-right: .75rem;
+}
+
+button,
+.button {
     border: 1px solid transparent;
     box-sizing: border-box;
     display: flex;
@@ -337,6 +393,8 @@ button {
     border-radius: 18px;
     height: 36px;
     transition: border-color .75s ease;
+
+    gap: 1rem;
     /* gap: .5rem; */
     /* background-color: red; */
 
@@ -344,10 +402,12 @@ button {
 
 .download-button {
     width: 114px;
+}
 
-    svg {
-        left: 6px;
-    }
+.backup-button {
+    width: 98px;
+
+
 }
 
 .cinema-button {
@@ -358,14 +418,28 @@ button {
     }
 }
 
-.download-button::after {
+button,
+.button {
+    svg {
+        font-size: 22px;
+        left: 6px;
+        flex-shrink: 0;
+    }
+}
+
+button::after {
     aspect-ratio: 1;
     padding-left: 5px;
-    // padding-left: 1rem;
-    // padding-right: 19px;
-    content: 'Download';
     max-height: 2rem;
     white-space: nowrap;
+}
+
+.download-button::after {
+    content: 'Download';
+}
+
+.backup-button::after {
+    content: 'Backup';
 }
 
 .cinema-button::after {
@@ -380,7 +454,7 @@ button {
 
 @media screen and (max-width: 680px) {
 
-    .download-button {
+    .backup-button {
         width: 36px;
 
         svg {
@@ -388,17 +462,23 @@ button {
         }
     }
 
-    .download-button::after {
+    .backup-button::after {
         aspect-ratio: unset;
         content: '';
         padding: 0;
     }
 }
 
+.button:active,
 button:active {
     transition: border-color 0s;
     background-color: rgb(84, 84, 84);
     border: 1px solid rgb(84, 84, 84);
+}
+
+button:disabled {
+    pointer-events: none;
+    opacity: 0.5;
 }
 </style>
 <style>
@@ -423,6 +503,7 @@ button:active {
 
 }
 
+.button:hover,
 button:hover {
     background-color: rgba(255, 255, 255, .2);
 }

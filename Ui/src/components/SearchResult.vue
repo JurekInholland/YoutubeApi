@@ -41,10 +41,13 @@ const onPointerUp = (e: PointerEvent) => {
                 <router-link :to="'/watch?v=' + video.id">
 
                     <h3 v-html="formatTitle(video.title)"></h3>
-                    <p class="view-count">{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new
-                        Date(video.uploadDate)) }}</p>
+                </router-link>
+                <p class="view-count">{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new
+                    Date(video.uploadDate)) }}</p>
 
-                    <div class="author" :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+                <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+
+                    <div class="author">
 
                         <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="">
                         <p>{{ video.youtubeChannel?.title }}</p>

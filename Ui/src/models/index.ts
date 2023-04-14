@@ -23,6 +23,7 @@ export interface IPlayerState {
   isFullscreen: boolean
   storedVolume: number
   settings: boolean
+  cinema: boolean
 }
 
 export interface IVideo {

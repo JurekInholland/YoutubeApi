@@ -27,19 +27,10 @@ watch(() => props.path, (newVal: any) => {
 </script>
 
 <template>
-    <button aria-keyshortcuts="k" title="Play (k)"><svg height="100%" version="1.1" viewBox="0 0 36 36" >
-            <use class="ytp-svg-shadow" xlink:href="#ytp-id-98"></use>
-            <path class="ytp-svg-fill" :d="pathStr" id="ytp-id-98">
+    <button aria-keyshortcuts="k" title="Play (k)"><svg height="100%" version="1.1" viewBox="0 0 36 36">
+            <use xlink:href="#ytp-id-98"></use>
+            <path :d="pathStr">
             </path>
         </svg>
     </button>
 </template>
-
-<style scoped>
-/* body {
-    background-color: #333;
-} */
-svg {
-    fill: white;
-}
-</style>

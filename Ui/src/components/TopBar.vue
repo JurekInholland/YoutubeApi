@@ -52,7 +52,8 @@ watch(searchFocs, (val) => {
 // });
 
 const clearSearch = () => {
-    store.searchQuery = '';
+    searchQuery.value = "";
+    // store.searchQuery = '';
 }
 
 async function onChange() {
@@ -101,12 +102,13 @@ const onMouseLeave = () => {
     activeIndex.value = -1;
 }
 const onSearch = () => {
-    console.log("SEARCHING FOR ", store.searchQuery)
+    console.log("SEARCHING FOR ", searchQuery.value)
     searchFocs.value = false;
 
     if (store.searchQuery === "") {
         return;
     }
+    store.searchQuery = searchQuery.value;
     if (router.currentRoute.value.name !== "results") {
         router.push({ name: "results", query: { search_query: store.searchQuery } })
     }
@@ -119,7 +121,8 @@ const onSearch = () => {
 const onSearchSuggestionClick = (e: Event) => {
     console.log("SUGGESTION CLICKED")
     const suggestion = (e.target as HTMLDivElement).innerText;
-    store.searchQuery = suggestion;
+    // store.searchQuery = suggestion;
+    searchQuery.value = suggestion;
     store.searchSuggestions = [];
     onSearch();
 }
@@ -136,7 +139,7 @@ const toggleMobileSearch = () => {
 }
 
 const toggleSidebar = (val: boolean) => {
-    console.log("TOGGLE sidebar")
+    console.log("TOGGLE sidebar" + val)
     menuOpen.value = val;
     if (menuOpen.value) {
         document.body.style.overflow = "hidden";
@@ -259,7 +262,7 @@ const toggleSidebar = (val: boolean) => {
             </button>
         </div>
     </div>
-    <div class="nav-bg" :class="menuOpen ? 'visible' : ''" @click.stop="toggleSidebar(true)">
+    <div class="nav-bg" :class="menuOpen ? 'visible' : ''" @click.stop="toggleSidebar(false)">
         <div class="side-nav" @click.stop="" :class="menuOpen ? 'open' : ''">
             <div class="left">
                 <button class="menu-button" @click.stop="toggleSidebar(false)">

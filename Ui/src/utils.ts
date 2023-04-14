@@ -20,7 +20,7 @@ export function formatDescription(description: string): string {
   const baseUrl = window.location.origin
 
   return description
-    .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag">#$1</span>')
+    .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag"><a href="/hashtag/$1" target="_blank">#$1</a></span>')
     .replaceAll('https://www.youtube.com/', baseUrl + '/')
     .replaceAll('https://youtube.com/', baseUrl + '/')
     .replaceAll('https://youtu.be/', baseUrl + '/')

@@ -1,35 +1,41 @@
 <template>
-  <!-- <button @click="inputChange" style="color: white;">test btn</button> -->
-  <div class="outer" v-if="found">
-    <div class="container" :class="toggle ? 'cinema' : ''" id="container1" ref="container">
-      <div class="layout">
-        <div class="player-box">
-          <YoutubePlayer v-if="store.currentVideo && !useLocalPlayer" ref="playerEl" v-bind="$attrs" class="player"
-            id="player" :videoId="store.currentVideo.id" :start-time="startTime" :aspect-ratio="16 / 9" />
+  <div>
+    <!-- <button @click="inputChange" style="color: white;">test btn</button> -->
+    <div class="outer" v-if="found">
+      <div class="container" :class="toggle ? 'cinema' : ''" id="container1" ref="container">
+        <div class="layout">
+          <div class="player-box">
+            <YoutubePlayer v-if="store.currentVideo && !useLocalPlayer && store.currentVideo?.playableInEmbed"
+              ref="playerEl" v-bind="$attrs" class="player" id="player" :videoId="store.currentVideo.id"
+              :start-time="startTime" :aspect-ratio="store.currentVideo.width / store.currentVideo.height" />
 
-          <VideoPlayer v-else ref="playerEl" :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`"
-            color="green">
+            <VideoPlayer :cinema="toggle" v-else-if="useLocalPlayer" ref="playerEl"
+              :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`" :color="store.color">
 
-          </VideoPlayer>
+            </VideoPlayer>
+            <div v-else-if="!store.currentVideo!.playableInEmbed">NOT EMEBEDDABLE</div>
+            <div v-else>NOT FOUND</div>
+
+          </div>
+          <div class="meta-cont">
+            <VideoMetadata v-if="store.currentVideo" class="metadata" @update:model-value="toggle = !toggle"
+              :modelValue="toggle" :video="store.currentVideo" @update:custom-player="togglePlayer" />
+            <div id="primary" v-auto-animate></div>
+          </div>
         </div>
-        <div class="meta-cont">
-          <VideoMetadata v-if="store.currentVideo" class="metadata" @update:model-value="toggle = !toggle"
-            :modelValue="toggle" :video="store.currentVideo" @update:custom-player="togglePlayer" />
-          <div id="primary" v-auto-animate></div>
+        <div id="tele" v-auto-animate>
         </div>
-      </div>
-      <div id="tele" v-auto-animate>
-      </div>
 
-      <!-- <teleport v-if="mounted" :to="toggle ? '#primary' : '#tele'">
-            <div class="secondary">
-                this is the secondary
-            </div>
-        </teleport> -->
+        <!-- <teleport v-if="mounted" :to="toggle ? '#primary' : '#tele'">
+                      <div class="secondary">
+                          this is the secondary
+                      </div>
+                  </teleport> -->
+      </div>
+      <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="toggle" />
     </div>
-    <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="toggle" />
+    <NotFound v-else />
   </div>
-  <NotFound v-else />
 </template>
 <script async setup lang="ts">
 import VideoMetadata from "@/components/VideoMetadata.vue"
@@ -67,15 +73,18 @@ const parsedId = computed(() => {
 
 watch(() => route.path, async () => {
   console.log("watch parsedId", parsedId.value)
-  
+  useLocalPlayer.value = store.currentVideo?.localVideo !== undefined
+
   await store.fetchCurrentVideo(parsedId.value!)
-  if (store.currentVideo !== null) found.value = true;
+  if (store.currentVideo !== null) found.value = true
 
 }, { immediate: true })
 
 watch(() => store.currentVideo, async () => {
   await nextTick()
   if (!store.currentVideo) return
+  useLocalPlayer.value = store.currentVideo?.localVideo !== undefined
+
   document.title = formatTitle(store.currentVideo!.title)
   calculateHeight(playerEl.value?.$el.offsetWidth)
 }, { immediate: true })
@@ -94,7 +103,7 @@ const isDisabled = () => {
   return res
 }
 useResizeObserver(playerEl, (entries) => {
-  console.log("RESIZE OBSERVER", entries[0].contentRect.width)
+  // console.log("RESIZE OBSERVER", entries[0].contentRect.width)
   calculateHeight(entries[0].contentRect.width)
 })
 
@@ -120,7 +129,7 @@ const calculateHeight = (width: number) => {
   if (toggle.value) {
     h = "100%"
   }
-  console.log("CALCULATING HEIGHT", h, toggle.value)
+  // console.log("CALCULATING HEIGHT", h, toggle.value)
   calcH.value = h
 }
 
@@ -131,11 +140,11 @@ const calculateHeight = (width: number) => {
 .outer {
   display: flex;
   justify-content: center;
-
+  // min-height: calc(100vh - 55px);
 }
 
 .meta-cont {
-  height: 100%;
+  // height: 100%;
   flex-grow: 1;
   width: 100%;
   max-width: var(--max-content-width);
@@ -151,6 +160,11 @@ const calculateHeight = (width: number) => {
 #tele {
   flex-basis: 300px;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--gutter-width) / 3);
+
+  // height: 100%;
 }
 
 .player-box {
@@ -158,9 +172,9 @@ const calculateHeight = (width: number) => {
   display: flex;
   flex-wrap: wrap;
   gap: var(--gutter-width);
-  height: v-bind(calcH);
+  max-height: min(v-bind(calcH), var(--max-p-height));
   // max-width: var(--max-player-width);
-  max-height: var(--max-p-height);
+  // max-height: var(--max-p-height);
   min-width: 360px;
   flex-grow: 1;
 
@@ -169,6 +183,7 @@ const calculateHeight = (width: number) => {
 
 .player {
   width: 100%;
+  height: 100%;
   // height: calc(100vw * 9 / 16);
   // max-height: v-bind(calcH);
   // max-height: calc(100% - 2 * var(--gutter-width));
@@ -206,22 +221,27 @@ const calculateHeight = (width: number) => {
 
   display: block;
 
+  .player-box {
+    background-color: black;
+  }
+
   .metadata {
     flex-basis: 640px;
-    flex-grow: 1;
     flex-grow: 1;
   }
 
   .meta-cont {
-    max-width: 1754px;
+    // max-width: calc(100vw - 2 * var(--gutter-width));
+    max-width: min(calc(100vw - 3 * var(--gutter-width)), 1754px);
     gap: var(--gutter-width);
-    margin: 0 var(--gutter-width);
-
+    // margin: 0 var(--gutter-width);
+    // padding-right: 3rem;
 
   }
 
   .layout {
     justify-content: center;
+    align-items: center;
   }
 
   .player {
@@ -261,13 +281,14 @@ const calculateHeight = (width: number) => {
 
 .layout {
   display: flex;
+  flex-direction: column;
   //flex-direction: row;
   flex-wrap: wrap;
   flex-basis: 640px;
   flex-grow: 1;
   gap: var(--gutter-width);
   transition: all .5s ease;
-  max-height: calc(100% - 50vh);
+  // max-height: calc(100% - 50vh);
   // margin-right: 1rem;
 }
 
@@ -292,7 +313,6 @@ const calculateHeight = (width: number) => {
     flex-basis: 300px;
     flex-grow: 1;
     max-width: 402px;
-    gap: calc(var(--gutter-width) / 3);
   }
 
   .cinema #primary {

@@ -1,14 +1,20 @@
 <script setup lang='ts'>
 import type { ApplicationSettings } from '@/types';
 import { ref, type Ref } from 'vue';
-
+import { useYoutubeStore } from '@/stores/youtubeStore';
+const store = useYoutubeStore();
 
 const settings: Ref<ApplicationSettings> = ref({
     showRelatedVideos: true,
     showComments: true,
-    autoplay: true
+    autoplay: true,
+    color: 'red'
 
 } as ApplicationSettings);
+
+const onColorChange = () => {
+    store.color = settings.value.color;
+}
 
 </script>
 
@@ -23,6 +29,11 @@ const settings: Ref<ApplicationSettings> = ref({
         <label for=''>
             Show comments
             <input type='checkbox' v-model='settings.showComments' name='' id=''>
+        </label>
+
+        <label for=''>
+            Color
+            <input type='color' v-model='settings.color' @change="onColorChange" name='' id=''>
         </label>
     </section>
 </template>

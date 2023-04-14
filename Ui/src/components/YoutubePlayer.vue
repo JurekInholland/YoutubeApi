@@ -43,7 +43,6 @@ const youtube = ref();
 }
 
 .youtube-wrapper {
-
     /* max-width: calc(100vh - 12rem) !important; */
     /* margin: 0 auto; */
 

@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { useYoutubeStore } from '@/stores/youtubeStore';
+
 
 const props = defineProps<{
     value: number,
     text: string
 }>();
+
+const store = useYoutubeStore();
 
 </script>
 
@@ -11,7 +15,7 @@ const props = defineProps<{
     <div class="wrapper">
 
         <div class="bar"
-            :style="{ 'background': `linear-gradient(to right, red 0%, red ${value}%, transparent ${value}%, transparent 100%)` }">
+            :style="{ 'background': `linear-gradient(to right, ${store.color} 0%, ${store.color} ${value}%, transparent ${value}%, transparent 100%)` }">
             <p>{{text}}</p>
         </div>
     </div>

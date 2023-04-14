@@ -7,10 +7,14 @@ import SettingsButton from '@/components/buttons/SettingsButton.vue';
 import ExitFullscreenButton from '@/components/buttons/ExitFullscreenButton.vue';
 import PlayPauseButton from '@/components/buttons/PlayPauseButton.vue';
 import SvgButton from '@/components/buttons/SvgButton.vue';
+import { useYoutubeStore } from '@/stores/youtubeStore';
+
+const store = useYoutubeStore();
 
 const props = defineProps<{
     src: string,
-    color: string
+    color: string,
+    cinema: boolean
 }>()
 
 const playerState: Ref<IPlayerState> = ref<IPlayerState>({
@@ -20,7 +24,8 @@ const playerState: Ref<IPlayerState> = ref<IPlayerState>({
     currentTime: 0,
     isFullscreen: false,
     storedVolume: 0,
-    settings: false
+    settings: false,
+    cinema: false
 });
 
 
@@ -37,8 +42,6 @@ const timeline_container = ref<HTMLDivElement>();
 const timeline = ref<HTMLDivElement>();
 
 const thumb = ref<HTMLDivElement>();
-// const settings = ref(false)
-
 const currentTime: Ref<number> = ref(0);
 
 const volume = computed(() => {
@@ -48,22 +51,15 @@ const volume = computed(() => {
 const handleBuffer = async (evt: Event) => {
     if (video.value == null) return;
     await nextTick();
-    // if (video.value.buffered.length == 0) return;
-    // console.log(video.value.buffered.length)
-    let test1 = video.value.duration;
+    let buffered = video.value.duration;
     try {
-        test1 = video.value.buffered.end(0);
+        buffered = video.value.buffered.end(0);
     } catch (e) {
         console.log("error", e)
     }
-    // let test1 = video.value.buffered.end(0);
-    let test2 = video.value.duration;
-    let duration = Math.round((test1 / video.value.duration) * 100) + 1;
-    // debugger;
-    // console.log("handleBuffer", video.value.buffered.end(0), video.value.duration, duration, "buffered")
+    let duration = Math.round((buffered / video.value.duration) * 100) + 1;
 
     timeline_container.value?.style.setProperty('--buffered', duration.toString() + "%");
-
 }
 
 onMounted(() => {
@@ -72,14 +68,10 @@ onMounted(() => {
         video.value.volume = parseFloat(playerState.value.volume);
 
         video.value.play()
-        // video.value.onplaying = () => {
-        //     console.log("playing")
-        // }
 
         video.value.onplaying = async () => {
             console.log("onplaying")
             playerState.value.isPlaying = true;
-            // console.log("play", this)
             startTime.value = video.value?.currentTime
             startDate.value = Date.now()
             smoothUpdate();
@@ -87,18 +79,12 @@ onMounted(() => {
 
         video.value.onplay = async () => {
             console.log("onplay")
-            // this.lastUpdate = Date.now();
         }
         video.value.onpause = () => {
             console.log("onpause")
             playerState.value.isPlaying = false;
             cancelAnimationFrame(animationId.value);
         }
-        // video.value.onloadeddata = () => {
-        //     if (video.value?.duration)
-        //         playerState.value.duration = video.value.duration;
-        // }
-
 
         video.value.onfullscreenchange = () => {
             playerState.value.isFullscreen = document.fullscreenElement != null;
@@ -114,14 +100,6 @@ onMounted(() => {
         video.value.onloadeddata = (e: Event) => {
             console.log("onloadeddata", e)
             console.log(video.value)
-            // handleBuffer(e)
-            // if (video.value?.currentTime) {
-            //     console.log("onloadeddata", e)
-
-            //     playerState.value.currentTime = video.value.currentTime;
-            //     const perecent = Math.round(video.value.currentTime / video.value.duration);
-            //     timeline_container.value?.style.setProperty('--progress', perecent.toString());
-            // }
             if (video.value?.duration)
                 playerState.value.duration = video.value.duration;
         }
@@ -141,8 +119,6 @@ onBeforeUnmount(() => {
 });
 const toggleMute = (e: Event) => {
     (document.activeElement as HTMLElement).blur();
-    // let target = e.target as HTMLButtonElement;
-    // target.focus();
 
     if (video.value) {
         if (video.value.volume > 0) {
@@ -161,10 +137,6 @@ const handleKeyUp = (e: KeyboardEvent) => {
     if (testEl.type === "text") {
         return;
     }
-
-    // if (document.activeElement instanceof HTMLInputElement) {
-    //     return;
-    // }
 
     if (e.key === ' ' || e.key === 'k') {
         onPlayPause(e);
@@ -203,7 +175,7 @@ const onVolumeChange = (e: Event) => {
     }
 }
 const auxclick = (e: Event) => {
-    console.log("ousside")
+    // console.log("ousside")
     playerState.value.settings = !playerState.value.settings
 }
 const onMouseMove = (e: MouseEvent) => {
@@ -211,7 +183,7 @@ const onMouseMove = (e: MouseEvent) => {
     if (rect == null)
         return;
     const percent = Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-    console.log("onMouseMove", percent)
+    // console.log("onMouseMove", percent)
     previewPos.value = percent;
     timeline_container.value?.style.setProperty('--preview', percent.toString());
 }
@@ -268,16 +240,15 @@ const progress = computed(() => {
 })
 
 const smoothUpdate = () => {
-    console.log("smoothUpdate")
     const elapsed = (Date.now() - startDate.value) / 1000;
     const currentTime = startTime.value! + elapsed;
 
     if (currentTime < playerState.value.duration) {
-        const barWidth = timeline.value!.getBoundingClientRect().width * (currentTime / playerState.value.duration);
-        if (!thumb.value) {
+        if (!thumb.value || !timeline.value) {
             console.log("no thumb ref");
             return;
         }
+        const barWidth = timeline.value!.getBoundingClientRect().width * (currentTime / playerState.value.duration);
         timeline_container.value?.style.setProperty('--bar', barWidth.toString() + "px");
         animationId.value = requestAnimationFrame(smoothUpdate);
     }
@@ -313,7 +284,8 @@ const smoothUpdate = () => {
                     {{ formatTime(playerState.currentTime) }} / {{ formatTime(playerState.duration) }}
 
                 </div>
-                <SettingsButton :toggled="playerState.settings"
+                {{ store.currentVideo!.height }}p
+                <SettingsButton :toggled="playerState.settings" :hd="store.currentVideo!.width >= 960"
                     @click.stop="playerState.settings = !playerState.settings" />
                 <SvgButton :style="'fill-rule: evenodd'"
                     path="M25,17 L17,17 L17,23 L25,23 L25,17 L25,17 Z M29,25 L29,10.98 C29,9.88 28.1,9 27,9 L9,9 C7.9,9 7,9.88 7,10.98 L7,25 C7,26.1 7.9,27 9,27 L27,27 C28.1,27 29,26.1 29,25 L29,25 Z M27,25.02 L9,25.02 L9,10.97 L27,10.97 L27,25.02 L27,25.02 Z" />
@@ -331,7 +303,7 @@ const smoothUpdate = () => {
                 </div>
             </div>
         </div>
-        <video class="player" id="vid" aria-description="video" :src="$props.src" ref="video">
+        <video class="player" id="vid" aria-description="video" :src="props.src"  ref="video">
         </video>
     </div>
 </template>
@@ -432,12 +404,15 @@ button {
 }
 
 .controls button {
-    opacity: .85;
-    transition: opacity 150ms ease;
+    opacity: 1;
+    fill: rgba(255,255,255,0.85);
+    transition: fill 50ms ease;
 }
 
 .video-controls-container .controls button:hover {
-    opacity: 1;
+    /* opacity: 1; */
+    fill: rgba(255,255,255,1);
+
 }
 
 .video-controls-container .controls svg {
