@@ -133,6 +133,10 @@ const calculateHeight = (width: number) => {
   calcH.value = h
 }
 
+const aspectRatio = computed(() => {
+  if (!store.currentVideo) return 16 / 9
+  return store.currentVideo!.width / store.currentVideo!.height
+})
 </script>
 
 
@@ -189,6 +193,9 @@ const calculateHeight = (width: number) => {
   // max-height: calc(100% - 2 * var(--gutter-width));
   max-height: var(--max-p-height);
   flex-basis: 100%;
+  aspect-ratio: v-bind(aspectRatio);
+  min-height: 320px;
+
   // width: 100%;
   // height: auto;
 }
@@ -223,6 +230,7 @@ const calculateHeight = (width: number) => {
 
   .player-box {
     background-color: black;
+    aspect-ratio: initial;
   }
 
   .metadata {

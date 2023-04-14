@@ -25,7 +25,7 @@ const props = defineProps<{
                 <div class="text">
                     <h3 v-html="formatTitle(video.title)" class="title"></h3>
                     <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">{{
-                        video.youtubeChannel!.handle }}</router-link>
+                        video.youtubeChannel!.title }}</router-link>
                     <!-- <p>pannenkoek2012</p> -->
                     <p>{{ formatViews(video.viewCount) }} views <span class="separator"> 2 days ago</span></p>
                 </div>

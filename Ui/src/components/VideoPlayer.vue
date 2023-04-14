@@ -269,7 +269,7 @@ const smoothUpdate = () => {
                 </div>
                 <div ref="thumb" class="thumb-indicator"></div>
             </div>
-            <div class="controls">
+            <div class="controls" @click.stop="">
                 <PlayPauseButton class="playPause" @click.stop="onPlayPause" :is-paused="!playerState.isPlaying" />
                 <SvgButton path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z" />
                 <div class="volume-container">

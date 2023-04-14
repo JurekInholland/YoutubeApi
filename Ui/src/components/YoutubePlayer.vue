@@ -18,7 +18,7 @@ const youtube = ref();
 <template>
     <div class="yotube-wrapper">
         <youtube-iframe ref="youtube" class="iframe" :style="{
-            'aspect-ratio': props.aspectRatio,
+          
         }" :preserveAspectRatio="true" :video-id="props.videoId" :player-vars="
     {
         // https://developers.google.com/youtube/player_parameters#Parameters
