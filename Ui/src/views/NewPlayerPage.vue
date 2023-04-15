@@ -180,7 +180,7 @@ const aspectRatio = computed(() => {
   display: flex;
   flex-direction: column;
   gap: calc(var(--gutter-width) / 3);
-
+  flex-wrap: nowrap;
   // height: 100%;
 }
 

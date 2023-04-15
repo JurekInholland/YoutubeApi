@@ -9,7 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <router-link :to="{ name: 'video', params: { videoId: video.id } }" class="video">
+    <router-link :to="{ name: 'video', params: { videoId: video.id } }" class="video-cont">
         <div class="thumbnail">
             <img :src="props.video.youtubeThumbnailUrl" alt="">
             <div class="play-overlay">{{ formatDuration(props.video.duration) }}</div>
@@ -31,7 +31,7 @@ const props = defineProps<{
     min-width: 133px;
 }
 
-.video {
+.video-cont {
     display: flex;
     gap: 6px;
     font-size: 12px;
@@ -41,9 +41,11 @@ const props = defineProps<{
     white-space: normal;
     margin-bottom: 2px;
     min-height: 95px;
+    flex-grow: 0;
+
 }
 
-.video:hover .play-overlay {
+.video-cont:hover .play-overlay {
     opacity: 0;
 }
 
@@ -70,10 +72,12 @@ img {
     position: relative;
     display: flex;
     /* min-width: 200px; */
-    min-width: 168px;
+    /* min-width: 168px; */
     height: auto;
+    flex-grow: 0;
     /* justify-content: center;
     align-items: center; */
+    /* overflow: hidden; */
 }
 
 .play-overlay {

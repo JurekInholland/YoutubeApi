@@ -25,7 +25,7 @@ function setAppIcon() {
     console.log(store.color)
     if (route.name === "video") {
         console.log("is vid")
-        if (store.currentVideo!.localVideo !== undefined) {
+        if (store.currentVideo?.localVideo !== undefined) {
             icon.value = createFavicon(store.color.replace('#', ''), "fff", true)
             return;
         }

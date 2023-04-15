@@ -16,9 +16,9 @@ export const apiUrls = {
   getLocalVideos: 'LocalVideo',
 
   getSearchResults: 'Scrape/SearchResults',
-  getRelatedVideos: 'Scrape/multiple',
-  getChannelByHandle: 'Scrape/handle',
-  getChannelById: 'Scrape/channelId',
+  getRelatedVideos: 'Scrape/Multiple',
+  getChannelByHandle: 'Scrape/YoutubeChannelByHandle',
+  getChannelById: 'Scrape/YoutubeChannelById',
 }
 
 export const apiService: ApiService = new ApiService()

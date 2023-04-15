@@ -76,9 +76,9 @@ onMounted(() => {
 
 
     setInterval(() => {
-        if (playerState.value.isFullscreen && idleTime.value < 1000)
+        if (playerState.value.isFullscreen && idleTime.value < 100)
             idleTime.value += 1;
-    }, 10)
+    }, 100)
 
     window.addEventListener('mousemove', () => {
         idleTime.value = 0;
@@ -325,9 +325,9 @@ const smoothUpdate = () => {
 
 <template>
     <div ref="video_container" class="video-container"
-        :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '', idleTime > 500 ? 'cursor-hidden' : '']"
+        :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '', idleTime > 50 ? 'cursor-hidden' : '']"
         @click="onClick">
-        <div class="video-controls-container" :class="idleTime > 500 && playerState.isFullscreen ? 'hidden' : ''">
+        <div class="video-controls-container" :class="idleTime > 50 && playerState.isFullscreen ? 'hidden' : ''">
             <div ref="timeline_container" class="timeline-container" @mousemove="onMouseMove" @click.stop="onTimelineClick"
                 @mousedown="">
                 <div ref="timeline" class="timeline">
