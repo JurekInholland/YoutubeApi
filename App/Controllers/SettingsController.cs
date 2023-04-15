@@ -17,15 +17,24 @@ public class SettingsController : BaseController
     {
         _settingsManager = settingsManager;
     }
-    
+
     /// <summary>
     ///    Update the settings
     /// </summary>
     [HttpPut("", Name = nameof(UpdateSettings))]
-    public async Task<IActionResult> UpdateSettings([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] UpdateSettingsRequest settingsRequest)
+    public async Task<IActionResult> UpdateSettings(
+        [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
+        UpdateSettingsRequest settingsRequest)
     {
+        try
+        {
+            await _settingsManager.SetSettings(settingsRequest);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
 
-        await _settingsManager.SetSettings(settingsRequest);
         return Ok();
     }
 }

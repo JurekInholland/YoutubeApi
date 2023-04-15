@@ -24,6 +24,7 @@ export interface IPlayerState {
   storedVolume: number
   settings: boolean
   cinema: boolean
+  pictureInPicture: boolean
 }
 
 export interface IVideo {

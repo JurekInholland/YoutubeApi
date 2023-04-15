@@ -16,6 +16,7 @@ namespace Services.QueueService;
 public class QueueService : BackgroundService, IQueueService
 {
     private readonly ILogger<QueueService> _logger;
+
     // private IUnitOfWork? _unitOfWork;
     // private readonly IYoutubeExplodeService _youtubeExplodeService;
     private readonly YoutubeHub _hub;
@@ -328,6 +329,7 @@ public class QueueService : BackgroundService, IQueueService
             Console.WriteLine("ERROR");
             Console.WriteLine(e);
         }
+
         return queuedDownload;
     }
 

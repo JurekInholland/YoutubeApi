@@ -48,7 +48,7 @@ public class YoutubeVideoControllerTests
         // _youtubeExplodeServiceMock.Setup(svc => svc.GetVideo(videoId)).ReturnsAsync(video);
 
         // Act
-        var result = await _youtubeVideoController.GetYoutubeVideo(videoId);
+        var result = await _youtubeVideoController.GetVideo(videoId);
 
         // Assert
         Assert.That(result, Is.TypeOf<OkObjectResult>());

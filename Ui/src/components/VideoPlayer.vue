@@ -17,6 +17,11 @@ const props = defineProps<{
     cinema: boolean
 }>()
 
+const emits = defineEmits<{
+    (event: 'update:cinema', value: boolean): void
+    (event: 'update:pictureInPicture', value: boolean): void
+}>()
+
 const playerState: Ref<IPlayerState> = ref<IPlayerState>({
     isPlaying: false,
     volume: "0.75",
@@ -25,7 +30,8 @@ const playerState: Ref<IPlayerState> = ref<IPlayerState>({
     isFullscreen: false,
     storedVolume: 0,
     settings: false,
-    cinema: false
+    cinema: false,
+    pictureInPicture: false,
 });
 
 
@@ -44,6 +50,10 @@ const timeline = ref<HTMLDivElement>();
 const thumb = ref<HTMLDivElement>();
 const currentTime: Ref<number> = ref(0);
 
+const idleTime: Ref<number> = ref(0);
+
+const lastClick: Ref<number> = ref(0);
+const clickTimeout: Ref<number | null> = ref(null)
 const volume = computed(() => {
     return video.value?.volume ? video.value.volume : 0;
 });
@@ -63,6 +73,17 @@ const handleBuffer = async (evt: Event) => {
 }
 
 onMounted(() => {
+
+
+    setInterval(() => {
+        if (playerState.value.isFullscreen && idleTime.value < 1000)
+            idleTime.value += 1;
+    }, 10)
+
+    window.addEventListener('mousemove', () => {
+        idleTime.value = 0;
+    })
+
     window.addEventListener('keyup', handleKeyUp);
     if (video.value != null) {
         video.value.volume = parseFloat(playerState.value.volume);
@@ -116,6 +137,9 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
     window.removeEventListener('keyup', handleKeyUp);
+    window.removeEventListener('mousemove', () => {
+        idleTime.value = 0;
+    })
 });
 const toggleMute = (e: Event) => {
     (document.activeElement as HTMLElement).blur();
@@ -157,6 +181,40 @@ const onDoubleClick = (e: Event) => {
 }
 
 
+const onClick = (e: Event) => {
+
+    if (clickTimeout.value) {
+        clearTimeout(clickTimeout.value)
+        clickTimeout.value = null
+        lastClick.value = 0
+        console.log("dbclick")
+        onDoubleClick(e)
+    } else {
+        clickTimeout.value = setTimeout(() => {
+            clickTimeout.value = null
+
+            if (lastClick.value === 1) {
+                console.log("single click")
+                onPlayPause(e)
+            }
+            lastClick.value -= 1
+        }, 250)
+        lastClick.value += 1
+    }
+
+
+    // // console.log("onClick", e)
+    // if (Date.now() - lastClick.value < 300) {
+    //     // onDoubleClick(e);
+    //     console.log("double click")
+    //     return;
+    // }
+    // else {
+    //     console.log("single click")
+    // }
+    // lastClick.value = Date.now();
+}
+
 const onPlayPause = (e: Event) => {
     console.log("e", e)
     if (!playerState.value.isPlaying) {
@@ -187,7 +245,14 @@ const onMouseMove = (e: MouseEvent) => {
     previewPos.value = percent;
     timeline_container.value?.style.setProperty('--preview', percent.toString());
 }
-
+const onCinemaClick = (e: MouseEvent) => {
+    playerState.value.cinema = !playerState.value.cinema;
+    emits("update:cinema", playerState.value.cinema)
+}
+const onPictureInPictureClick = (e: MouseEvent) => {
+    playerState.value.pictureInPicture = !playerState.value.pictureInPicture;
+    emits("update:pictureInPicture", playerState.value.pictureInPicture)
+}
 const onTimelineClick = async (e: MouseEvent) => {
 
     let isPlaying = false;
@@ -256,12 +321,13 @@ const smoothUpdate = () => {
 }
 
 </script>
+<!-- @dblclick.stop="onDoubleClick" @click="onPlayPause"> -->
 
 <template>
     <div ref="video_container" class="video-container"
-        :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '']"
-        @dblclick.stop="onDoubleClick" @click="onPlayPause">
-        <div class="video-controls-container">
+        :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '', idleTime > 500 ? 'cursor-hidden' : '']"
+        @click="onClick">
+        <div class="video-controls-container" :class="idleTime > 500 && playerState.isFullscreen ? 'hidden' : ''">
             <div ref="timeline_container" class="timeline-container" @mousemove="onMouseMove" @click.stop="onTimelineClick"
                 @mousedown="">
                 <div ref="timeline" class="timeline">
@@ -284,12 +350,13 @@ const smoothUpdate = () => {
                     {{ formatTime(playerState.currentTime) }} / {{ formatTime(playerState.duration) }}
 
                 </div>
+                {{ idleTime }}
                 {{ store.currentVideo!.height }}p
                 <SettingsButton :toggled="playerState.settings" :hd="store.currentVideo!.width >= 960"
                     @click.stop="playerState.settings = !playerState.settings" />
-                <SvgButton :style="'fill-rule: evenodd'"
+                <SvgButton :style="'fill-rule: evenodd'" @click.stop="onPictureInPictureClick"
                     path="M25,17 L17,17 L17,23 L25,23 L25,17 L25,17 Z M29,25 L29,10.98 C29,9.88 28.1,9 27,9 L9,9 C7.9,9 7,9.88 7,10.98 L7,25 C7,26.1 7.9,27 9,27 L27,27 C28.1,27 29,26.1 29,25 L29,25 Z M27,25.02 L9,25.02 L9,10.97 L27,10.97 L27,25.02 L27,25.02 Z" />
-                <SvgButton :style="'fill-rule: evenodd'"
+                <SvgButton :style="'fill-rule: evenodd'" @click.stop="onCinemaClick"
                     path="m 28,11 0,14 -20,0 0,-14 z m -18,2 16,0 0,10 -16,0 0,-10 z" />
 
                 <FullscreenButton v-if="!playerState.isFullscreen" @click.stop="onDoubleClick" />
@@ -378,6 +445,14 @@ video {
 /* .video-container:focus-within .video-controls-container, */
 .video-container:hover .video-controls-container {
     opacity: 1;
+}
+
+.hidden {
+    opacity: 0 !important;
+}
+
+.cursor-hidden {
+    cursor: none !important;
 }
 
 .playPause {
@@ -499,7 +574,8 @@ input[type=range]::-webkit-slider-runnable-track {
     transition: width 150ms ease-in-out;
 }
 
-.volume-container:hover, #volume-btn:focus-within .volume-container,
+.volume-container:hover,
+#volume-btn:focus-within .volume-container,
 .volume-container:focus-within {
     width: 112px;
 

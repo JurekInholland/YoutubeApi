@@ -53,6 +53,7 @@ watch(searchFocs, (val) => {
 
 const clearSearch = () => {
     searchQuery.value = "";
+
     // store.searchQuery = '';
 }
 

@@ -2,10 +2,12 @@
 import { RouterView } from 'vue-router'
 import SignalR from './components/SignalR.vue';
 import TopBar from './components/TopBar.vue';
+import Favicon from './components/Favicon.vue';
 </script>
 
 <template>
   <SignalR />
+  <Favicon />
   <TopBar />
 
   <RouterView />

@@ -51,7 +51,6 @@
 
     <ItemGroup>
       <Folder Include="data\videos\" />
-      <Folder Include="Tasks" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(DisableImplicitAssetTargetFallback)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &gt;= '2.0'">

@@ -31,12 +31,10 @@ public class YoutubeVideoController : BaseController
     }
 
     /// <summary>
-    ///
+    /// Retrieve a youtube video by id from database. If not found, scrape youtube for video information
     /// </summary>
-    /// <param name="videoId"></param>
-    /// <returns></returns>
-    [HttpGet(Name = nameof(GetYoutubeVideo))]
-    public async Task<IActionResult> GetYoutubeVideo(string videoId)
+    [HttpGet(nameof(GetVideo))]
+    public async Task<IActionResult> GetVideo(string videoId)
     {
         YoutubeVideo? video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).Include(y => y.LocalVideo)
             .Include(x => x.YoutubeChannel).FirstOrDefaultAsync();
@@ -54,37 +52,12 @@ public class YoutubeVideoController : BaseController
         return Ok(video);
     }
 
-    /// <summary>
-    /// Get a youtube video DEPRECATED
-    /// </summary>
-    [HttpGet("old", Name = nameof(GetYoutubeVideoOld))]
-    public async Task<IActionResult> GetYoutubeVideoOld(string videoId)
-    {
-        _logger.LogInformation("Getting video {VideoId}", videoId);
-
-        YoutubeVideo? video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).Include(y => y.LocalVideo).FirstOrDefaultAsync();
-        if (video is not null) return Ok(video);
-
-        _logger.LogInformation("Video {VideoId} not found in database, getting from youtube", videoId);
-        try
-        {
-            video = await _youtubeExplodeService.GetVideo(videoId);
-            Task.Run(() => _youtubeExplodeService.GetChannel(video.YoutubeChannel.Id));
-        }
-        catch (VideoUnavailableException e)
-        {
-            _logger.LogInformation("Video with id {VideoId} is unavailable", videoId);
-            return NotFound(e.Message);
-        }
-
-        return Ok(video);
-    }
 
     /// <summary>
     /// Get all locally available youtube videos
     /// </summary>
-    [HttpGet("all", Name = nameof(GetAllYoutubeVideos))]
-    public async Task<IActionResult> GetAllYoutubeVideos()
+    [HttpGet(nameof(GetAll))]
+    public async Task<IActionResult> GetAll()
     {
         _logger.LogInformation("Getting all videos");
         var videos = await _unitOfWork.YoutubeVideos.All()

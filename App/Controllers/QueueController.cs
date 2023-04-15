@@ -29,24 +29,21 @@ public class QueueController : BaseController
     /// Debug; Reset queue status of all items
     /// </summary>
     /// <returns></returns>
-    [HttpGet("reset", Name = nameof(ResetQueue))]
-    public async Task<IActionResult> ResetQueue()
+    [HttpGet(nameof(Reset))]
+    public async Task<IActionResult> Reset()
     {
-
         await _queueService.ResetQueue();
         return Ok();
     }
 
 
-
     /// <summary>
     /// Process the queue
     /// </summary>
-    [HttpGet("process", Name = nameof(ProcessQueue))]
-    public async Task<IActionResult> ProcessQueue()
+    [HttpGet(nameof(Process))]
+    public IActionResult Process()
     {
         Task.Run(() => _queueService.ProcessQueue(CancellationToken.None));
-        // await _queueService.ProcessQueue();
         return Ok();
     }
 
@@ -54,15 +51,18 @@ public class QueueController : BaseController
     /// Get next enqueued video
     /// </summary>
     /// <returns></returns>
-    [HttpGet("next", Name = nameof(GetNext))]
-    public async Task<IActionResult> GetNext()
+    [HttpGet(nameof(Next))]
+    public async Task<IActionResult> Next()
     {
         QueuedDownload? queuedDownload = await _queueService.DequeueDownload();
         return Ok(queuedDownload);
     }
 
-    [HttpDelete("clear", Name = nameof(ClearQueue))]
-    public async Task<IActionResult> ClearQueue()
+    /// <summary>
+    /// Clear the queue
+    /// </summary>
+    [HttpDelete(nameof(Clear))]
+    public async Task<IActionResult> Clear()
     {
         await _queueService.ClearQueue();
         return Ok();
@@ -71,7 +71,7 @@ public class QueueController : BaseController
     /// <summary>
     /// Get all enqueued videos
     /// </summary>
-    [HttpGet("all", Name = nameof(GetAll))]
+    [HttpGet(nameof(GetAll))]
     public async Task<IActionResult> GetAll()
     {
         var queuedDownloads = await _queueService.GetQueuedDownloads();
@@ -81,8 +81,8 @@ public class QueueController : BaseController
     /// <summary>
     /// Enqueue a video for download
     /// </summary>
-    [HttpPost("add", Name = nameof(AddToQueue))]
-    public async Task<IActionResult> AddToQueue([FromBody] EnqueueDownloadRequest request)
+    [HttpPost(nameof(Add))]
+    public async Task<IActionResult> Add([FromBody] EnqueueDownloadRequest request)
     {
         try
         {
@@ -91,9 +91,11 @@ public class QueueController : BaseController
         }
         catch (Exception e)
         {
-            // _logger.LogError(e, "Error while adding video to queue");
             if (e is InvalidOperationException)
+            {
                 return Conflict(e.Message);
+            }
+
             return BadRequest(e.Message);
         }
     }

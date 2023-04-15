@@ -10,7 +10,9 @@
               :start-time="startTime" :aspect-ratio="store.currentVideo.width / store.currentVideo.height" />
 
             <VideoPlayer :cinema="toggle" v-else-if="useLocalPlayer" ref="playerEl"
-              :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`" :color="store.color">
+              :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`" :color="store.color"
+              @update:cinema="toggle = !toggle" @update:picture-in-picture="onPictureInPicture"
+              >
 
             </VideoPlayer>
             <div v-else-if="!store.currentVideo!.playableInEmbed">NOT EMEBEDDABLE</div>
@@ -48,6 +50,7 @@ import { useRoute } from "vue-router"
 import { formatTitle } from "@/utils"
 import VideoPlayer from "@/components/VideoPlayer.vue"
 import NotFound from "@/components/NotFound.vue"
+import { useFavicon } from '@vueuse/core'
 
 const toggle = ref(false)
 
@@ -56,6 +59,10 @@ const found = ref(false)
 const route = useRoute()
 const store = useYoutubeStore()
 const calcH = ref("100%")
+
+
+const icon = useFavicon()
+
 const startTime = computed(() => {
   return route.query.t ? parseInt(route.query.t as string) : 0
 })
@@ -64,7 +71,10 @@ const togglePlayer = (val: boolean) => {
   console.log("toggle player" + val)
   useLocalPlayer.value = val
 }
+const onPictureInPicture = (val: boolean) => {
+  console.log("picture in picture" + val)
 
+}
 const parsedId = computed(() => {
   const split = route.path.substring(1).split("?")[0]
   if (split.length === 11) return split
@@ -75,6 +85,8 @@ watch(() => route.path, async () => {
   console.log("watch parsedId", parsedId.value)
   useLocalPlayer.value = store.currentVideo?.localVideo !== undefined
 
+
+
   await store.fetchCurrentVideo(parsedId.value!)
   if (store.currentVideo !== null) found.value = true
 
@@ -84,6 +96,7 @@ watch(() => store.currentVideo, async () => {
   await nextTick()
   if (!store.currentVideo) return
   useLocalPlayer.value = store.currentVideo?.localVideo !== undefined
+
 
   document.title = formatTitle(store.currentVideo.title)
   calculateHeight(playerEl.value?.$el.offsetWidth)

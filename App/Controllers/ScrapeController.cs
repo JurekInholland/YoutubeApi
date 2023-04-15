@@ -25,14 +25,15 @@ public class ScrapeController : BaseController
     }
 
     /// <summary>
-    /// Scrape a youtube channel for videos
+    /// Scrape a youtube channel for videos via id
     /// </summary>
+    /// <remarks>Only the last ~40 videos are scraped</remarks>
+    /// <param name="channelId">The id of the channel to scrape</param>
+    /// <response code="200">List of videos</response>
     [HttpGet(nameof(YoutubeChannelById))]
     public async Task<IActionResult> YoutubeChannelById(string channelId)
     {
         var yt = await _scrapeService.ScrapeChannelById(channelId);
-
-        // await _unitOfWork.YoutubeChannels.Create(yt);
 
         Response.Headers.Add("Count", yt.Length.ToString());
         return Ok(yt);
@@ -46,8 +47,6 @@ public class ScrapeController : BaseController
     {
         var yt = await _scrapeService.ScrapeChannelByHandle(handle);
 
-        // await _unitOfWork.YoutubeChannels.Create(yt);
-
         Response.Headers.Add("Count", yt.Length.ToString());
         return Ok(yt);
     }
@@ -59,6 +58,8 @@ public class ScrapeController : BaseController
     public async Task<IActionResult> SearchResults(string query)
     {
         var res = await _scrapeService.ScrapeYoutubeSearchResults(query);
+        Response.Headers.Add("Count", res.Length.ToString());
+
         return Ok(res);
     }
 

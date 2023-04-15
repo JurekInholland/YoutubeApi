@@ -1,19 +1,22 @@
 import ApiService from './api'
 
 export const apiUrls = {
-  getAllQueuedDownloads: 'Queue/all',
-  deleteQueue: 'Queue/clear',
-  resetQueue: 'Queue/reset',
+  addToQueue: 'Queue/Add',
   deleteFromQueue: 'Queue/',
-  addToQueue: 'Queue/add',
-  getVideoInfo: 'YoutubeVideo',
-  getVideos: 'YoutubeVideo/all',
+  getAllQueuedDownloads: 'Queue/GetAll',
+  deleteQueue: 'Queue/Clear',
+  processQueue: 'Queue/Process',
+  resetQueue: 'Queue/Reset',
+
+
+  getVideoInfo: 'YoutubeVideo/GetVideo',
+  getVideos: 'YoutubeVideo/GetAll',
+
   getSearchCompletion: 'Youtube/searchCompletion',
-  getSearchResults: 'Scrape/SearchResults',
-  processQueue: 'Queue/process',
-  getRelatedVideos: 'Scrape/multiple',
   getLocalVideos: 'LocalVideo',
 
+  getSearchResults: 'Scrape/SearchResults',
+  getRelatedVideos: 'Scrape/multiple',
   getChannelByHandle: 'Scrape/handle',
   getChannelById: 'Scrape/channelId',
 }
