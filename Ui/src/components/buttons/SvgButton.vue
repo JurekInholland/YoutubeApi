@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useYoutubeStore } from '@/stores/youtubeStore';
+import UpNext from '../player/UpNext.vue';
+const store = useYoutubeStore();
 const props = defineProps({
     path: {
         type: String,
@@ -30,5 +33,23 @@ const props = defineProps({
             <path :d="props.path" id="ytp-id-21" :style="style"></path>
         </svg>
         <span v-if="props.text != ''">{{ props.text }}</span>
+        <div class="tooltip">
+            <slot></slot>
+        </div>
     </button>
 </template>
+
+<style scoped>
+.tooltip {
+    
+    opacity: 0;
+    scale: .75;
+    transition: all .25s ease;
+    position: absolute;
+
+}
+button:hover .tooltip {
+    opacity: 1;
+    scale: 1;
+}
+</style>

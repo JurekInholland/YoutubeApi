@@ -2,17 +2,17 @@
   <div>
     <!-- <button @click="inputChange" style="color: white;">test btn</button> -->
     <div class="outer" v-if="found">
-      <div class="container" :class="toggle ? 'cinema' : ''" id="container1" ref="container">
+      <div class="container" :class="playerStats.cinema ? 'cinema' : ''" id="container1" ref="container">
         <div class="layout">
           <div class="player-box">
-            <YoutubePlayer v-if="store.currentVideo && !useLocalPlayer && store.currentVideo?.playableInEmbed"
-              ref="playerEl" v-bind="$attrs" class="player" id="player" :videoId="store.currentVideo.id"
-              :start-time="startTime" :aspect-ratio="store.currentVideo.width / store.currentVideo.height" />
+            <YoutubePlayer v-if="store.currentVideo && !playerStats.useLocalPlayer && store.currentVideo?.playableInEmbed"
+              :player-state="playerStats" ref="playerEl" v-bind="$attrs" class="player" id="player"
+              :videoId="store.currentVideo.id" :start-time="startTime"
+              :aspect-ratio="store.currentVideo.width / store.currentVideo.height" />
 
-            <VideoPlayer :cinema="toggle" v-else-if="useLocalPlayer" ref="playerEl"
-              :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`" :color="store.color"
-              @update:cinema="toggle = !toggle" @update:picture-in-picture="onPictureInPicture"
-              >
+            <VideoPlayer :player-state="playerStats" :cinema="playerStats.cinema" v-else-if="playerStats.useLocalPlayer"
+              ref="playerEl" :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`"
+              :color="store.color" @update:cinema="toggleCinema" @update:picture-in-picture="onPictureInPicture">
 
             </VideoPlayer>
             <div v-else-if="!store.currentVideo!.playableInEmbed">NOT EMEBEDDABLE</div>
@@ -20,8 +20,11 @@
 
           </div>
           <div class="meta-cont">
-            <VideoMetadata v-if="store.currentVideo" class="metadata" @update:model-value="toggle = !toggle"
-              :modelValue="toggle" :video="store.currentVideo" @update:custom-player="togglePlayer" />
+            <VideoMetadata v-if="store.currentVideo" class="metadata" @update:cinema="toggleCinema"
+              :cinema="playerStats.cinema" :useLocalPlayer="playerStats.useLocalPlayer" :modelValue="playerStats.cinema"
+              :video="store.currentVideo" @update:custom-player="togglePlayer" />
+            <!-- <p>{{ playerStats }}</p> -->
+
             <div id="primary" v-auto-animate></div>
           </div>
         </div>
@@ -34,7 +37,7 @@
                       </div>
                   </teleport> -->
       </div>
-      <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="toggle" />
+      <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="playerStats.cinema" />
     </div>
     <NotFound v-else />
   </div>
@@ -43,7 +46,7 @@
 import VideoMetadata from "@/components/VideoMetadata.vue"
 import YoutubePlayer from "@/components/YoutubePlayer.vue"
 import { useYoutubeStore } from "@/stores/youtubeStore"
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from "vue"
 import { useResizeObserver } from "@vueuse/core"
 import Sidebar from "@/components/Sidebar.vue"
 import { useRoute } from "vue-router"
@@ -51,8 +54,9 @@ import { formatTitle } from "@/utils"
 import VideoPlayer from "@/components/VideoPlayer.vue"
 import NotFound from "@/components/NotFound.vue"
 import { useFavicon } from '@vueuse/core'
+import type { PlayerState } from "@/types"
 
-const toggle = ref(false)
+// const toggle = ref(false)
 
 const useLocalPlayer = ref(false)
 const found = ref(false)
@@ -60,8 +64,19 @@ const route = useRoute()
 const store = useYoutubeStore()
 const calcH = ref("100%")
 
+const playerStats: Ref<PlayerState> = ref<PlayerState>({
+  isPlaying: true,
+  volume: 0.5,
+  currentTime: 0,
+  duration: 100,
+  isFullscreen: false,
+  storedVolume: 0.5,
+  settings: false,
+  cinema: false,
+  pictureInPicture: false,
+  useLocalPlayer: false
+})
 
-const icon = useFavicon()
 
 const startTime = computed(() => {
   return route.query.t ? parseInt(route.query.t as string) : 0
@@ -69,7 +84,7 @@ const startTime = computed(() => {
 
 const togglePlayer = (val: boolean) => {
   console.log("toggle player" + val)
-  useLocalPlayer.value = val
+  playerStats.value.useLocalPlayer = val
 }
 const onPictureInPicture = (val: boolean) => {
   console.log("picture in picture" + val)
@@ -81,13 +96,13 @@ const parsedId = computed(() => {
   return route.query.v ? route.query.v as string : null
 })
 
-watch(() => route.path, async () => {
+watch(route, async () => {
+  console.log("WATCH RRRRRR OUUUTE ")
+  playerStats.value.currentTime = 0;
   console.log("watch parsedId", parsedId.value)
-  useLocalPlayer.value = store.currentVideo?.localVideo !== undefined
-
-
 
   await store.fetchCurrentVideo(parsedId.value!)
+  playerStats.value.useLocalPlayer = store.currentVideo?.localVideo !== undefined
   if (store.currentVideo !== null) found.value = true
 
 }, { immediate: true })
@@ -103,18 +118,13 @@ watch(() => store.currentVideo, async () => {
 }, { immediate: true })
 
 
-watch(() => toggle.value, async () => {
-  console.log("Toggle")
+watch(() => playerStats.value.cinema, async () => {
+  console.log("playerStats.cinema")
 }, { immediate: true })
 
 const playerEl = ref<HTMLDivElement | null>(null) as any
 const mounted = ref(false)
 
-const isDisabled = () => {
-  const res = !mounted.value || !toggle.value
-  console.log("is disabled", res, mounted.value, toggle.value)
-  return res
-}
 useResizeObserver(playerEl, (entries) => {
   // console.log("RESIZE OBSERVER", entries[0].contentRect.width)
   calculateHeight(entries[0].contentRect.width)
@@ -139,7 +149,7 @@ const calculateHeight = (width: number) => {
   if (!store.currentVideo) return
   // let h = `calc(${width}px * (${store.currentVideo!.height} / ${store.currentVideo!.width}))`
   let h = `${Math.floor(width * (store.currentVideo.height / store.currentVideo.width))}px`
-  if (toggle.value) {
+  if (playerStats.value.cinema) {
     h = "100%"
   }
   // console.log("CALCULATING HEIGHT", h, toggle.value)
@@ -150,6 +160,11 @@ const aspectRatio = computed(() => {
   if (!store.currentVideo) return 16 / 9
   return store.currentVideo.width / store.currentVideo.height
 })
+
+const toggleCinema = () => {
+  playerStats.value.cinema = !playerStats.value.cinema
+}
+
 </script>
 
 
@@ -157,6 +172,9 @@ const aspectRatio = computed(() => {
 .outer {
   display: flex;
   justify-content: center;
+  width: 100%;
+  max-width: 100vw;
+  margin-top: var(--gutter-width);
   // min-height: calc(100vh - 55px);
 }
 
@@ -165,6 +183,7 @@ const aspectRatio = computed(() => {
   flex-grow: 1;
   width: 100%;
   max-width: var(--max-content-width);
+  max-height: 100vh;
   display: flex;
   flex-wrap: wrap;
 }
@@ -181,6 +200,7 @@ const aspectRatio = computed(() => {
   flex-direction: column;
   gap: calc(var(--gutter-width) / 3);
   flex-wrap: nowrap;
+  margin-bottom: var(--gutter-width);
   // height: 100%;
 }
 
@@ -189,13 +209,8 @@ const aspectRatio = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: var(--gutter-width);
-  max-height: min(v-bind(calcH), var(--max-p-height));
-  // max-width: var(--max-player-width);
-  // max-height: var(--max-p-height);
   min-width: 360px;
-  flex-grow: 1;
-
-  // max-height: var(--max-player-height);
+  flex-grow: 0;
 }
 
 .player {
@@ -222,11 +237,13 @@ const aspectRatio = computed(() => {
   flex-direction: row;
   flex-wrap: wrap;
   // justify-content: center;
-  flex-grow: 1;
+  // flex-grow: 1;
   // gap: var(--gutter-width);
   max-width: 1754px;
   margin: 0 var(--gutter-width);
   gap: var(--gutter-width);
+
+  width: calc((100vh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px);
 
 }
 
@@ -255,6 +272,7 @@ const aspectRatio = computed(() => {
     // max-width: calc(100vw - 2 * var(--gutter-width));
     max-width: min(calc(100vw - 3 * var(--gutter-width)), 1754px);
     gap: var(--gutter-width);
+    max-height: unset;
     // margin: 0 var(--gutter-width);
     // padding-right: 3rem;
 
@@ -316,7 +334,7 @@ const aspectRatio = computed(() => {
 #primary {
   flex: 1;
   flex-grow: 1;
-  height: 100%;
+  // height: 100%;
 }
 
 .secondary {
@@ -346,7 +364,7 @@ const aspectRatio = computed(() => {
 :root {
 
   --nav-height: 56px;
-  --max-p-height: calc(100vh - 172px);
+  --max-p-height: calc(100vh - 204px);
   /* --max-player-width: calc(100vw - (var(var(--nav-height)) + 2 * var(--gutter-width))); */
 
 

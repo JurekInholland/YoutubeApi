@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, type Ref, nextTick, onBeforeUnmount } from 'vue';
+import { ref, onMounted, computed, type Ref, nextTick, onBeforeUnmount, watch } from 'vue';
 import type { IPlayerState } from '@/models';
 import VolumeButton from '@/components/buttons/VolumeButton.vue';
 import FullscreenButton from '@/components/buttons/FullScreenButton.vue';
@@ -7,14 +7,20 @@ import SettingsButton from '@/components/buttons/SettingsButton.vue';
 import ExitFullscreenButton from '@/components/buttons/ExitFullscreenButton.vue';
 import PlayPauseButton from '@/components/buttons/PlayPauseButton.vue';
 import SvgButton from '@/components/buttons/SvgButton.vue';
+import UpNext from '@/components/player/UpNext.vue';
 import { useYoutubeStore } from '@/stores/youtubeStore';
+import type { PlayerState } from '@/types';
+import { useRoute } from 'vue-router';
+import PlayerTooltip from './player/PlayerTooltip.vue';
 
+const route = useRoute();
 const store = useYoutubeStore();
 
 const props = defineProps<{
     src: string,
     color: string,
-    cinema: boolean
+    cinema: boolean,
+    playerState: PlayerState
 }>()
 
 const emits = defineEmits<{
@@ -22,19 +28,47 @@ const emits = defineEmits<{
     (event: 'update:pictureInPicture', value: boolean): void
 }>()
 
-const playerState: Ref<IPlayerState> = ref<IPlayerState>({
-    isPlaying: false,
-    volume: "0.75",
-    duration: 0,
-    currentTime: 0,
-    isFullscreen: false,
-    storedVolume: 0,
-    settings: false,
-    cinema: false,
-    pictureInPicture: false,
-});
+// const playerState: Ref<IPlayerState> = ref<IPlayerState>({
+//     isPlaying: false,
+//     volume: "0.75",
+//     duration: 0,
+//     currentTime: 0,
+//     isFullscreen: false,
+//     storedVolume: 0,
+//     settings: false,
+//     cinema: false,
+//     pictureInPicture: false,
+// });
+watch(route, (r) => {
+    console.log("VIDEO R CHANGE", r)
+})
+
+watch(() => props.src, (src) => {
+
+    video.value?.pause();
+    cancelAnimationFrame(animationId.value);
+    props.playerState.currentTime = 0;
+    // props.playerState.isPlaying = false;
+
+    setTimeout(() => {
+        video.value?.play();
+    }, 100)
+
+    const vid = video.value;
+    // debugger;
+    console.log(vid)
+
+    // debugger;
+
+    // setInterval(() => {
+    //     if (props.playerState.isFullscreen && idleTime.value < 100)
+    //         idleTime.value += 1;
+    // }, 100)
 
 
+    // console.log("VIDEO src CHANGE", src)
+    // setupPlayer();
+})
 const previewPos = ref(0);
 
 const startTime: Ref<number | undefined> = ref(0);
@@ -48,15 +82,11 @@ const timeline_container = ref<HTMLDivElement>();
 const timeline = ref<HTMLDivElement>();
 
 const thumb = ref<HTMLDivElement>();
-const currentTime: Ref<number> = ref(0);
 
 const idleTime: Ref<number> = ref(0);
 
 const lastClick: Ref<number> = ref(0);
 const clickTimeout: Ref<number | null> = ref(null)
-const volume = computed(() => {
-    return video.value?.volume ? video.value.volume : 0;
-});
 
 const handleBuffer = async (evt: Event) => {
     if (video.value == null) return;
@@ -72,11 +102,24 @@ const handleBuffer = async (evt: Event) => {
     timeline_container.value?.style.setProperty('--buffered', duration.toString() + "%");
 }
 
+const setupPlayer = () => {
+    if (video.value == null) return;
+    // cancelAnimationFrame(animationId.value);
+
+    video.value.volume = props.playerState.volume;
+    video.value.currentTime = props.playerState.currentTime;
+    if (props.playerState.isPlaying) {
+        video.value.play();
+    }
+    else {
+        video.value.pause();
+    }
+}
+
 onMounted(() => {
 
-
     setInterval(() => {
-        if (playerState.value.isFullscreen && idleTime.value < 100)
+        if (props.playerState.isFullscreen && idleTime.value < 100)
             idleTime.value += 1;
     }, 100)
 
@@ -86,43 +129,47 @@ onMounted(() => {
 
     window.addEventListener('keyup', handleKeyUp);
     if (video.value != null) {
-        video.value.volume = parseFloat(playerState.value.volume);
+        video.value.volume = props.playerState.volume;
+        setupPlayer();
 
         video.value.play()
 
         video.value.onplaying = async () => {
             console.log("onplaying")
-            playerState.value.isPlaying = true;
+            props.playerState.isPlaying = true;
             startTime.value = video.value?.currentTime
             startDate.value = Date.now()
             smoothUpdate();
         }
 
-        video.value.onplay = async () => {
-            console.log("onplay")
-        }
         video.value.onpause = () => {
             console.log("onpause")
-            playerState.value.isPlaying = false;
+            props.playerState.isPlaying = false;
             cancelAnimationFrame(animationId.value);
         }
-
+        video.value.onenterpictureinpicture = () => {
+            props.playerState.pictureInPicture = true;
+        }
+        video.value.onleavepictureinpicture = () => {
+            props.playerState.pictureInPicture = false;
+        }
         video.value.onfullscreenchange = () => {
-            playerState.value.isFullscreen = document.fullscreenElement != null;
+            props.playerState.isFullscreen = document.fullscreenElement != null;
         }
         video.value.ontimeupdate = (e: Event) => {
             handleBuffer(e)
             if (!video.value?.currentTime) return
-            playerState.value.currentTime = video.value.currentTime;
+            props.playerState.currentTime = video.value.currentTime;
             const perecent = Math.round(video.value.currentTime / video.value.duration * 100000) / 1000;
             timeline_container.value?.style.setProperty('--progress', perecent.toString() + "%");
         }
 
         video.value.onloadeddata = (e: Event) => {
-            console.log("onloadeddata", e)
-            console.log(video.value)
             if (video.value?.duration)
-                playerState.value.duration = video.value.duration;
+                props.playerState.duration = video.value.duration;
+
+            // console.log("onloadeddata", e)
+            // console.log(video.value)
         }
         video.value.onprogress = (e: any) => {
             console.log("onprogress", e)
@@ -130,8 +177,8 @@ onMounted(() => {
         }
         video.value.onvolumechange = (e) => {
             let target = e.target as HTMLVideoElement;
-            console.log("VOL CHANGE", e)
-            playerState.value.volume = target.volume.toString();
+            console.log("VOL CHANGE", target.volume)
+            props.playerState.volume = target.volume;
         }
     }
 });
@@ -146,10 +193,10 @@ const toggleMute = (e: Event) => {
 
     if (video.value) {
         if (video.value.volume > 0) {
-            playerState.value.storedVolume = video.value.volume;
+            props.playerState.storedVolume = video.value.volume;
             video.value.volume = 0;
         } else {
-            video.value.volume = playerState.value.storedVolume;
+            video.value.volume = props.playerState.storedVolume;
         }
     }
 }
@@ -172,12 +219,12 @@ const handleKeyUp = (e: KeyboardEvent) => {
 
 const onDoubleClick = (e: Event) => {
     console.log("onDoubleClicke", e)
-    if (!playerState.value.isFullscreen && video.value) {
+    if (!props.playerState.isFullscreen && video.value) {
         video_container.value?.requestFullscreen();
     }
     else
         document.exitFullscreen();
-    playerState.value.isFullscreen = !playerState.value.isFullscreen;
+    props.playerState.isFullscreen = !props.playerState.isFullscreen;
 }
 
 
@@ -217,24 +264,24 @@ const onClick = (e: Event) => {
 
 const onPlayPause = (e: Event) => {
     console.log("e", e)
-    if (!playerState.value.isPlaying) {
+    if (!props.playerState.isPlaying) {
         video.value?.play();
     } else {
         video.value?.pause();
     }
-    playerState.value.isPlaying = !playerState.value.isPlaying;
+    props.playerState.isPlaying = !props.playerState.isPlaying;
 }
 
 const onVolumeChange = (e: Event) => {
     console.log("e", e)
     if (video.value) {
-        video.value.volume = parseFloat(playerState.value.volume);
+        video.value.volume = props.playerState.volume;
         console.log(video.value.volume)
     }
 }
 const auxclick = (e: Event) => {
     // console.log("ousside")
-    playerState.value.settings = !playerState.value.settings
+    props.playerState.settings = !props.playerState.settings
 }
 const onMouseMove = (e: MouseEvent) => {
     const rect = timeline_container.value?.getBoundingClientRect();
@@ -246,17 +293,21 @@ const onMouseMove = (e: MouseEvent) => {
     timeline_container.value?.style.setProperty('--preview', percent.toString());
 }
 const onCinemaClick = (e: MouseEvent) => {
-    playerState.value.cinema = !playerState.value.cinema;
-    emits("update:cinema", playerState.value.cinema)
+    emits("update:cinema", props.playerState.cinema)
 }
 const onPictureInPictureClick = (e: MouseEvent) => {
-    playerState.value.pictureInPicture = !playerState.value.pictureInPicture;
-    emits("update:pictureInPicture", playerState.value.pictureInPicture)
+
+    props.playerState.pictureInPicture = !props.playerState.pictureInPicture;
+    if (props.playerState.pictureInPicture)
+        video.value?.requestPictureInPicture();
+    else
+        document.exitPictureInPicture();
+    // emits("update:pictureInPicture", props.playerState.pictureInPicture)
 }
 const onTimelineClick = async (e: MouseEvent) => {
 
     let isPlaying = false;
-    if (playerState.value.isPlaying) {
+    if (props.playerState.isPlaying) {
         isPlaying = true;
     }
 
@@ -299,7 +350,7 @@ const formatTime = (duration: number) => {
 }
 
 const progress = computed(() => {
-    const prog = (playerState.value.currentTime / playerState.value.duration) * 100;
+    const prog = (props.playerState.currentTime / props.playerState.duration) * 100;
     console.log("progress", Math.round(prog * 100) / 100)
     return Math.round(prog / 100) * 100;
 })
@@ -308,12 +359,12 @@ const smoothUpdate = () => {
     const elapsed = (Date.now() - startDate.value) / 1000;
     const currentTime = startTime.value! + elapsed;
 
-    if (currentTime < playerState.value.duration) {
+    if (currentTime < props.playerState.duration) {
         if (!thumb.value || !timeline.value) {
             console.log("no thumb ref");
             return;
         }
-        const barWidth = timeline.value!.getBoundingClientRect().width * (currentTime / playerState.value.duration);
+        const barWidth = timeline.value!.getBoundingClientRect().width * (currentTime / props.playerState.duration);
         timeline_container.value?.style.setProperty('--bar', barWidth.toString() + "px");
         animationId.value = requestAnimationFrame(smoothUpdate);
     }
@@ -333,15 +384,22 @@ const smoothUpdate = () => {
                 <div ref="timeline" class="timeline">
                     <div class="buffered"></div>
                 </div>
-                <div ref="thumb" class="thumb-indicator"></div>
+                <div class="tp">
+
+                    <div ref="thumb" class="thumb-indicator">
+                        <div class="circle"></div>
+                    </div>
+                </div>
             </div>
             <div class="controls" @click.stop="">
                 <PlayPauseButton class="playPause" @click.stop="onPlayPause" :is-paused="!playerState.isPlaying" />
-                <SvgButton path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z" />
+                <SvgButton class="next-button" path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z">
+                    <UpNext :video="store.relatedVideos[0]" />
+                </SvgButton>
                 <div class="volume-container">
-                    <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="parseFloat(playerState.volume)" />
+                    <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="playerState.volume" />
                     <input class="volume-input" @click.stop="" @input="onVolumeChange"
-                        :style="{ 'background-size': Math.round(parseFloat(playerState.volume) * 100) + '% 100%' }" :min="0"
+                        :style="{ 'background-size': Math.round(Math.floor(playerState.volume * 100)) + '% 100%' }" :min="0"
                         :max="1" step="any" v-model="playerState.volume" type="range">
                 </div>
 
@@ -350,17 +408,21 @@ const smoothUpdate = () => {
                     {{ formatTime(playerState.currentTime) }} / {{ formatTime(playerState.duration) }}
 
                 </div>
-                {{ idleTime }}
                 {{ store.currentVideo!.height }}p
                 <SettingsButton :toggled="playerState.settings" :hd="store.currentVideo!.width >= 960"
                     @click.stop="playerState.settings = !playerState.settings" />
                 <SvgButton :style="'fill-rule: evenodd'" @click.stop="onPictureInPictureClick"
-                    path="M25,17 L17,17 L17,23 L25,23 L25,17 L25,17 Z M29,25 L29,10.98 C29,9.88 28.1,9 27,9 L9,9 C7.9,9 7,9.88 7,10.98 L7,25 C7,26.1 7.9,27 9,27 L27,27 C28.1,27 29,26.1 29,25 L29,25 Z M27,25.02 L9,25.02 L9,10.97 L27,10.97 L27,25.02 L27,25.02 Z" />
+                    path="M25,17 L17,17 L17,23 L25,23 L25,17 L25,17 Z M29,25 L29,10.98 C29,9.88 28.1,9 27,9 L9,9 C7.9,9 7,9.88 7,10.98 L7,25 C7,26.1 7.9,27 9,27 L27,27 C28.1,27 29,26.1 29,25 L29,25 Z M27,25.02 L9,25.02 L9,10.97 L27,10.97 L27,25.02 L27,25.02 Z">
+                    <PlayerTooltip text="Miniplayer (i)"/>
+                    </SvgButton>
                 <SvgButton :style="'fill-rule: evenodd'" @click.stop="onCinemaClick"
-                    path="m 28,11 0,14 -20,0 0,-14 z m -18,2 16,0 0,10 -16,0 0,-10 z" />
+                    :path="playerState.cinema ? 'm 26,13 0,10 -16,0 0,-10 z m -14,2 12,0 0,6 -12,0 0,-6 z' : 'm 28,11 0,14 -20,0 0,-14 z m -18,2 16,0 0,10 -16,0 0,-10 z'">
+                    <PlayerTooltip :text=" playerState.cinema? 'Default mode': 'Theater mode (t)'"/>
 
-                <FullscreenButton v-if="!playerState.isFullscreen" @click.stop="onDoubleClick" />
-                <ExitFullscreenButton v-else @click.stop="onDoubleClick" />
+                    </SvgButton>
+
+                <FullscreenButton class="fullscreen-button" v-if="!playerState.isFullscreen" @click.stop="onDoubleClick" />
+                <ExitFullscreenButton class="fullscreen-button" v-else @click.stop="onDoubleClick" />
 
                 <div v-if="playerState.settings" class="settings-container" v-click-outside-element="auxclick">
                     <ul>
@@ -381,6 +443,12 @@ const smoothUpdate = () => {
 *::after {
     box-sizing: border-box;
 }
+
+.tp {
+    width: 0;
+    position: absolute;
+}
+
 
 #vid {}
 
@@ -479,7 +547,9 @@ button {
     height: 36px;
     font-size: .85rem;
 }
-
+.controls {
+    position: relative;
+}
 .controls button {
     opacity: 1;
     fill: rgba(255, 255, 255, 0.85);
@@ -638,10 +708,13 @@ input[type=range]::-webkit-slider-runnable-track {
     height: 100%;
 }
 
-.timeline-container:hover .thumb-indicator {
-    --scale: 1;
-    opacity: 1;
+/* .timeline-container:hover .thumb-indicator {
 
+} */
+
+.timeline-container:hover .circle {
+    transform: scale(.65);
+    opacity: 1;
 }
 
 .timeline::before {
@@ -678,21 +751,35 @@ input[type=range]::-webkit-slider-runnable-track {
 
 
 .thumb-indicator {
-    --scale: 0;
-    opacity: 0;
-    scale: var(--scale);
     position: absolute;
-    left: -2px;
+    /* top: 3.5px; */
+    /* top: -6px; */
+    top: calc(-1.5rem / 3);
+    left: -4px;
+    /* left: -2px;
     top: 8px;
-    height: 13px;
+    height: 13px; */
     transition: opacity 150ms ease;
-    transform: translateX(var(--bar));
 
-    background-color: v-bind(color);
-    border-radius: 50%;
     aspect-ratio: 1;
     z-index: 2;
     pointer-events: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    transform: translateX(var(--bar));
+    /* width: var(--size);
+    height: var(--size); */
+    /* transition: width .5s ease, height .5s ease; */
+}
+
+.circle {
+    opacity: 0;
+    border-radius: 50%;
+    background-color: v-bind(color);
+    width: 100%;
+    height: 100%;
+    transition: transform .25s ease, opacity .25s ease;
+    transform: scale(.2);
 }
 
 .settings-container {

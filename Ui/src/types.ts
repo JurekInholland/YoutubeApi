@@ -96,11 +96,13 @@ export interface ApplicationSettings {
 
 export type PlayerState = {
   isPlaying: boolean
-  volume: string
+  volume: number
   currentTime: number
   duration: number
   isFullscreen: boolean
   storedVolume: number
   settings: boolean
   cinema: boolean
+  pictureInPicture: boolean
+  useLocalPlayer: boolean
 }

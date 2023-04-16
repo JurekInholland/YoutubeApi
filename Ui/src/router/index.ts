@@ -18,7 +18,12 @@ const router = createRouter({
       component: () => import('../views/NewPlayerPage.vue'),
       meta: { layout: DefaultLayout }
     },
+    {
+      path: '/watch',
+      name: 'watch',
+      component: () => import('../views/NewPlayerPage.vue'),
 
+    },
     {
       path: '/about',
       name: 'about',
@@ -51,6 +56,12 @@ const router = createRouter({
       component: () => import('../views/SettingsView.vue')
     },
 
+    {
+      path: '/channel/:channelId',
+      name: 'channel-id',
+      component: () => import('../views/ChannelView.vue')
+    },
+
     // Channel routes
     {
       path: '/@:username',
@@ -59,7 +70,7 @@ const router = createRouter({
     },
     {
       path: '/c/@:username',
-      name: 'channel',
+      name: 'channel-c',
       component: () => import('../views/ChannelView.vue')
     },
 

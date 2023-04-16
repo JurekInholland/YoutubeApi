@@ -45,7 +45,7 @@ const onPointerUp = (e: PointerEvent) => {
                 <p class="view-count">{{ formatViews(video.viewCount) }} views . {{ formatDateAgo(new
                     Date(video.uploadDate)) }}</p>
 
-                <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+                <router-link :to="{ name: 'channel-id', params: { channelId: video.youtubeChannel?.id } }">
 
                     <div class="author">
 

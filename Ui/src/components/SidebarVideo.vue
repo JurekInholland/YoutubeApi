@@ -9,7 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <router-link :to="{ name: 'video', params: { videoId: video.id } }" class="video-cont">
+    <router-link :to="{ name: 'watch', query: { v: video.id }, }" class="video-cont">
         <div class="thumbnail">
             <img :src="props.video.youtubeThumbnailUrl" alt="">
             <div class="play-overlay">{{ formatDuration(props.video.duration) }}</div>

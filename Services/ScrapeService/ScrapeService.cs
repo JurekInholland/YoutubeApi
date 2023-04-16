@@ -110,6 +110,9 @@ public partial class ScrapeService : IScrapeService
     {
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
+
+
+
         MatchCollection matches = VideoIdRegex().Matches(sourceCode);
 
         var videoIds = matches.Select(m => m.Value).ToHashSet().ToArray();

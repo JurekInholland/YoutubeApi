@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import { computed, ref, watch, type Ref, nextTick } from 'vue';
+import { computed, ref, watch, type Ref, nextTick, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { Vue3ToggleButton } from 'vue3-toggle-button'
-import '../../node_modules/vue3-toggle-button/dist/style.css'
 
 import { Icon } from '@iconify/vue';
 
 import type { YoutubeVideo } from '@/types';
 import { formatDateAgo, formatDescription, formatViews, formatDate, formatTitle } from '@/utils';
-import SvgButton from './buttons/SvgButton.vue';
 import ToggleButton from "@/components/ToggleButton.vue";
 import ProgressBar from "@/components/ProgressBar.vue";
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import { apiService } from '@/constants';
 
 const router = useRouter();
-const props = defineProps<{ video: YoutubeVideo, modelValue: boolean }>();
+const props = defineProps<{ video: YoutubeVideo, modelValue: boolean, cinema: boolean, useLocalPlayer: boolean }>();
 const store = useYoutubeStore();
 
 const isDescriptionExpanded: Ref<boolean> = ref(false);
@@ -38,22 +35,23 @@ const toggleDescriptionButton = () => {
 }
 
 const emits = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void,
+    // (e: 'update:modelValue', value: boolean): void,
+    (e: 'update:cinema', value: boolean): void,
     (e: 'update:customPlayer', value: boolean): void,
 }>();
 
 const toggleCinema = () => {
     console.log('toggleCinema', props.modelValue);
     // props.cinema = !props.cinema;
-    emits('update:modelValue', !props.modelValue);
+    emits('update:cinema', !props.modelValue);
+    // emits('update:modelValue', !props.modelValue);
 }
 
-const tog: Ref<boolean> = ref(false);
+const tog: Ref<boolean> = ref(props.modelValue);
 
 watch(tog, (val) => {
     console.log('watch tog' + val)
     emits('update:customPlayer', val)
-
 })
 
 const downloadVideo = async () => {
@@ -67,7 +65,15 @@ const runtimeSeconds = computed(() => {
     // console.log("runtimeSeconds", hours, minutes, seconds, hours * 3600 + minutes * 60 + seconds)
     return hours * 3600 + minutes * 60 + seconds;
 })
+onMounted(() => {
+    console.log("mounted metadata" + props.modelValue)
+    tog.value = props.useLocalPlayer;
+})
 
+watch(props, (val) => {
+    console.log('watch props.modelValue' + val)
+    tog.value = val.useLocalPlayer;
+})
 </script>
 
 <template>
@@ -114,16 +120,16 @@ const runtimeSeconds = computed(() => {
                 </button>
 
                 <a v-else class="button" :href="'/api/LocalVideo/GetVideoStream?videoId=' + props.video.id">
-                    <Icon icon="material-symbols:cloud-download-rounded" />
+                    <Icon icon="solar:download-minimalistic-linear" />
 
                     Download
                 </a>
 
                 <!-- <button v-else class="download-button">
-                                <Icon icon="material-symbols:cloud-download-rounded" />
-                            </button> -->
+                                            <Icon icon="material-symbols:cloud-download-rounded" />
+                                        </button> -->
                 <button class="cinema-button" @click="toggleCinema">
-                    <Icon icon="maki:cinema" />
+                    <Icon icon="mdi:cinema" />
                 </button>
 
             </div>
@@ -394,12 +400,21 @@ button,
     height: 36px;
     transition: border-color .75s ease;
 
-    gap: 1rem;
+    gap: 0;
+
     /* gap: .5rem; */
     /* background-color: red; */
+    svg {
+        width: 24px;
+        height: 24px;
+        margin-right: 1rem;
+    }
+}
+button svg {
+    margin-left: 2px;
+    margin-right: .8rem;
 
 }
-
 .download-button {
     width: 114px;
 }
@@ -411,7 +426,7 @@ button,
 }
 
 .cinema-button {
-    width: 100px;
+    width: 106px;
 
     svg {
         left: 6px;
@@ -447,11 +462,13 @@ button::after {
     padding-left: 5px;
     // padding-left: 1rem;
     // padding-right: 19px;
-    content: 'Cinema';
+    content: 'Theater';
     max-height: 2rem;
     white-space: nowrap;
 }
-
+.cinema .cinema-button::after {
+    content: 'Default';
+}
 @media screen and (max-width: 680px) {
 
     .backup-button {

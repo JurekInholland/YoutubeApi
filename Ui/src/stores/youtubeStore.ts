@@ -46,8 +46,8 @@ export const useYoutubeStore = defineStore({
       ),
     localVideos: (state) => state.videos.filter((video) => video.localVideo !== undefined),
 
-    channelVideos: (state) => (channelHandle: string) =>
-      state.videos.filter((video: YoutubeVideo) => video.youtubeChannel?.handle === channelHandle),
+    channelVideos: (state) => (channelId: string) =>
+      state.videos.filter((video: YoutubeVideo) => video.youtubeChannel?.id === channelId),
 
     getVideoTags: (state) => {
       const tags: { [key: string]: number } = {}
@@ -83,6 +83,15 @@ export const useYoutubeStore = defineStore({
   actions: {
     clearSearchResults() {
       // this.searchResults = {}
+    },
+
+    async fetchChannelById(id: string) {
+      const res = await apiService.getChannelById(id)
+      for (const video of res) {
+        if (video === undefined || video === null || video.id === null) continue
+        if (this.videos.filter((v) => v.id === video.id).length === 0) this.videos.push(video)
+
+      }
     },
 
     async fetchChannelByHandle(handle: string) {

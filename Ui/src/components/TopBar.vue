@@ -69,13 +69,13 @@ const onKeyPress = async (e: KeyboardEvent) => {
     console.log("KEYPRESS", e.key)
     if (e.key === "ArrowDown") {
         activeIndex.value = (activeIndex.value + 1) % (store.searchSuggestions.length + 1);
-        store.searchQuery = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
+        searchQuery.value = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
 
 
     }
     else if (e.key === "ArrowUp") {
         activeIndex.value = (activeIndex.value - 1 + store.searchSuggestions.length + 1) % (store.searchSuggestions.length + 1);
-        store.searchQuery = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
+        searchQuery.value = store.searchSuggestions[activeIndex.value] ?? oldQuery.value;
 
     }
     else if (e.key === "Enter") {
@@ -711,7 +711,7 @@ button:hover {
 
 #country-code {
     top: 12px;
-    left: 129px;
+    left: 138px;
     position: absolute;
     color: rgba(255, 255, 255, .75);
 }

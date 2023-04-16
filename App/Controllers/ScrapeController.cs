@@ -33,22 +33,37 @@ public class ScrapeController : BaseController
     [HttpGet(nameof(YoutubeChannelById))]
     public async Task<IActionResult> YoutubeChannelById(string channelId)
     {
-        var yt = await _scrapeService.ScrapeChannelById(channelId);
+        try
+        {
+            var yt = await _scrapeService.ScrapeChannelById(channelId);
+            Response.Headers.Add("Count", yt.Length.ToString());
+            return Ok(yt);
+        }
 
-        Response.Headers.Add("Count", yt.Length.ToString());
-        return Ok(yt);
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     /// <summary>
     /// Scrape a youtube channel for videos via handle
     /// </summary>
-    [HttpGet(nameof(YoutubeChannelByHandle))]
-    public async Task<IActionResult> YoutubeChannelByHandle(string handle)
+    [HttpPost(nameof(YoutubeChannelByHandle))]
+    public async Task<IActionResult> YoutubeChannelByHandle([FromBody] string handle)
     {
-        var yt = await _scrapeService.ScrapeChannelByHandle(handle);
+        _logger.LogInformation("Scraping channel {Handle}", handle);
+        try
+        {
+            var yt = await _scrapeService.ScrapeChannelByHandle(handle);
 
-        Response.Headers.Add("Count", yt.Length.ToString());
-        return Ok(yt);
+            Response.Headers.Add("Count", yt.Length.ToString());
+            return Ok(yt);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     /// <summary>

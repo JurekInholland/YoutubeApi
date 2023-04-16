@@ -26,7 +26,7 @@ onMounted(() => {
 <template>
     <main>
         <h1>home</h1>
-
+        <p>{{ route }}</p>
     </main>
 </template>
 <style scoped>
