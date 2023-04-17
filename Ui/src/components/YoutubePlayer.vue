@@ -11,8 +11,6 @@ const isInitialized = ref(false);
 
 const props = defineProps<{
     videoId: string,
-    startTime: number,
-    aspectRatio: number,
     playerState: PlayerState
 }>()
 const youtube = ref();
@@ -26,7 +24,7 @@ const onReady = (event: any) => {
     const isPlaying = event.target.getPlayerState() === 1;
     const tar = event.target;
     event.target.setVolume(props.playerState.volume * 100);
-    event.target.startSeconds = props.startTime;
+    event.target.startSeconds = props.playerState.currentTime;
     console.log("SEEKING TO ", props.playerState.currentTime)
     event.target.seekTo(props.playerState.currentTime, true);
     props.playerState.duration = duration;
@@ -89,7 +87,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="yotube-wrapper">
-        <youtube-iframe ref="youtube" class="iframe" :preserveAspectRatio="true" :video-id="props.videoId" @ready="onReady"
+        <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"
             @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{
                 // https://developers.google.com/youtube/player_parameters#Parameters
                 iv_load_policy: 3,

@@ -170,6 +170,7 @@ export const useYoutubeStore = defineStore({
         .flat()
         .find((video) => video.id === videoId)
 
+
       if (found) {
         console.log('returning search result')
         this.currentVideo = found

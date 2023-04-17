@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, type Ref, nextTick, onBeforeUnmount, watch } from 'vue';
-import type { IPlayerState } from '@/models';
 import VolumeButton from '@/components/buttons/VolumeButton.vue';
 import FullscreenButton from '@/components/buttons/FullScreenButton.vue';
 import SettingsButton from '@/components/buttons/SettingsButton.vue';
@@ -12,6 +11,7 @@ import { useYoutubeStore } from '@/stores/youtubeStore';
 import type { PlayerState } from '@/types';
 import { useRoute } from 'vue-router';
 import PlayerTooltip from './player/PlayerTooltip.vue';
+import SvgLink from './buttons/SvgLink.vue';
 
 const route = useRoute();
 const store = useYoutubeStore();
@@ -95,7 +95,6 @@ const handleBuffer = async (evt: Event) => {
     try {
         buffered = video.value.buffered.end(0);
     } catch (e) {
-        console.log("error", e)
     }
     let duration = Math.round((buffered / video.value.duration) * 100) + 1;
 
@@ -109,7 +108,12 @@ const setupPlayer = () => {
     video.value.volume = props.playerState.volume;
     video.value.currentTime = props.playerState.currentTime;
     if (props.playerState.isPlaying) {
-        video.value.play();
+        try {
+            video.value.play();
+        }
+        catch (e) {
+            console.log("errorasdasd", e)
+        }
     }
     else {
         video.value.pause();
@@ -127,16 +131,18 @@ onMounted(() => {
         idleTime.value = 0;
     })
 
+    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+
+    window.addEventListener('fullscreenchange', onFullscreenChange)
+
     if (video.value != null) {
         video.value.volume = props.playerState.volume;
         setupPlayer();
 
-        video.value.play()
-
         video.value.onplaying = async () => {
             console.log("onplaying")
-            props.playerState.isPlaying = true;
+            props.playerState.isPlaying = video.value?.paused == false;
             startTime.value = video.value?.currentTime
             startDate.value = Date.now()
             smoothUpdate();
@@ -184,6 +190,9 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
     window.removeEventListener('keyup', handleKeyUp);
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('fullscreenchange', onFullscreenChange)
+
     window.removeEventListener('mousemove', () => {
         idleTime.value = 0;
     })
@@ -201,11 +210,16 @@ const toggleMute = (e: Event) => {
     }
 }
 
+const handleKeyDown = (e: KeyboardEvent) => {
+
+};
+
 const handleKeyUp = (e: KeyboardEvent) => {
+    e.preventDefault();
 
-    let testEl = document.activeElement as HTMLInputElement;
+    let activeElement = document.activeElement as HTMLInputElement;
 
-    if (testEl.type === "text") {
+    if (activeElement.type === "text") {
         return;
     }
 
@@ -216,7 +230,9 @@ const handleKeyUp = (e: KeyboardEvent) => {
         onDoubleClick(e);
     }
 }
-
+const onFullscreenChange = (e: Event) => {
+    props.playerState.isFullscreen = document.fullscreenElement != null;
+}
 const onDoubleClick = (e: Event) => {
     console.log("onDoubleClicke", e)
     if (!props.playerState.isFullscreen && video.value) {
@@ -355,6 +371,13 @@ const progress = computed(() => {
     return Math.round(prog / 100) * 100;
 })
 
+const onReplay = () => {
+    props.playerState.currentTime = 0;
+    video.value?.play();
+    props.playerState.isPlaying = true;
+    // animationId.value = requestAnimationFrame(smoothUpdate);
+}
+
 const smoothUpdate = () => {
     const elapsed = (Date.now() - startDate.value) / 1000;
     const currentTime = startTime.value! + elapsed;
@@ -370,7 +393,6 @@ const smoothUpdate = () => {
     }
 
 }
-
 </script>
 <!-- @dblclick.stop="onDoubleClick" @click="onPlayPause"> -->
 
@@ -392,12 +414,32 @@ const smoothUpdate = () => {
                 </div>
             </div>
             <div class="controls" @click.stop="">
-                <PlayPauseButton class="playPause" @click.stop="onPlayPause" :is-paused="!playerState.isPlaying" />
-                <SvgButton class="next-button" path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z">
-                    <UpNext :video="store.relatedVideos[0]" />
+                <PlayPauseButton v-if="playerState.duration - playerState.currentTime > 1" class="playPause"
+                    @click.stop="onPlayPause" :is-paused="!playerState.isPlaying">
+                    <PlayerTooltip :text="playerState.isPlaying ? 'Pause (k)' : 'Play (k)'" />
+
+                </PlayPauseButton>
+
+                <SvgButton v-else class="replay-button" @click.stop="onReplay"
+                    path="M 18,11 V 7 l -5,5 5,5 v -4 c 3.3,0 6,2.7 6,6 0,3.3 -2.7,6 -6,6 -3.3,0 -6,-2.7 -6,-6 h -2 c 0,4.4 3.6,8 8,8 4.4,0 8,-3.6 8,-8 0,-4.4 -3.6,-8 -8,-8 z">
+                    <PlayerTooltip text="Replay" />
                 </SvgButton>
+
+                <SvgLink v-if="store.relatedVideos[0]" class="button"
+                    path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z" text=""
+                    :href="{ name: 'watch', query: { v: store.relatedVideos[0].id } }">
+                    <UpNext :video="store.relatedVideos[0]" />
+                </SvgLink>
+
+                <!-- <SvgButton class="next-button" path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z">
+                                        <UpNext :video="store.relatedVideos[0]" />
+                                    </SvgButton> -->
                 <div class="volume-container">
-                    <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="playerState.volume" />
+                    <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="playerState.volume">
+
+                        <PlayerTooltip :text="playerState.volume > 0 ? 'Mute (m)' : 'Unmute (m)'" />
+
+                    </VolumeButton>
                     <input class="volume-input" @click.stop="" @input="onVolumeChange"
                         :style="{ 'background-size': Math.round(Math.floor(playerState.volume * 100)) + '% 100%' }" :min="0"
                         :max="1" step="any" v-model="playerState.volume" type="range">
@@ -410,19 +452,26 @@ const smoothUpdate = () => {
                 </div>
                 {{ store.currentVideo!.height }}p
                 <SettingsButton :toggled="playerState.settings" :hd="store.currentVideo!.width >= 960"
-                    @click.stop="playerState.settings = !playerState.settings" />
+                    @click.stop="playerState.settings = !playerState.settings">
+                    <PlayerTooltip v-if="!playerState.settings" text="Settings" />
+                </SettingsButton>
                 <SvgButton :style="'fill-rule: evenodd'" @click.stop="onPictureInPictureClick"
                     path="M25,17 L17,17 L17,23 L25,23 L25,17 L25,17 Z M29,25 L29,10.98 C29,9.88 28.1,9 27,9 L9,9 C7.9,9 7,9.88 7,10.98 L7,25 C7,26.1 7.9,27 9,27 L27,27 C28.1,27 29,26.1 29,25 L29,25 Z M27,25.02 L9,25.02 L9,10.97 L27,10.97 L27,25.02 L27,25.02 Z">
-                    <PlayerTooltip text="Miniplayer (i)"/>
-                    </SvgButton>
+                    <PlayerTooltip text="Miniplayer (i)" />
+                </SvgButton>
                 <SvgButton :style="'fill-rule: evenodd'" @click.stop="onCinemaClick"
                     :path="playerState.cinema ? 'm 26,13 0,10 -16,0 0,-10 z m -14,2 12,0 0,6 -12,0 0,-6 z' : 'm 28,11 0,14 -20,0 0,-14 z m -18,2 16,0 0,10 -16,0 0,-10 z'">
-                    <PlayerTooltip :text=" playerState.cinema? 'Default mode': 'Theater mode (t)'"/>
+                    <PlayerTooltip :text="playerState.cinema ? 'Default mode' : 'Theater mode (t)'" />
 
-                    </SvgButton>
+                </SvgButton>
 
-                <FullscreenButton class="fullscreen-button" v-if="!playerState.isFullscreen" @click.stop="onDoubleClick" />
-                <ExitFullscreenButton class="fullscreen-button" v-else @click.stop="onDoubleClick" />
+                <FullscreenButton class="fullscreen-button" v-if="!playerState.isFullscreen" @click.stop="onDoubleClick">
+                    <PlayerTooltip text="Enter fullscreen" />
+                </FullscreenButton>
+                <ExitFullscreenButton class="fullscreen-button" v-else @click.stop="onDoubleClick">
+                    <PlayerTooltip text="Exit fullscreen" />
+
+                </ExitFullscreenButton>
 
                 <div v-if="playerState.settings" class="settings-container" v-click-outside-element="auxclick">
                     <ul>
@@ -432,7 +481,7 @@ const smoothUpdate = () => {
                 </div>
             </div>
         </div>
-        <video class="player" id="vid" aria-description="video" :src="props.src" ref="video">
+        <video :muted="false" class="player" id="vid" aria-description="video" :src="props.src" ref="video">
         </video>
     </div>
 </template>
@@ -547,13 +596,26 @@ button {
     height: 36px;
     font-size: .85rem;
 }
+
 .controls {
     position: relative;
 }
+
+.controls .button {
+    width: 44px;
+    height: 44px;
+}
+
+.controls .button,
 .controls button {
     opacity: 1;
-    fill: rgba(255, 255, 255, 0.85);
+    fill: var(--button-color);
     transition: fill 50ms ease;
+}
+
+.video-controls-container .controls .button:hover {
+    background-color: transparent;
+    fill: rgba(255, 255, 255, 1);
 }
 
 .video-controls-container .controls button:hover {
@@ -798,5 +860,10 @@ input[type=range]::-webkit-slider-runnable-track {
 
 .player {
     max-height: 100%;
+}
+</style>
+<style>
+:root {
+    --button-color: rgba(255, 255, 255, 0.85);
 }
 </style>

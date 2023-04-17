@@ -72,6 +72,9 @@ const onHover = (e: Event) => {
                 <path class="ytp-svg-fill" :d="regular[3]" id="ytp-id-438"></path>
             </g>
         </svg>
+        <div class="tooltip">
+            <slot></slot>
+        </div>
     </button>
 </template>
 
@@ -81,5 +84,18 @@ button {
 }
 svg {
     pointer-events: none;
+}
+.tooltip {
+    pointer-events: none;
+    opacity: 0;
+    scale: .75;
+    transition: all .25s ease;
+    position: absolute;
+    left: -1rem;
+
+}
+button:hover .tooltip {
+    opacity: 1;
+    scale: 1;
 }
 </style>

@@ -5,13 +5,13 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div>
+    <div class="tt">
         {{ text }}
     </div>
 </template>
 
 <style scoped>
-div {
+.tt {
     background-color: rgba(24, 24, 24, .9);
     padding: .45rem;
     top: -3rem;

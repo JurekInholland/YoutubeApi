@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
-
+import { formatTitle } from '@/utils';
 const props = defineProps<{
     video: YoutubeVideo
 }>();
@@ -15,7 +15,7 @@ const props = defineProps<{
         <div class="infos">
             next (shift+n)
             <span>
-                {{ video.title }}
+                {{ formatTitle(video.title) }}
             </span>
         </div>
     </div>
@@ -71,7 +71,6 @@ const props = defineProps<{
     background-color: rgba(28, 28, 28, .9);
     overflow: hidden;
     gap: .5rem;
-
     img {
         width: 100%;
         height: 100%;

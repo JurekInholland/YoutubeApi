@@ -72,6 +72,24 @@ onMounted(() => {
                 d="M 9.25,9 7.98,10.27 24.71,27 l 1.27,-1.27 Z" fill="#fff" id="ytp-id-58"
                 style="--darkreader-inline-fill:#e8e6e3; display: none;" data-darkreader-inline-fill=""></path> -->
         </svg>
+        <div class="tooltip">
+            <slot></slot>
+        </div>
     </button>
     <!-- <MorphButton :path="path" /> -->
 </template>
+
+<style scoped>
+.tooltip {
+    pointer-events: none;
+    opacity: 0;
+    scale: .75;
+    transition: all .25s ease;
+    position: absolute;
+
+}
+button:hover .tooltip {
+    opacity: 1;
+    scale: 1;
+}
+</style>

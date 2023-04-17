@@ -6,3 +6,8 @@
 https://youtu.be/p3_xN2Zp1TY?t=300
 
 api problem: https://www.youtube.com/watch?v=rcZxskQUuZ0
+
+
+- play/pause to replay on 100%
+
+broken: http://localhost:5175/watch?v=qQHf4eTfFqw

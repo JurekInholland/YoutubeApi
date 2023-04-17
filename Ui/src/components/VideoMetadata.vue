@@ -522,7 +522,7 @@ button:disabled {
 
 .button:hover,
 button:hover {
-    background-color: rgba(255, 255, 255, .2);
+    /* background-color: rgba(255, 255, 255, .2); */
 }
 
 /* .cinema #description,

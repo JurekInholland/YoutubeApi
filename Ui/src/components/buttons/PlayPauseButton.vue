@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import {  onBeforeMount, ref, watch } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import MorphButton from './MorphButton.vue';
 
 const props = defineProps<{
@@ -25,5 +25,15 @@ onBeforeMount(() => {
 
 </script>
 <template>
-    <MorphButton :path="path" />
+    <MorphButton :path="path">
+        <slot></slot>
+
+    </MorphButton>
 </template>
+<style scoped>
+.slot {
+    position: absolute;
+
+    pointer-events: none;
+}
+</style>

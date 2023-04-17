@@ -7,8 +7,7 @@
           <div class="player-box">
             <YoutubePlayer v-if="store.currentVideo && !playerStats.useLocalPlayer && store.currentVideo?.playableInEmbed"
               :player-state="playerStats" ref="playerEl" v-bind="$attrs" class="player" id="player"
-              :videoId="store.currentVideo.id" :start-time="startTime"
-              :aspect-ratio="store.currentVideo.width / store.currentVideo.height" />
+              :videoId="store.currentVideo.id" />
 
             <VideoPlayer :player-state="playerStats" :cinema="playerStats.cinema" v-else-if="playerStats.useLocalPlayer"
               ref="playerEl" :src="`/api/LocalVideo/GetVideoStream?videoId=${store.currentVideo?.id}`"
@@ -23,7 +22,7 @@
             <VideoMetadata v-if="store.currentVideo" class="metadata" @update:cinema="toggleCinema"
               :cinema="playerStats.cinema" :useLocalPlayer="playerStats.useLocalPlayer" :modelValue="playerStats.cinema"
               :video="store.currentVideo" @update:custom-player="togglePlayer" />
-            <!-- <p>{{ playerStats }}</p> -->
+            <p>{{ playerStats }}</p>
 
             <div id="primary" v-auto-animate></div>
           </div>
@@ -65,7 +64,7 @@ const store = useYoutubeStore()
 const calcH = ref("100%")
 
 const playerStats: Ref<PlayerState> = ref<PlayerState>({
-  isPlaying: true,
+  isPlaying: false,
   volume: 0.5,
   currentTime: 0,
   duration: 100,
@@ -97,23 +96,23 @@ const parsedId = computed(() => {
 })
 
 watch(route, async () => {
-  console.log("WATCH RRRRRR OUUUTE ")
+  console.log("WATCH RRRRRR OUUUTE ", route)
   playerStats.value.currentTime = 0;
   console.log("watch parsedId", parsedId.value)
 
   await store.fetchCurrentVideo(parsedId.value!)
   playerStats.value.useLocalPlayer = store.currentVideo?.localVideo !== undefined
-  if (store.currentVideo !== null) found.value = true
+  if (store.currentVideo && store.currentVideo !== null && store.currentVideo !== undefined) found.value = true
 
 }, { immediate: true })
 
 watch(() => store.currentVideo, async () => {
-  await nextTick()
-  if (!store.currentVideo) return
+  if (store.currentVideo === null || store.currentVideo === undefined) return
   useLocalPlayer.value = store.currentVideo?.localVideo !== undefined
 
 
   document.title = formatTitle(store.currentVideo.title)
+  await nextTick()
   calculateHeight(playerEl.value?.$el.offsetWidth)
 }, { immediate: true })
 
@@ -283,9 +282,6 @@ const toggleCinema = () => {
     align-items: center;
   }
 
-  .player {
-    max-height: var(--max-p-height);
-  }
 
   // .layout {
   //     max-width: calc(1280px + var(--sidebar-width) + 3 * var(--gutter-width));

@@ -50,9 +50,10 @@ public static class CliCommand
     /// </summary>
     public static async Task CallCommand(string cmd, DataReceivedEventHandler callback = null!)
     {
+        Console.WriteLine("CallCommand" + cmd);
         using var process = new Process();
         process.StartInfo.FileName = Shell[0];
-        process.StartInfo.Arguments = $"{Shell[1]} \"{cmd}\"";
+        process.StartInfo.Arguments = $@"{Shell[1]} ""{cmd}""";
 
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.RedirectStandardOutput = true;
