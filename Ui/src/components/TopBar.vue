@@ -2,9 +2,10 @@
 import { ref, watch, markRaw, type Ref } from 'vue';
 import { Icon } from '@iconify/vue';
 import Logo from './Logo.vue';
-import { apiService } from '@/constants';
 import { useRouter } from 'vue-router';
 import { useYoutubeStore } from '@/stores/youtubeStore';
+import PageMenu from './menus/PageMenu.vue';
+import UserMenu from './menus/UserMenu.vue';
 
 const router = useRouter();
 const store = useYoutubeStore();
@@ -17,17 +18,12 @@ const searchQuery: Ref<string> = ref('');
 
 const oldQuery: Ref<string> = ref('');
 
-// const suggestions: Ref<string[]> = ref([]);
-
 const activeIndex: Ref<number> = ref(-1);
 
 const menuOpen: Ref<boolean> = ref(false);
 
-const activeChange = () => {
-    // console.log("E",e)
-    console.log("active")
-    searchFocs.value = !searchFocs.value;
-}
+const userMenuOpen: Ref<boolean> = ref(false);
+
 
 watch(router.currentRoute, (val) => {
     console.log("ROUTE", val)
@@ -40,29 +36,15 @@ watch(searchFocs, (val) => {
     }
 
 })
-// watch(searchQuery, async (val) => {
-//     console.log("searchQuery", val)
-//     const res = await apiService.GetSearchCompletion(val);
-//     if (res instanceof Error) {
-//         console.log("ERROR", res)
-//     }
-//     else {
-//         suggestions.value = res;
-//     }
-// });
 
 const clearSearch = () => {
     searchQuery.value = "";
-
-    // store.searchQuery = '';
 }
 
 async function onChange() {
     console.log("onchange")
     oldQuery.value = store.searchQuery;
     await store.setSearchQuery(searchQuery.value);
-    // console.log("CHANGE", e)
-    // store.searchQuery = (e.target as HTMLInputElement).value;
 }
 
 const onKeyPress = async (e: KeyboardEvent) => {
@@ -154,6 +136,10 @@ const toggleSidebar = (val: boolean) => {
         document.body.style.pointerEvents = "auto";
     }
 }
+const toggleUserMenu = () => {
+    console.log("TOGGLE user menu")
+    userMenuOpen.value = !userMenuOpen.value;
+}
 </script>
 
 <template>
@@ -220,9 +206,13 @@ const toggleSidebar = (val: boolean) => {
                 <Icon style="font-size: 1.5rem;" icon="mdi:bell" />
             </button>
 
-            <button>
+            <button @click.stop="toggleUserMenu">
                 <Icon style="font-size: 1.5rem;" icon="mdi:account" />
             </button>
+
+            <PageMenu v-if="userMenuOpen" v-click-outside-element="toggleUserMenu">
+                <UserMenu />
+            </PageMenu>
 
         </div>
     </div>
@@ -331,6 +321,10 @@ const toggleSidebar = (val: boolean) => {
 
 
 <style scoped lang="scss">
+.page-menu {
+    top: 40px
+}
+
 hr {
     border-color: rgba(255, 255, 255, .2);
     border-top: 0px solid transparent;

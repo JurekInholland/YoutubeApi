@@ -206,7 +206,7 @@ export const useYoutubeStore = defineStore({
       } else this.videos = res
     },
     async fetchQueue() {
-      this.queue = await apiService.getQueuedDownloads()
+      this.queue = (await apiService.getQueuedDownloads()).sort((a, b) => new Date(b.queuedAt).getTime() - new Date(a.queuedAt).getTime())
     },
     async fetchSearchResults(query: string) {
       const res = await apiService.getSearchResults(query)

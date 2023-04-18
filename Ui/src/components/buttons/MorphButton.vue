@@ -22,7 +22,6 @@ watch(() => props.path, (newVal: any) => {
         value: newVal,
         ease: "power2.inOut"
     });
-    console.log("default changed");
 });
 </script>
 

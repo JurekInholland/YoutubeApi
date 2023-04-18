@@ -1,6 +1,11 @@
 /**
  * Formats a number with number separators
  */
+
+export function roundTo(num: number, digits: number): number {
+  return Number(num.toFixed(digits))
+}
+
 export const addSeperators = (num: number, separator: string = ','): string => {
   return num.toLocaleString(undefined, {
     useGrouping: true,

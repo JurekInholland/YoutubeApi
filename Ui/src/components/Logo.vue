@@ -1,22 +1,75 @@
 <script setup lang="ts">
 import { useYoutubeStore } from '@/stores/youtubeStore';
+import { watch } from 'vue';
+import gsap from 'gsap';
+
 const store = useYoutubeStore();
 
+const paths = ["M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z", "M 11.425 14.285 C 13.899 15.714 18.848 12.857 18.848 10 C 18.848 7.144 13.899 4.287 11.425 5.715 C 8.951 7.144 8.951 12.857 11.425 14.285 Z", "M 10.851 6.289 L 15.136 13.712 L 19.421 6.289 L 10.851 6.289 Z"]
 console.log("store color: " + store.color)
+
+watch(() => store.currentVideo?.localVideo, async (val, oldval) => {
+    return;
+    console.log("watchvals", val, oldval)
+    if (val === undefined) {
+        console.log("if")
+        await gsap.to("#icon",
+            {
+                duration: 0.25,
+                yoyo: false,
+                repeat: 0,
+                ease: "quart.inOut",
+                attr: { d: paths[1] }
+            });
+        await gsap.to("#icon",
+            {
+                duration: 0.25,
+                delay: 0.5,
+                yoyo: false,
+                repeat: 0,
+                ease: "quart.inOut",
+                attr: { d: paths[2] }
+            });
+    }
+    else {
+        console.log("else")
+
+        await gsap.to("#icon",
+            {
+                duration: 0.25,
+                yoyo: false,
+                repeat: 0,
+                ease: "quart.inOut",
+                attr: { d: paths[1] }
+            });
+        await gsap.to("#icon",
+            {
+                duration: 0.25,
+                delay: 0.5,
+                yoyo: false,
+                repeat: 0,
+                ease: "quart.inOut",
+                attr: { d: paths[0] }
+            });
+    }
+})
+
 </script>
 
 <template>
     <svg viewBox="0 0 90 20" preserveAspectRatio="xMidYMid meet" focusable="false" class="style-scope yt-icon"
-        style="pointer-events: none; display: block; width: 100%; height: 100%;">
-        <g viewBox="0 0 90 20" preserveAspectRatio="xMidYMid meet" class="style-scope yt-icon">
-            <g class="style-scope yt-icon">
-                <path
-                    d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 2.24288e-07 14.285 0 14.285 0C14.285 0 5.35042 2.24288e-07 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C2.24288e-07 5.35042 0 10 0 10C0 10 2.24288e-07 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5677 5.35042 27.9727 3.12324Z"
-                    :fill="store.currentVideo?.localVideo === undefined ? 'red' : store.color" class="style-scope yt-icon">
+    style="pointer-events: none; display: block; width: 100%; height: 100%;">
+    <g viewBox="0 0 90 20" preserveAspectRatio="xMidYMid meet" class="style-scope yt-icon">
+        <g class="style-scope yt-icon">
+            <path
+            d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 2.24288e-07 14.285 0 14.285 0C14.285 0 5.35042 2.24288e-07 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C2.24288e-07 5.35042 0 10 0 10C0 10 2.24288e-07 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5677 5.35042 27.9727 3.12324Z"
+            :fill="store.currentVideo?.localVideo === undefined ? 'red' : store.color" class="style-scope yt-icon">
+        </path>
+        <path :d="paths[0]" fill="white" class="style-scope yt-icon" id="icon"
+            :transform="store.currentVideo?.localVideo === undefined ? '' : 'matrix(0.882948, -0.469472, 0.469472, 0.882948, -2.922952, 8.276682)'">
                 </path>
-                <path d="M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z" fill="white" :transform=" store.currentVideo?.localVideo == undefined ? '' : 'matrix(0, 1, -1, 0, 25, -5)'"
-                    class="style-scope yt-icon"></path>
             </g>
+
             <g class="style-scope yt-icon">
                 <g id="youtube-paths" class="style-scope yt-icon">
                     <path
@@ -45,8 +98,12 @@ console.log("store color: " + store.color)
     </svg>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .yt-icon {
-    transition: all 1s ease;
+    transition: all .5s ease;
+
+    svg path {
+        transition: all 1s ease;
+    }
 }
 </style>

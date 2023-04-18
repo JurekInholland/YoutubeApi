@@ -12,6 +12,7 @@ import type { PlayerState } from '@/types';
 import { useRoute } from 'vue-router';
 import PlayerTooltip from './player/PlayerTooltip.vue';
 import SvgLink from './buttons/SvgLink.vue';
+import { roundTo } from '@/utils';
 
 const route = useRoute();
 const store = useYoutubeStore();
@@ -28,47 +29,17 @@ const emits = defineEmits<{
     (event: 'update:pictureInPicture', value: boolean): void
 }>()
 
-// const playerState: Ref<IPlayerState> = ref<IPlayerState>({
-//     isPlaying: false,
-//     volume: "0.75",
-//     duration: 0,
-//     currentTime: 0,
-//     isFullscreen: false,
-//     storedVolume: 0,
-//     settings: false,
-//     cinema: false,
-//     pictureInPicture: false,
-// });
-watch(route, (r) => {
-    console.log("VIDEO R CHANGE", r)
-})
-
-watch(() => props.src, (src) => {
+watch(() => props.src, () => {
     console.log("WATCH SRC")
     video.value?.pause();
     cancelAnimationFrame(animationId.value);
     props.playerState.currentTime = 0;
-    // props.playerState.isPlaying = false;
 
     setTimeout(() => {
         video.value?.play();
     }, 100)
-
-    const vid = video.value;
-    // debugger;
-    console.log(vid)
-
-    // debugger;
-
-    // setInterval(() => {
-    //     if (props.playerState.isFullscreen && idleTime.value < 100)
-    //         idleTime.value += 1;
-    // }, 100)
-
-
-    // console.log("VIDEO src CHANGE", src)
-    // setupPlayer();
 })
+
 const previewPos = ref(0);
 
 const startTime: Ref<number | undefined> = ref(0);
@@ -92,13 +63,13 @@ const currentHoverTime: Ref<string> = ref("0:00");
 const currentPositionOffset: Ref<number> = ref(0);
 const currentPositionPercent: Ref<string> = ref("0%");
 
+const volString: Ref<string> = ref(props.playerState.volume.toString());
 const mounted = ref(false);
 
-const handleBuffer = async (evt: Event) => {
+
+const handleBuffer = (evt: Event) => {
     if (video.value == null) return;
 
-    await nextTick();
-    console.log("handleBuffer", evt)
     let buffered = video.value.duration;
     try {
         const len = video.value.buffered.end.length;
@@ -108,13 +79,11 @@ const handleBuffer = async (evt: Event) => {
         console.log("handleBuffer error", e)
     }
     let duration = Math.round((buffered / video.value.duration) * 100) + 1;
-    // console.log("buffered: ", buffered, "duration: ", video.value.duration, "duration: ", duration, "%")
     timeline_container.value?.style.setProperty('--buffered', duration.toString() + "%");
 }
 
 const setupPlayer = () => {
     if (video.value == null) return;
-    // cancelAnimationFrame(animationId.value);
 
     video.value.volume = props.playerState.volume;
     video.value.currentTime = props.playerState.currentTime;
@@ -132,7 +101,6 @@ const setupPlayer = () => {
 }
 
 onMounted(() => {
-
     setInterval(() => {
         if (props.playerState.isFullscreen && idleTime.value < 100)
             idleTime.value += 1;
@@ -186,11 +154,9 @@ onMounted(() => {
             if (video.value?.duration)
                 props.playerState.duration = video.value.duration;
             video.value?.play()
-            // console.log("onloadeddata", e)
-            // console.log(video.value)
         }
         video.value.onprogress = (e: any) => {
-            console.log("onprogress", e)
+            // console.log("onprogress", e)
             handleBuffer(e)
         }
         video.value.onvolumechange = (e) => {
@@ -249,7 +215,6 @@ const onFullscreenChange = (e: Event) => {
     props.playerState.isFullscreen = document.fullscreenElement != null;
 }
 const onDoubleClick = (e: Event) => {
-    console.log("onDoubleClicke", e)
     if (!props.playerState.isFullscreen && video.value) {
         video_container.value?.requestFullscreen();
     }
@@ -265,36 +230,21 @@ const onClick = (e: Event) => {
         clearTimeout(clickTimeout.value)
         clickTimeout.value = null
         lastClick.value = 0
-        console.log("dbclick")
         onDoubleClick(e)
     } else {
         clickTimeout.value = setTimeout(() => {
             clickTimeout.value = null
 
             if (lastClick.value === 1) {
-                console.log("single click")
                 onPlayPause(e)
             }
             lastClick.value -= 1
         }, 250)
         lastClick.value += 1
     }
-
-
-    // // console.log("onClick", e)
-    // if (Date.now() - lastClick.value < 300) {
-    //     // onDoubleClick(e);
-    //     console.log("double click")
-    //     return;
-    // }
-    // else {
-    //     console.log("single click")
-    // }
-    // lastClick.value = Date.now();
 }
 
 const onPlayPause = (e: Event) => {
-    console.log("e", e)
     if (!props.playerState.isPlaying) {
         video.value?.play();
     } else {
@@ -304,14 +254,14 @@ const onPlayPause = (e: Event) => {
 }
 
 const onVolumeChange = (e: Event) => {
-    console.log("e", e)
-    if (video.value) {
-        video.value.volume = props.playerState.volume;
-        console.log(video.value.volume)
-    }
+    if (video.value == null) return;
+    const tar = e.target as HTMLInputElement;
+    const value = tar.value;
+    video.value.volume = roundTo(parseFloat(value), 2);
+    props.playerState.volume = roundTo(parseFloat(value), 2)
 }
+
 const auxclick = (e: Event) => {
-    // console.log("ousside")
     props.playerState.settings = !props.playerState.settings
 }
 const onMouseMove = (e: MouseEvent) => {
@@ -458,8 +408,8 @@ const smoothUpdate = () => {
                 </SvgLink>
 
                 <!-- <SvgButton class="next-button" path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z">
-                                                            <UpNext :video="store.relatedVideos[0]" />
-                                                        </SvgButton> -->
+                                                                                <UpNext :video="store.relatedVideos[0]" />
+                                                                            </SvgButton> -->
                 <div class="volume-container">
                     <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="playerState.volume">
 
@@ -468,7 +418,7 @@ const smoothUpdate = () => {
                     </VolumeButton>
                     <input class="volume-input" @click.stop="" @input="onVolumeChange"
                         :style="{ 'background-size': Math.round(Math.floor(playerState.volume * 100)) + '% 100%' }" :min="0"
-                        :max="1" step="any" v-model="playerState.volume" type="range">
+                        :max="1" step="any" :v-model="volString" type="range">
                 </div>
 
 

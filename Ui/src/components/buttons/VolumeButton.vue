@@ -10,11 +10,8 @@ const volume = ref(0);
 // const paused = ref(false);
 
 watch(() => props.volume, (newVal: number) => {
-    // paused.value = newVal;
-    console.log("watch props.volume", newVal, path.value)
     volume.value = newVal;
     setPath(newVal);
-
 });
 
 const setPath = (vol: number) => {
