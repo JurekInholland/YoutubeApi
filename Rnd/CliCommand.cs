@@ -27,7 +27,7 @@ public static class CliCommand
     {
         var sw = new Stopwatch();
         sw.Start();
-
+        cmd = cmd.Replace("\"", "\\\"");
         using var process = new Process();
         Console.WriteLine(sw.ElapsedMilliseconds);
         process.StartInfo.FileName = Shell[0];
@@ -50,10 +50,11 @@ public static class CliCommand
     /// </summary>
     public static async Task CallCommand(string cmd, DataReceivedEventHandler callback = null!)
     {
-        Console.WriteLine("CallCommand" + cmd);
         using var process = new Process();
         process.StartInfo.FileName = Shell[0];
-        process.StartInfo.Arguments = $@"{Shell[1]} ""{cmd}""";
+        var args =  $@"{Shell[1]} ""{cmd}""";
+        Console.WriteLine("CallCommand args: " + args);
+        process.StartInfo.Arguments = args;
 
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.RedirectStandardOutput = true;

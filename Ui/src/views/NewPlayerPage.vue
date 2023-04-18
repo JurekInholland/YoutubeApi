@@ -96,9 +96,8 @@ const parsedId = computed(() => {
 })
 
 watch(route, async () => {
-  console.log("WATCH RRRRRR OUUUTE ", route)
   playerStats.value.currentTime = 0;
-  console.log("watch parsedId", parsedId.value)
+  if (parsedId.value === null) return
 
   await store.fetchCurrentVideo(parsedId.value!)
   playerStats.value.useLocalPlayer = store.currentVideo?.localVideo !== undefined

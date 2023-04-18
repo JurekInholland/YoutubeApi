@@ -126,8 +126,8 @@ watch(props, (val) => {
                 </a>
 
                 <!-- <button v-else class="download-button">
-                                            <Icon icon="material-symbols:cloud-download-rounded" />
-                                        </button> -->
+                                                <Icon icon="material-symbols:cloud-download-rounded" />
+                                            </button> -->
                 <button class="cinema-button" @click="toggleCinema">
                     <Icon icon="mdi:cinema" />
                 </button>
@@ -410,11 +410,13 @@ button,
         margin-right: 1rem;
     }
 }
+
 button svg {
     margin-left: 2px;
     margin-right: .8rem;
 
 }
+
 .download-button {
     width: 114px;
 }
@@ -466,9 +468,11 @@ button::after {
     max-height: 2rem;
     white-space: nowrap;
 }
+
 .cinema .cinema-button::after {
     content: 'Default';
 }
+
 @media screen and (max-width: 680px) {
 
     .backup-button {
@@ -522,7 +526,7 @@ button:disabled {
 
 .button:hover,
 button:hover {
-    /* background-color: rgba(255, 255, 255, .2); */
+    background-color: rgba(255, 255, 255, .2);
 }
 
 /* .cinema #description,

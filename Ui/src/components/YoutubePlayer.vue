@@ -27,6 +27,8 @@ const onReady = (event: any) => {
     event.target.startSeconds = props.playerState.currentTime;
     console.log("SEEKING TO ", props.playerState.currentTime)
     event.target.seekTo(props.playerState.currentTime, true);
+    if (!props.playerState.isPlaying)
+        event.target.pauseVideo();
     props.playerState.duration = duration;
     props.playerState.isPlaying = isPlaying;
     isInitialized.value = true;
@@ -91,14 +93,11 @@ onBeforeUnmount(() => {
             @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{
                 // https://developers.google.com/youtube/player_parameters#Parameters
                 iv_load_policy: 3,
-                color: 'white',
-                start: props.startTime,
+                start: props.playerState.currentTime,
                 modestbranding: 1,
                 enablejsapi: 1,
                 rel: 0,
                 autoplay: 1,
-
-
             }">
         </youtube-iframe>
     </div>

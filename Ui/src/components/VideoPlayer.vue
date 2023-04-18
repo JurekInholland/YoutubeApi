@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, type Ref, nextTick, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, computed, type Ref, nextTick, onBeforeUnmount, watch, onUnmounted } from 'vue';
 import VolumeButton from '@/components/buttons/VolumeButton.vue';
 import FullscreenButton from '@/components/buttons/FullScreenButton.vue';
 import SettingsButton from '@/components/buttons/SettingsButton.vue';
@@ -44,7 +44,7 @@ watch(route, (r) => {
 })
 
 watch(() => props.src, (src) => {
-
+    console.log("WATCH SRC")
     video.value?.pause();
     cancelAnimationFrame(animationId.value);
     props.playerState.currentTime = 0;
@@ -88,16 +88,27 @@ const idleTime: Ref<number> = ref(0);
 const lastClick: Ref<number> = ref(0);
 const clickTimeout: Ref<number | null> = ref(null)
 
+const currentHoverTime: Ref<string> = ref("0:00");
+const currentPositionOffset: Ref<number> = ref(0);
+const currentPositionPercent: Ref<string> = ref("0%");
+
+const mounted = ref(false);
+
 const handleBuffer = async (evt: Event) => {
     if (video.value == null) return;
+
     await nextTick();
+    console.log("handleBuffer", evt)
     let buffered = video.value.duration;
     try {
-        buffered = video.value.buffered.end(0);
+        const len = video.value.buffered.end.length;
+        console.log("len", len)
+        buffered = video.value.buffered.end(len - 1);
     } catch (e) {
+        console.log("handleBuffer error", e)
     }
     let duration = Math.round((buffered / video.value.duration) * 100) + 1;
-
+    // console.log("buffered: ", buffered, "duration: ", video.value.duration, "duration: ", duration, "%")
     timeline_container.value?.style.setProperty('--buffered', duration.toString() + "%");
 }
 
@@ -149,6 +160,7 @@ onMounted(() => {
         }
 
         video.value.onpause = () => {
+            if (!mounted.value) return;
             console.log("onpause")
             props.playerState.isPlaying = false;
             cancelAnimationFrame(animationId.value);
@@ -173,7 +185,7 @@ onMounted(() => {
         video.value.onloadeddata = (e: Event) => {
             if (video.value?.duration)
                 props.playerState.duration = video.value.duration;
-
+            video.value?.play()
             // console.log("onloadeddata", e)
             // console.log(video.value)
         }
@@ -187,8 +199,11 @@ onMounted(() => {
             props.playerState.volume = target.volume;
         }
     }
+    mounted.value = true;
 });
+
 onBeforeUnmount(() => {
+    mounted.value = false;
     window.removeEventListener('keyup', handleKeyUp);
     window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('fullscreenchange', onFullscreenChange)
@@ -307,6 +322,12 @@ const onMouseMove = (e: MouseEvent) => {
     // console.log("onMouseMove", percent)
     previewPos.value = percent;
     timeline_container.value?.style.setProperty('--preview', percent.toString());
+    let ctime = video.value!.duration * percent;
+    currentHoverTime.value = formatTime(ctime);
+    currentPositionOffset.value = percent;
+    currentPositionPercent.value = (percent * 100).toString() + "%";
+
+    // console.log("ctime", formatTime(ctime))
 }
 const onCinemaClick = (e: MouseEvent) => {
     emits("update:cinema", props.playerState.cinema)
@@ -400,11 +421,16 @@ const smoothUpdate = () => {
     <div ref="video_container" class="video-container"
         :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '', idleTime > 50 ? 'cursor-hidden' : '']"
         @click="onClick">
+
         <div class="video-controls-container" :class="idleTime > 50 && playerState.isFullscreen ? 'hidden' : ''">
             <div ref="timeline_container" class="timeline-container" @mousemove="onMouseMove" @click.stop="onTimelineClick"
                 @mousedown="">
+                <div class="cTime">{{ currentHoverTime }}</div>
+                <!-- <div class="ctime-cont"> -->
+                <!-- </div> -->
                 <div ref="timeline" class="timeline">
                     <div class="buffered"></div>
+
                 </div>
                 <div class="tp">
 
@@ -432,8 +458,8 @@ const smoothUpdate = () => {
                 </SvgLink>
 
                 <!-- <SvgButton class="next-button" path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z">
-                                        <UpNext :video="store.relatedVideos[0]" />
-                                    </SvgButton> -->
+                                                            <UpNext :video="store.relatedVideos[0]" />
+                                                        </SvgButton> -->
                 <div class="volume-container">
                     <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="playerState.volume">
 
@@ -466,10 +492,10 @@ const smoothUpdate = () => {
                 </SvgButton>
 
                 <FullscreenButton class="fullscreen-button" v-if="!playerState.isFullscreen" @click.stop="onDoubleClick">
-                    <PlayerTooltip text="Enter fullscreen" />
+                    <PlayerTooltip text="Full screen (f)" />
                 </FullscreenButton>
                 <ExitFullscreenButton class="fullscreen-button" v-else @click.stop="onDoubleClick">
-                    <PlayerTooltip text="Exit fullscreen" />
+                    <PlayerTooltip text="Exit full screen (f)" />
 
                 </ExitFullscreenButton>
 
@@ -497,6 +523,32 @@ const smoothUpdate = () => {
     width: 0;
     position: absolute;
 }
+
+.ctime-cont {
+    display: flex;
+    width: 100%;
+    height: 0;
+    position: relative;
+    height: 1.5rem;
+}
+
+.cTime {
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity .25s ease;
+    position: absolute;
+    text-align: center;
+    left: v-bind(currentPositionPercent);
+    bottom: 2rem;
+    margin-left: -1rem;
+    /* right: calc(100% - var(--preview) * 100%); */
+
+}
+
+.timeline-container:hover .cTime {
+    opacity: 1;
+}
+
 
 
 #vid {}
@@ -759,6 +811,7 @@ input[type=range]::-webkit-slider-runnable-track {
     background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3));
     background-size: var(--buffered) 100%;
     background-repeat: no-repeat;
+    transition: background-size 150ms ease-in-out;
 }
 
 .timeline-container:hover>.timeline {
