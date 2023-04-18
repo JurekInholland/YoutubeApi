@@ -16,16 +16,12 @@ namespace Services.QueueService;
 public class QueueService : BackgroundService, IQueueService
 {
     private readonly ILogger<QueueService> _logger;
-
-    // private IUnitOfWork? _unitOfWork;
-    // private readonly IYoutubeExplodeService _youtubeExplodeService;
     private readonly YoutubeHub _hub;
     private readonly IScrapeService _scrapeService;
-
     private CancellationTokenSource? _cancellationTokenSource;
 
 
-    public IUnitOfWork UnitOfWork => _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
+    private IUnitOfWork UnitOfWork => _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
 
     private static readonly Regex DownloadProgressRegex =
         new(
@@ -58,7 +54,6 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task<IEnumerable<QueuedDownload>> GetQueuedDownloads()
     {
-        // _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
         return await UnitOfWork.QueuedDownloads.All().Include(q => q.Video).ThenInclude(v => v.YoutubeChannel).ToListAsync();
     }
 
@@ -128,15 +123,15 @@ public class QueueService : BackgroundService, IQueueService
         var targetDir = Path.GetFullPath($"data/videos/{queuedDownload.Video.YoutubeChannel.Title}");
         var files = Directory.GetFiles(targetDir, $"{queuedDownload.Id}*.info.json");
 
-        var file = files.FirstOrDefault();
+        string? file = files.FirstOrDefault();
 
         if (file is null)
         {
             throw new($"Could not find json file for video with id {queuedDownload.Id}");
         }
 
-        var jsonFile = await File.ReadAllTextAsync(file);
-        var doc = JsonDocument.Parse(jsonFile);
+        string jsonFile = await File.ReadAllTextAsync(file);
+        JsonDocument doc = JsonDocument.Parse(jsonFile);
 
         int width = doc.RootElement.GetProperty("width").GetInt32();
         int height = doc.RootElement.GetProperty("height").GetInt32();
@@ -182,7 +177,7 @@ public class QueueService : BackgroundService, IQueueService
 
         Console.WriteLine("DL " + queuedDownload?.Video.Title);
 
-        string format = "data/videos/%(uploader)s/%(id)s - %(title)s.%(ext)s";
+        const string format = "data/videos/%(uploader)s/%(id)s - %(title)s.%(ext)s";
 
         while (queuedDownload is not null && !cancellationToken.IsCancellationRequested)
         {
@@ -194,18 +189,14 @@ public class QueueService : BackgroundService, IQueueService
                 Console.WriteLine("Video already downloaded");
 
                 unitOfWork.LocalVideos.Delete(queuedDownload.Video.LocalVideo);
-                // queuedDownload.Video.LocalVideo = null;
                 await unitOfWork.Save();
             }
 
 
             queuedDownload.Video.LocalVideo = local;
-            // await unitOfWork.LocalVideos.Create(local!);
-            // unitOfWork.YoutubeVideos.Update(queuedDownload.Video);
             Console.WriteLine("dl done 1");
             queuedDownload.Status = Enums.DownloadStatus.Finished;
             await unitOfWork.QueuedDownloads.UpdateQueueVideo(queuedDownload);
-            // await unitOfWork.Save();
 
             await _hub.SendLocalVideo(local!);
 
@@ -229,7 +220,7 @@ public class QueueService : BackgroundService, IQueueService
                 Progress = 100,
                 Status = "finished"
             };
-            // await _hub.SendObject("user", "downloadProgress", finalProgress);
+
             await _hub.SendDownloadProgress(finalProgress);
             return;
         }
@@ -239,7 +230,6 @@ public class QueueService : BackgroundService, IQueueService
         DownloadProgress? progress = ParseProgressLine(content, videoId);
         if (progress is null) return;
 
-        // await _hub.SendObject("user", "downloadProgress", progress);
         await _hub.SendDownloadProgress(progress);
 
         _lastExecution = DateTime.Now;
@@ -257,8 +247,6 @@ public class QueueService : BackgroundService, IQueueService
 
         string kind = match.Groups["kind"].Value;
         float progress = float.Parse(match.Groups["progress"].Value, CultureInfo.InvariantCulture);
-        // float size = float.Parse(match.Groups["size"].Value);
-        // string unit = match.Groups["unit"].Value;
         float speed = float.Parse(match.Groups["speed"].Value.Replace('.', ','));
         string speedUnit = match.Groups["speedUnit"].Value;
         TimeSpan eta = TimeSpan.ParseExact(match.Groups["eta"].Value, "mm':'ss", CultureInfo.InvariantCulture);
@@ -285,24 +273,12 @@ public class QueueService : BackgroundService, IQueueService
             throw new ArgumentNullException(nameof(videoId));
         }
 
-        // _unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
-
         var queued = unitOfWork.QueuedDownloads.Where(x => x.Id == videoId);
         if (queued.Any())
         {
             throw new InvalidOperationException("Video already in queue");
         }
 
-        // YoutubeVideo? existing = await unitOfWork.YoutubeVideos.Where(x => x.Id == videoId).FirstOrDefaultAsync();
-
-        // if (existing is not null)
-        // {
-        //     unitOfWork.YoutubeChannels.Delete(existing.YoutubeChannel);
-        //     unitOfWork.YoutubeVideos.Delete(existing);
-        //     await unitOfWork.Save();
-        // }
-
-        // YoutubeVideo video = await _youtubeExplodeService.GetVideo(videoId);
         YoutubeVideo? video = await _scrapeService.ScrapeYoutubeVideo(videoId);
 
         if (video?.Duration > TimeSpan.FromMinutes(60))
@@ -315,7 +291,6 @@ public class QueueService : BackgroundService, IQueueService
             Id = videoId,
             Status = Enums.DownloadStatus.Queued,
             QueuedAt = DateTime.Now,
-            // YoutubeVideoId = video.Id,
             Video = video!
         };
 

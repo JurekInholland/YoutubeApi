@@ -1,40 +1,26 @@
 ﻿using System.Diagnostics;
-using Domain.Migrations;
 using Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Models;
-using Services.QueueService;
 
 namespace Services.TaskService;
 
 public class TaskService : BackgroundService, ITaskService
 {
     private readonly ILogger<TaskService> _logger;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(1000));
-
-
     private PeriodicTimer _cleaningTaskTimer = new(TimeSpan.FromMilliseconds(5000));
 
-    private IUnitOfWork _unitOfWork;
-
-    private readonly IQueueService _queueService;
-
-    private readonly IServiceScopeFactory _scopeFactory;
-    // private readonly IQueueService _queueService;
 
     public TaskService(ILogger<TaskService> logger, IServiceScopeFactory scopeFactory)
 
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
-        var scope = scopeFactory.CreateScope();
-        // _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        _queueService = scope.ServiceProvider.GetRequiredService<IQueueService>();
-        // _queueService = queueService;
     }
 
     /// <summary>
@@ -42,9 +28,8 @@ public class TaskService : BackgroundService, ITaskService
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
-
-        _unitOfWork = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
-        ApplicationSettings settings = await _unitOfWork.ApplicationSettings.GetSettings();
+        var unitOfWork = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
+        ApplicationSettings settings = await unitOfWork.ApplicationSettings.GetSettings();
         _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(settings.WorkInterval));
         _cleaningTaskTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(settings.CleanUpInterval));
 
@@ -73,7 +58,6 @@ public class TaskService : BackgroundService, ITaskService
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
             await DoWorkAsync(stoppingToken);
-            // await _queueService.ProcessQueue();
         }
     }
 
@@ -87,22 +71,23 @@ public class TaskService : BackgroundService, ITaskService
 
     private async Task DoCleanup(CancellationToken stoppingToken)
     {
+        if (stoppingToken.IsCancellationRequested)
+        {
+            return;
+        }
+
         Stopwatch sw = new();
         sw.Start();
-        _unitOfWork = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var unitOfWork = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-        ApplicationSettings settings = await _unitOfWork.ApplicationSettings.GetSettings();
+        ApplicationSettings settings = await unitOfWork.ApplicationSettings.GetSettings();
         _logger.LogInformation("Doing cleanup {Duration} in {Time}", settings.MaxVideoDuration, sw.ElapsedTicks);
-        // await _queueService.ClearQueue();
-        // await Task.Delay(2000, stoppingToken);
     }
 
     private async Task DoWorkAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("DT: {Date}", DateTime.Now.ToString("O"));
-        // await Task.Delay(2000, stoppingToken);
+        if (stoppingToken.IsCancellationRequested) return;
 
-        // await _queueService.ProcessQueue(stoppingToken);
-        // await Task.Delay(2000);
+        _logger.LogInformation("DT: {Date}", DateTime.Now.ToString("O"));
     }
 }
