@@ -67,6 +67,19 @@ public class ScrapeController : BaseController
     }
 
     /// <summary>
+    /// Scrape a youtube hashtag for videos
+    /// </summary>
+    /// <param name="hashtag"></param>
+    [HttpGet(nameof(Hashtag))]
+    public async Task<IActionResult> Hashtag(string hashtag)
+    {
+        var res = await _scrapeService.ScrapeHashtag(hashtag);
+        Response.Headers.Add("Count", res.Length.ToString());
+
+        return Ok(res);
+    }
+
+    /// <summary>
     /// Scrape youtube search results for a given query
     /// </summary>
     [HttpGet(nameof(SearchResults))]

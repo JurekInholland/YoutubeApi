@@ -11,10 +11,10 @@ const store = useYoutubeStore();
 
 const username = route.params.username as string;
 const id = route.params.channelId as string;
-watch(route, (r) => {
-    console.log("!!!!!!!!!!!!!! CHANGE", r)
-    debugger;
-})
+// watch(route, (r) => {
+//     console.log("!!!!!!!!!!!!!! CHANGE", r)
+//     debugger;
+// })
 
 onMounted(async () => {
     document.title = `@${username}`;

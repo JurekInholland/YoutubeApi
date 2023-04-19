@@ -17,7 +17,7 @@ const store = useYoutubeStore();
 
 const isDescriptionExpanded: Ref<boolean> = ref(false);
 
-watch(router.currentRoute, (val) => {
+watch(router.currentRoute, () => {
     isDescriptionExpanded.value = false;
 })
 
@@ -54,10 +54,24 @@ watch(tog, (val) => {
     emits('update:customPlayer', val)
 })
 
-const downloadVideo = async () => {
+const backupVideo = async () => {
+
+    if (queueItem.value) {
+        console.log("already in queue")
+        return;
+    }
+
     await apiService.EnqueueDownload(props.video.id);
     await store.fetchQueue();
     await apiService.processQueue();
+    await store.updateDownloadProgress({
+        id: props.video.id,
+        progress: 0,
+        eta: 0,
+        status: "queued",
+        speed: 0,
+        fragment: "",
+    });
 }
 
 const runtimeSeconds = computed(() => {
@@ -79,9 +93,12 @@ watch(props, (val) => {
 <template>
     <div class="metadata">
         <div class="flex">
-            <h1 v-html="formatTitle(props.video.title)"></h1>
+            <h1>
+                <div class="title" v-html="formatTitle(props.video.title)"></div>
+            </h1>
             <ProgressBar v-if="queueItem?.progress" :value="queueItem.progress.progress"
-                :text="`${queueItem.progress!.eta}`" />
+                :text="queueItem?.progress.progress !== 0 ? `${queueItem.progress.eta}` : 'Waiting for download to start'" />
+            <!-- <ProgressBar :value="50" text="lel"></ProgressBar> -->
 
         </div>
 
@@ -114,8 +131,8 @@ watch(props, (val) => {
                 </ToggleButton>
 
                 <!-- <Vue3ToggleButton v-model="tog" :handleColor="'#cc00cc'"> </Vue3ToggleButton> -->
-                <button v-if="!props.video.localVideo" :disabled="runtimeSeconds > 3600" @click="downloadVideo"
-                    class="backup-button">
+                <button v-if="!props.video.localVideo" :disabled="runtimeSeconds > 3600 || queueItem !== undefined"
+                    @click="backupVideo" class="backup-button">
                     <Icon icon="material-symbols:cloud-download-rounded" />
                 </button>
 
@@ -126,8 +143,8 @@ watch(props, (val) => {
                 </a>
 
                 <!-- <button v-else class="download-button">
-                                                <Icon icon="material-symbols:cloud-download-rounded" />
-                                            </button> -->
+                                                                <Icon icon="material-symbols:cloud-download-rounded" />
+                                                            </button> -->
                 <button class="cinema-button" @click="toggleCinema">
                     <Icon icon="mdi:cinema" />
                 </button>
@@ -150,7 +167,7 @@ watch(props, (val) => {
 <style scoped lang="scss">
 .flex {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 1rem;
     align-items: center;
     overflow: hidden;
@@ -163,8 +180,9 @@ watch(props, (val) => {
 
     h1 {
         display: inline-flex;
+        flex-wrap: wrap;
         // flex-shrink: 0;
-        line-height: 22px;
+        word-break: break-word;
     }
 }
 
@@ -270,8 +288,8 @@ watch(props, (val) => {
 h1 {
     font-weight: 600;
     font-size: 20px;
-    line-height: 28px;
-    margin-bottom: 8px;
+    line-height: 34px;
+    // margin-bottom: 8px;
     color: rgb(223, 220, 216)
 }
 

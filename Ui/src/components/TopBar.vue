@@ -146,7 +146,7 @@ const toggleUserMenu = () => {
     <div class="ytd-mmasthead" v-if="!mobileSearchToggle">
         <div class="left">
             <button class="menu-button">
-                <Icon class="menu" icon="mdi-light:menu" @click="toggleSidebar" />
+                <Icon class="menu" icon="mdi-light:menu" @click="toggleSidebar(!menuOpen)" />
             </button>
             <router-link to="/">
                 <Logo class="logo" />

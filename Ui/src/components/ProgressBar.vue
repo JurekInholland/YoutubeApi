@@ -23,7 +23,8 @@ const store = useYoutubeStore();
 
 <style scoped>
 .wrapper {
-    width: 100%;
+    flex-basis: 250px;
+    flex-grow: 1;
     transition: all .5s ease !important;
 }
 

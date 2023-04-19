@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { useYoutubeStore } from '@/stores/youtubeStore';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 
 
 const store = useYoutubeStore();
 
-const props = defineProps<{
-    modelValue: boolean,
-}>();
+const props = withDefaults(defineProps<{
+    modelValue?: boolean,
+    disabled?: boolean
+}>(), {
+    modelValue: false,
+    disabled: false
+})
 
 const emits = defineEmits<{
     (e: 'update:modelValue', value: boolean): void
@@ -17,15 +23,14 @@ const updateValue = (event: Event) => {
     emits('update:modelValue', !props.modelValue);
 }
 
-const color = store.color;
-
+const color = storeToRefs(store).color;
 </script>
 
 <template>
     <div class="togglebutton">
 
-        <div class="toggle">
-            <input type="checkbox" :v-model="modelValue" @input="updateValue">
+        <div class="toggle" :class="{ 'disabled': disabled }">
+            <input :disabled="disabled" type="checkbox" :v-model="modelValue" @input="updateValue">
             <span class="track">
                 <span class="handle" :class="modelValue ? 'on' : ''"></span>
             </span>
@@ -98,7 +103,11 @@ const color = store.color;
         height: 100%;
         cursor: pointer;
         opacity: 0;
-
     }
+}
+
+.disabled {
+    opacity: .5;
+    pointer-events: none;
 }
 </style>

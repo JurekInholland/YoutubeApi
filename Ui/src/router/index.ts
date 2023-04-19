@@ -25,6 +25,11 @@ const router = createRouter({
 
     },
     {
+      path: '/shorts/:videoId',
+      name: 'shorts',
+      component: () => import('../views/NewPlayerPage.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting

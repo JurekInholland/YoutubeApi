@@ -90,8 +90,10 @@ const onPictureInPicture = (val: boolean) => {
 
 }
 const parsedId = computed(() => {
-  const split = route.path.substring(1).split("?")[0]
-  if (split.length === 11) return split
+  const substring = route.path.substring(1);
+  if (substring.length === 11) return substring
+  const pathId = substring.split("/")[1]
+  if (pathId !== undefined && pathId.length === 11) return pathId
   return route.query.v ? route.query.v as string : null
 })
 
@@ -318,7 +320,7 @@ const toggleCinema = () => {
   flex-direction: column;
   //flex-direction: row;
   flex-wrap: wrap;
-  flex-basis: 640px;
+  flex-basis: 540px;
   flex-grow: 1;
   gap: var(--gutter-width);
   transition: all .5s ease;

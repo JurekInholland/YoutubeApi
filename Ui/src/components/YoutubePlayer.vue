@@ -28,10 +28,13 @@ const onReady = (event: any) => {
     console.log("SEEKING TO ", props.playerState.currentTime)
     event.target.seekTo(props.playerState.currentTime, true);
     if (!props.playerState.isPlaying)
+    {
         event.target.pauseVideo();
+    }
     props.playerState.duration = duration;
     props.playerState.isPlaying = isPlaying;
     isInitialized.value = true;
+    event.target.playVideo();
     // props.playerState.volume = isMuted ? 0 : vol;
 
 };

@@ -19,14 +19,10 @@ function createFavicon(backgroundColor: string, foregroundColor: string, rotated
 // const isVideoRoute: boolean = route.name === "video";
 
 function setAppIcon() {
-    console.log("#######")
-    console.log(route.name)
-    console.log(store.currentVideo?.localVideo)
-    console.log(store.color)
+    icon.value = createFavicon(store.color.replace('#', ''), "fff", true)
+    return;
     if (route.name === "video") {
-        console.log("is vid")
         if (store.currentVideo?.localVideo !== undefined) {
-            icon.value = createFavicon(store.color.replace('#', ''), "fff", true)
             return;
         }
         else {
@@ -45,6 +41,10 @@ watch(() => route.path, async () => {
 watch(() => store.currentVideo, () => {
     setAppIcon();
 }) 
+
+watch(() => store.color, () => {
+    setAppIcon();
+})
 </script>
 
 <template></template>

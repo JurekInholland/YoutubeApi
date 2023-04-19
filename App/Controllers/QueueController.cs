@@ -1,3 +1,4 @@
+using Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Options;
@@ -15,14 +16,16 @@ public class QueueController : BaseController
 {
     private readonly ILogger<QueueController> _logger;
     private readonly IQueueService _queueService;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// QueueController constructor
     /// </summary>
-    public QueueController(ILogger<QueueController> logger, IQueueService queueService, IOptions<JsonOptions> options)
+    public QueueController(ILogger<QueueController> logger, IQueueService queueService, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _queueService = queueService;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -41,8 +44,13 @@ public class QueueController : BaseController
     /// Process the queue
     /// </summary>
     [HttpGet(nameof(Process))]
-    public IActionResult Process()
+    public async Task<IActionResult> Process()
     {
+        if ((await _unitOfWork.ApplicationSettings.GetSettings()).CurrentTask != null)
+        {
+            return BadRequest("Task already running");
+        }
+
         Task.Run(() => _queueService.ProcessQueue(CancellationToken.None));
         return Ok();
     }

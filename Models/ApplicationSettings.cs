@@ -10,6 +10,7 @@ public class ApplicationSettings : BaseEntity
     public TimeSpan MaxVideoDuration { get; set; }
     public long CleanUpInterval { get; set; }
 
+
     public long UpdateChannelsIntervalSeconds { get; set; }
     public long UpdateVideosIntervalSeconds { get; set; }
     public long CheckForNewVideosIntervalSeconds { get; set; }
@@ -17,4 +18,6 @@ public class ApplicationSettings : BaseEntity
 
 
     public long WorkInterval { get; set; }
+
+    public Enums.ApplicationTask? CurrentTask { get; set; }
 }

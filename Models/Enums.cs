@@ -24,4 +24,11 @@ public abstract class Enums
         Finished,
         Error
     }
+
+    public enum ChannelSubscriptionType
+    {
+        None,
+        Fetch,
+        Download
+    }
 }

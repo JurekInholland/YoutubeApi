@@ -14,11 +14,18 @@ export const addSeperators = (num: number, separator: string = ','): string => {
   })
 }
 export function formatTitle(title: string): string {
-  return title
-    .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag"><a href="/tags/$1"> #$1</a></span> ')
+  const formatted = title
+    .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag"><a href="/tags/$1"> #$1&nbsp; </a></span> ')
     .replaceAll('&#39;', "'")
     .replaceAll('&quot;', '"')
     .replaceAll("''", "'")
+  
+  if (formatted.includes('#')) {
+    const split = formatted.split('<span class="tag">')
+    console.log("split: ", split)
+    return formatted.replace(split[0], '<span dir="auto" class="main">' + split[0] + '&nbsp;</span>')
+  }
+  return formatted
 }
 
 export function formatDescription(description: string): string {

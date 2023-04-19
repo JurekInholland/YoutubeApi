@@ -2,13 +2,15 @@
 import type { ApplicationSettings } from '@/types';
 import { ref, type Ref } from 'vue';
 import { useYoutubeStore } from '@/stores/youtubeStore';
+import { defaultColor } from '@/constants';
+import ToggleButton from '@/components/ToggleButton.vue';
 const store = useYoutubeStore();
 
 const settings: Ref<ApplicationSettings> = ref({
     showRelatedVideos: true,
-    showComments: true,
+    showComments: false,
     autoplay: true,
-    color: 'red'
+    color: store.color 
 
 } as ApplicationSettings);
 
@@ -19,16 +21,17 @@ const onColorChange = () => {
 </script>
 
 <template>
-    <h1>Settings</h1>
     <section class='settings'>
+        <h1>Settings</h1>
         <label for=''>
             Show related videos
-            <input type='checkbox' v-model='settings.showRelatedVideos' name='' id=''>
+            <ToggleButton v-model='settings.showRelatedVideos' />
         </label>
 
         <label for=''>
             Show comments
-            <input type='checkbox' v-model='settings.showComments' name='' id=''>
+            <ToggleButton :disabled="true" v-model='settings.showComments' />
+
         </label>
 
         <label for=''>
@@ -38,21 +41,28 @@ const onColorChange = () => {
     </section>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .settings {
+    font-family: Roboto, sans-serif;
     max-width: 1280px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    background-color: brown;
     margin: 0 auto;
+    padding: 1rem;
+
+    h1 {
+        font-weight: 600;
+        font-size: 2rem;
+    }
 }
 
 label {
     display: flex;
     align-items: center;
     gap: 1rem;
-    font-weight: bold;
+    font-weight: 500;
+    height: 27px;
 }
 
 input[type="checkbox"] {

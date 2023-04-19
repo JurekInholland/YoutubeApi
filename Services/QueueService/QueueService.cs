@@ -83,9 +83,15 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task ProcessQueue(CancellationToken cancellationToken)
     {
+        IUnitOfWork unitOfWork = UnitOfWork;
+        ApplicationSettings settings = await unitOfWork.ApplicationSettings.GetSettings();
+
+
         _logger.LogInformation("Processing queue");
         try
         {
+            settings.CurrentTask = Enums.ApplicationTask.ProcessDownloadQueue;
+            await unitOfWork.Save();
             await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Started);
 
             await DownloadQueueVideos(cancellationToken);
@@ -99,7 +105,8 @@ public class QueueService : BackgroundService, IQueueService
         finally
         {
             await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Finished);
-
+            settings.CurrentTask = null;
+            await unitOfWork.Save();
             Console.WriteLine("QUEUE PROCESSED");
         }
     }
@@ -170,7 +177,6 @@ public class QueueService : BackgroundService, IQueueService
     private async Task DownloadQueueVideos(CancellationToken cancellationToken)
     {
         IUnitOfWork unitOfWork = UnitOfWork;
-
         Console.WriteLine("DownloadQueueVideos");
         QueuedDownload? queuedDownload = await DequeueDownload();
 

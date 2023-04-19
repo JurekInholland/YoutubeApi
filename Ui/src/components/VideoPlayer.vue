@@ -13,6 +13,7 @@ import { useRoute } from 'vue-router';
 import PlayerTooltip from './player/PlayerTooltip.vue';
 import SvgLink from './buttons/SvgLink.vue';
 import { roundTo } from '@/utils';
+import router from '@/router';
 
 const route = useRoute();
 const store = useYoutubeStore();
@@ -73,7 +74,6 @@ const handleBuffer = (evt: Event) => {
     let buffered = video.value.duration;
     try {
         const len = video.value.buffered.end.length;
-        console.log("len", len)
         buffered = video.value.buffered.end(len - 1);
     } catch (e) {
         console.log("handleBuffer error", e)
@@ -110,8 +110,8 @@ onMounted(() => {
         idleTime.value = 0;
     })
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('keypress', handleKeyDown);
+    // window.addEventListener('keyup', handleKeyUp);
 
     window.addEventListener('fullscreenchange', onFullscreenChange)
 
@@ -171,7 +171,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
     mounted.value = false;
     window.removeEventListener('keyup', handleKeyUp);
-    window.removeEventListener('keydown', handleKeyDown);
+    // window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keypress', handleKeyDown);
+
     window.removeEventListener('fullscreenchange', onFullscreenChange)
 
     window.removeEventListener('mousemove', () => {
@@ -191,12 +193,11 @@ const toggleMute = (e: Event) => {
     }
 }
 
-const handleKeyDown = (e: KeyboardEvent) => {
+const handleKeyUp = (e: KeyboardEvent) => {
 
 };
 
-const handleKeyUp = (e: KeyboardEvent) => {
-    e.preventDefault();
+const handleKeyDown = (e: KeyboardEvent) => {
 
     let activeElement = document.activeElement as HTMLInputElement;
 
@@ -205,11 +206,39 @@ const handleKeyUp = (e: KeyboardEvent) => {
     }
 
     if (e.key === ' ' || e.key === 'k') {
+        e.preventDefault();
         onPlayPause(e);
     }
-    if (e.key == "f") {
+    if (e.key === "f") {
+        e.preventDefault();
         onDoubleClick(e);
     }
+    if (e.key === "m") {
+        e.preventDefault();
+        toggleMute(e);
+    }
+    if (e.key === "i") {
+        e.preventDefault();
+        onPictureInPictureClick();
+    }
+    if (e.key === "t") {
+        e.preventDefault();
+        onCinemaClick();
+    }
+    if (e.key === "N" && e.shiftKey) {
+        console.log("shift n")
+        e.preventDefault();
+        router.push({ name: 'watch', query: { v: store.relatedVideos[0].id } });
+    }
+    if (e.key === "p") {
+        if (e.shiftKey) {
+
+            e.preventDefault();
+            console.log(" shift p")
+            router.go(-1);
+        }
+    }
+
 }
 const onFullscreenChange = (e: Event) => {
     props.playerState.isFullscreen = document.fullscreenElement != null;
@@ -279,10 +308,10 @@ const onMouseMove = (e: MouseEvent) => {
 
     // console.log("ctime", formatTime(ctime))
 }
-const onCinemaClick = (e: MouseEvent) => {
+const onCinemaClick = () => {
     emits("update:cinema", props.playerState.cinema)
 }
-const onPictureInPictureClick = (e: MouseEvent) => {
+const onPictureInPictureClick = () => {
 
     props.playerState.pictureInPicture = !props.playerState.pictureInPicture;
     if (props.playerState.pictureInPicture)
@@ -408,8 +437,8 @@ const smoothUpdate = () => {
                 </SvgLink>
 
                 <!-- <SvgButton class="next-button" path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z">
-                                                                                <UpNext :video="store.relatedVideos[0]" />
-                                                                            </SvgButton> -->
+                                                                                                                <UpNext :video="store.relatedVideos[0]" />
+                                                                                                            </SvgButton> -->
                 <div class="volume-container">
                     <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="playerState.volume">
 
@@ -604,6 +633,7 @@ button {
 .controls .button {
     width: 44px;
     height: 44px;
+    flex-shrink: 0;
 }
 
 .controls .button,

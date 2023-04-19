@@ -8,7 +8,6 @@ export const apiUrls = {
   processQueue: 'Queue/Process',
   resetQueue: 'Queue/Reset',
 
-
   getVideoInfo: 'YoutubeVideo/GetVideo',
   getVideos: 'YoutubeVideo/GetAll',
 
@@ -18,7 +17,9 @@ export const apiUrls = {
   getSearchResults: 'Scrape/SearchResults',
   getRelatedVideos: 'Scrape/Multiple',
   getChannelByHandle: 'Scrape/YoutubeChannelByHandle',
-  getChannelById: 'Scrape/YoutubeChannelById',
+  getChannelById: 'Scrape/YoutubeChannelById'
 }
 
 export const apiService: ApiService = new ApiService()
+
+export const defaultColor: string = '#38cd6d'
