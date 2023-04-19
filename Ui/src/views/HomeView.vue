@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import VideoRow from '@/components/VideoRow.vue';
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -16,6 +17,9 @@ onMounted(() => {
     <main>
         <h1>home</h1>
         <p>{{ route }}</p>
+
+        <VideoRow />
+
     </main>
 </template>
 <style scoped>

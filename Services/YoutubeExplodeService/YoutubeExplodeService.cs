@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Models;
 using Models.DomainModels;
 using Models.Factories;
 using YoutubeExplode;
@@ -30,8 +29,6 @@ public class YoutubeExplodeService : IYoutubeExplodeService
 
         var streamInfos = new[] {audioStreamInfo, videoStreamInfo};
 
-        // var stream = await _youtube.Videos.Streams.GetAsync(streamInfo);
-
         await _youtube.Videos.DownloadAsync(streamInfos,
             new ConversionRequestBuilder($"Downloads/{video.Id}.{videoStreamInfo.Container}").Build());
         return streamInfos;
@@ -49,7 +46,6 @@ public class YoutubeExplodeService : IYoutubeExplodeService
         var bytes = await res.Content.ReadAsByteArrayAsync();
 
         await File.WriteAllBytesAsync($"data/thumbnails/{chan.Id}.jpg", bytes);
-
 
         return chan;
     }
@@ -128,12 +124,5 @@ public class YoutubeExplodeService : IYoutubeExplodeService
 
         stopwatch.Stop();
         return responses;
-        // foreach (var item in results)
-        // {
-        //     if (item is not VideoSearchResult videoResult) continue;
-        //     Console.WriteLine("Fetching: " + videoResult.Id);
-        //     Video video = await _youtube.Videos.GetAsync(videoResult.Id);
-        //     results.Add(video);
-        // }
     }
 }

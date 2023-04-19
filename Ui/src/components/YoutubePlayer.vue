@@ -93,6 +93,7 @@ onBeforeUnmount(() => {
             @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{
                 // https://developers.google.com/youtube/player_parameters#Parameters
                 iv_load_policy: 3,
+                color: 'white',
                 start: props.playerState.currentTime,
                 modestbranding: 1,
                 enablejsapi: 1,

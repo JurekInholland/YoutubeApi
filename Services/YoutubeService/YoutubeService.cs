@@ -19,17 +19,6 @@ public class YoutubeService : IYoutubeService
 
     private readonly string _youtubeDlPath;
 
-    private string DownloadCommand => $@"{_youtubeDlPath} -j -N 5 --buffer-size 16k --write-subs --add-chapters --simulate";
-    private string OutputFormat => $@"--output $(id) $(title) $(ext)";
-
-    private readonly JsonSerializerOptions _serializerOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNameCaseInsensitive = true,
-        // PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
-
     public YoutubeService(ILogger<YoutubeService> logger, IOptions<AppConfig> config, IUnitOfWork unitOfWork)
     {
         _logger = logger;
@@ -56,45 +45,6 @@ public class YoutubeService : IYoutubeService
         // var response = await client.GetAsync($"https://gdata.youtube.com/feeds/api/videos/{id}");
         // var response = await client.GetAsync($"https://www.youtube.com/watch?v={id}&format=json");
         return response.IsSuccessStatusCode;
-    }
-
-    public async Task<bool> DownloadVideo(string id)
-    {
-        if (!await IsValidId(id)) return false;
-        var cmd = $@"{_youtubeDlPath} -j {id}";
-        // var res = await CliCommand.CallCommand(cmd);
-        return true;
-    }
-
-    public async Task<Stream> GetLocalVideo(string id)
-    {
-        var video = await _unitOfWork.YoutubeVideos.Where(x => x.Id == id).Include(v => v.LocalVideo).Include(v => v.YoutubeChannel)
-            .FirstOrDefaultAsync();
-
-        var path = Path.Combine("Downloads", $"{id}");
-
-        return new FileStream(path, FileMode.Open);
-    }
-
-    public async Task<YoutubeVideo?> GetVideoInfo(string id)
-    {
-        if (!await IsValidId(id)) return null;
-
-        var cmd = $@"{_youtubeDlPath} -j {id}";
-        // var res = await CliCommand.CallCommand(cmd);
-        // var video = JsonSerializer.Deserialize<YoutubeVideo>(res, _serializerOptions);
-        return null;
-    }
-
-    public async Task<string> GetMetadata(string id)
-    {
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
-
-        var cmd = $@"{_youtubeDlPath} --print channel_follower_count {id}";
-        var res = await CliCommand.CallCommandWithReturn(cmd);
-        Console.WriteLine(stopWatch.ElapsedMilliseconds);
-        return res;
     }
 
     public async Task<IEnumerable<YoutubeVideo>> GetLocalVideos()
