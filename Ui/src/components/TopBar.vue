@@ -253,70 +253,73 @@ const toggleUserMenu = () => {
             </button>
         </div>
     </div>
-    <div class="nav-bg" :class="menuOpen ? 'visible' : ''" @click.stop="toggleSidebar(false)">
-        <div class="side-nav" @click.stop="" :class="menuOpen ? 'open' : ''">
-            <div class="left">
-                <button class="menu-button" @click.stop="toggleSidebar(false)">
-                    <Icon style="font-size: 1.5rem;" icon="mdi-light:menu" />
-                </button>
-                <router-link to="/">
-                    <Logo class="logo" />
-                </router-link>
-                <span id="country-code">
-                    .juri.lol
-                </span>
-            </div>
-            <ul @click.stop="toggleSidebar(false)">
-                <li>
+    <transition name="translateX">
+        <!--  :class="menuOpen ? 'visible' : ''" -->
+        <div v-if="menuOpen" class="nav-bg" @click.stop="toggleSidebar(false)">
+            <div class="side-nav" @click.stop="" :class="menuOpen ? 'open' : ''">
+                <div class="left">
+                    <button class="menu-button" @click.stop="toggleSidebar(false)">
+                        <Icon style="font-size: 1.5rem;" icon="mdi-light:menu" />
+                    </button>
                     <router-link to="/">
-                        <Icon style="font-size: 1.5rem;" icon="ri:home-4-line" />
-                        <span>Home</span>
+                        <Logo class="logo" />
                     </router-link>
-                    <router-link to="/trending">
-                        <Icon style="font-size: 1.5rem;" icon="ri:fire-line" />
-                        <span>Shorts</span>
-                    </router-link>
+                    <span id="country-code">
+                        .juri.lol
+                    </span>
+                </div>
+                <ul @click.stop="toggleSidebar(false)">
+                    <li>
+                        <router-link to="/">
+                            <Icon style="font-size: 1.5rem;" icon="ri:home-4-line" />
+                            <span>Home</span>
+                        </router-link>
+                        <router-link to="/trending">
+                            <Icon style="font-size: 1.5rem;" icon="ri:fire-line" />
+                            <span>Shorts</span>
+                        </router-link>
 
-                    <router-link to="/trending">
-                        <Icon style="font-size: 1.5rem;" icon="ri:fire-line" />
-                        <span>Subscriptions</span>
-                    </router-link>
+                        <router-link to="/trending">
+                            <Icon style="font-size: 1.5rem;" icon="ri:fire-line" />
+                            <span>Subscriptions</span>
+                        </router-link>
 
-                    <router-link to="/tags">
-                        <Icon style="font-size: 1.5rem;" icon="clarity:tags-line" />
-                        <span>Tags</span>
-                    </router-link>
-                    <hr>
-                    <router-link to="/library">
-                        <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
-                        <span>Library</span>
-                    </router-link>
-                    <router-link to="/library">
-                        <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
-                        <span>History</span>
-                    </router-link>
-                    <router-link to="/library">
-                        <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
-                        <span>Your videos</span>
-                    </router-link>
-                    <router-link to="/library">
-                        <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
-                        <span>Watch Later</span>
-                    </router-link>
-                    <hr>
-                    <router-link to="/settings">
-                        <Icon style="font-size: 1.5rem;" icon="material-symbols:settings-outline-rounded" />
-                        <span>Settings</span>
-                    </router-link>
-
-
+                        <router-link to="/tags">
+                            <Icon style="font-size: 1.5rem;" icon="clarity:tags-line" />
+                            <span>Tags</span>
+                        </router-link>
+                        <hr>
+                        <router-link to="/library">
+                            <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
+                            <span>Library</span>
+                        </router-link>
+                        <router-link to="/library">
+                            <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
+                            <span>History</span>
+                        </router-link>
+                        <router-link to="/library">
+                            <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
+                            <span>Your videos</span>
+                        </router-link>
+                        <router-link to="/library">
+                            <Icon style="font-size: 1.5rem;" icon="ic:round-video-library" />
+                            <span>Watch Later</span>
+                        </router-link>
+                        <hr>
+                        <router-link to="/settings">
+                            <Icon style="font-size: 1.5rem;" icon="material-symbols:settings-outline-rounded" />
+                            <span>Settings</span>
+                        </router-link>
 
 
-                </li>
-            </ul>
 
+
+                    </li>
+                </ul>
+
+            </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 
@@ -342,10 +345,10 @@ hr {
     height: 100%;
     background-color: rgba(0, 0, 0, 0);
     z-index: 1000;
-    transition: opacity .2s ease;
+    // transition: opacity .2s ease;
     pointer-events: none;
     overflow: hidden;
-    transition: all .5s ease;
+    transition: transform .2s ease;
 }
 
 .visible {
@@ -365,7 +368,7 @@ hr {
     background-color: rgb(14, 14, 14);
     z-index: 1001;
     transform: translateX(-100%);
-    transition: transform .2s ease;
+    // transition: transform .2s ease;
     padding-left: 16px;
     // opacity: .5;
 
@@ -740,4 +743,14 @@ input:focus-within+.results {
 }
 </style>
 
-<style></style>
+<style lang="scss">
+.translateX-enter-from,
+.translateX-leave-to {
+    transform: translateX(-240px);
+}
+
+.translateX-enter-to,
+.translateX-leave-from {
+    transform: translateX(0%);
+}
+</style>
