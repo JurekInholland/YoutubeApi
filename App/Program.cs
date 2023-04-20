@@ -100,5 +100,11 @@ app.UseStaticFiles();
 app.MapControllers();
 app.MapHub<YoutubeHub>("/api/signalr");
 
-// app.UseMiddleware<ProxyMiddleware>();
+// Ensure the database is created
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<YoutubeAppContext>();
+    await dbContext.Database.EnsureCreatedAsync();
+}
+
 await app.RunAsync();
