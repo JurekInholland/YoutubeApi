@@ -105,6 +105,7 @@ using (IServiceScope scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<YoutubeAppContext>();
     await dbContext.Database.EnsureCreatedAsync();
+    await dbContext.SaveChangesAsync();
 }
 
 await app.RunAsync();
