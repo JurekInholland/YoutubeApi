@@ -74,10 +74,10 @@ public class YoutubeAppContext : DbContext
                 c => c.ToArray()));
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-        if (optionsBuilder.IsConfigured) return;
-        optionsBuilder.UseSqlite("Data Source=data/youtube.db");
-    }
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     base.OnConfiguring(optionsBuilder);
+    //     if (optionsBuilder.IsConfigured) return;
+    //     optionsBuilder.UseSqlite("Data Source=data/youtube.db");
+    // }
 }
