@@ -47,8 +47,7 @@ builder.Services.Configure<AppConfig>(cfg =>
 });
 builder.Services.AddDbContext<YoutubeAppContext>(options =>
 {
-    var dataPath = Path.Combine(builder.Configuration.GetValue<string>("DataPath") ?? string.Empty, "youtube.db");
-    options.UseSqlite($"Data Source={dataPath}");
+    options.UseSqlite(builder.Configuration.GetValue<string>("DBConnectionString"));
 });
 
 
