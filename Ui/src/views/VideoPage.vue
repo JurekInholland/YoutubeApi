@@ -147,14 +147,14 @@ watch(cinemaMode, (newVal) => {
 <template>
     <div id='container' :class="cinemaMode ? 'cinema' : 'default'">
         <div id='primary'>
-            <YoutubePlayer class='player' v-if='parsedId' :video-id='parsedId' :start-time='startTime'
-                           :aspect-ratio='aspectRatio' />
+            <!-- <YoutubePlayer class='player' v-if='parsedId' :video-id='parsedId' :start-time='startTime' -->
+                           <!-- :aspect-ratio='aspectRatio' /> -->
             <!-- <VideoPlayer src="./vid.webm" color="green" /> -->
-            <VideoMetadata v-if='store.currentVideo' :video='store.currentVideo' v-model='cinemaMode' />
-            <div v-auto-animate v-else class='loading'>
+            <!-- <VideoMetadata v-if='store.currentVideo' :video='store.currentVideo' v-model='cinemaMode' /> -->
+            <!-- <div v-auto-animate v-else class='loading'>
                 <Spinner />
             </div>
-            <button @click='toggleCinema'>CINEMA</button>
+            <button @click='toggleCinema'>CINEMA</button> -->
 
         </div>
 
