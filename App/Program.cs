@@ -45,8 +45,12 @@ builder.Services.Configure<AppConfig>(cfg =>
     cfg.YtDlPath = builder.Configuration.GetValue<string>("YtDlPath") ?? string.Empty;
     cfg.YoutubeApiKey = builder.Configuration.GetValue<string>("YoutubeApiKey") ?? string.Empty;
 });
+builder.Services.AddDbContext<YoutubeAppContext>(options =>
+{
+    var dataPath = Path.GetFullPath(Path.Combine(builder.Configuration.GetValue<string>("DataPath") ?? string.Empty, "youtube.db"));
+    options.UseSqlite($"Data Source={dataPath}");
+});
 
-builder.Services.AddDbContext<YoutubeAppContext>(options => { options.UseSqlite("Data Source=data/youtube.db"); });
 
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<YoutubeHub>();
@@ -82,6 +86,11 @@ builder.Services.AddControllers(o => { o.AllowEmptyInputInBodyModelBinding = tru
 builder.Services.AddValidatorsFromAssemblyContaining<DownloadYoutubeVideoValidator>(); // register validators
 
 WebApplication app = builder.Build();
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<YoutubeAppContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 app.UseMiddleware<RequestDurationMiddleware>();
 
@@ -101,10 +110,5 @@ app.MapControllers();
 app.MapHub<YoutubeHub>("/api/signalr");
 
 // Ensure the database is created
-using (IServiceScope scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<YoutubeAppContext>();
-    await dbContext.Database.MigrateAsync();
-}
 
 await app.RunAsync();
