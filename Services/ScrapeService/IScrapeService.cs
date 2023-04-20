@@ -14,4 +14,7 @@ public interface IScrapeService
     public Task<YoutubeVideo[]> ScrapeChannelByHandle(string userName);
 
     public Task<YoutubeVideo[]> ScrapeHashtag(string tag);
+
+
+    public Task DownloadChannelThumbnail(string channelId);
 }

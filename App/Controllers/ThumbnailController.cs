@@ -24,8 +24,10 @@ public class ThumbnailController : BaseController
     /// Get the thumbnail for a youtube channel
     /// </summary>
     [HttpGet("channel", Name = nameof(GetChannelThumbnail))]
+
     public async Task<IActionResult> GetChannelThumbnail(string channelId)
     {
+        Console.WriteLine("GetChannelThumbnail");
         try
         {
             byte[]? file = await _thumbnailService.GetChannelThumbnail(channelId);

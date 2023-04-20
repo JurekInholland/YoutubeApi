@@ -11,7 +11,7 @@ api problem: https://www.youtube.com/watch?v=rcZxskQUuZ0
 - play/pause to replay on 100%
 
 broken: http://localhost:5173/watch?v=qQHf4eTfFqw
-
+unembeddable: https://youtube.juri.lol/watch?v=mV_ivricBn4
 close side nav on navigation
 - handle video having been deleted (after backup)
 - fix volume know not synced

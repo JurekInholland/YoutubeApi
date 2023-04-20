@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Services.ScrapeService;
 using Services.YoutubeExplodeService;
 
 namespace Services.ThumbnailService;
@@ -7,11 +8,13 @@ public class ThumbnailService : IThumbnailService
 {
     private readonly ILogger<ThumbnailService> _logger;
     private readonly IYoutubeExplodeService _youtubeExplodeService;
+    private readonly IScrapeService _scrapeService;
 
-    public ThumbnailService(ILogger<ThumbnailService> logger, IYoutubeExplodeService youtubeExplodeService)
+    public ThumbnailService(ILogger<ThumbnailService> logger, IYoutubeExplodeService youtubeExplodeService, IScrapeService scrapeService)
     {
         _logger = logger;
         _youtubeExplodeService = youtubeExplodeService;
+        _scrapeService = scrapeService;
     }
 
     public async Task<byte[]?> GetChannelThumbnail(string channelId)
@@ -20,7 +23,8 @@ public class ThumbnailService : IThumbnailService
 
         if (!File.Exists(path))
         {
-            await _youtubeExplodeService.GetChannel(channelId);
+            await _scrapeService.DownloadChannelThumbnail(channelId);
+            // await _youtubeExplodeService.GetChannel(channelId);
         }
 
 

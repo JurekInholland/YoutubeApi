@@ -123,9 +123,31 @@ public partial class ScrapeService : IScrapeService
         return await ScrapeVideos(sourceCode);
     }
 
+    public async Task DownloadChannelThumbnail(string channelId)
+    {
+        var url = $"https://www.youtube.com/channel/{channelId}";
+        HtmlDocument document = await GetHtmlDocument(url);
+        string sourceCode = document.DocumentNode.OuterHtml;
+
+        Match? largestAvatarMatch = ChannelImg().Matches(sourceCode)
+            .OrderByDescending(m => int.Parse(m.Groups[2].Value))
+            .Where(m => !m.Groups[1].Value.EndsWith("-no-nd-rj"))
+            .Skip(1)
+            .FirstOrDefault();
+
+        if (largestAvatarMatch is null)
+        {
+            return;
+        }
+
+        string secondLargestAvatarUrl = $"https://yt3.googleusercontent.com/{largestAvatarMatch.Groups[1].Value}";
+
+        var bytes = await _httpClient.GetByteArrayAsync(secondLargestAvatarUrl);
+        await File.WriteAllBytesAsync($"data/thumbnails/{channelId}.jpg", bytes);
+    }
+
     private async Task ScrapeChannelInfo(string sourceCode)
     {
-
         List<(int, int, string)> avatars = new();
         List<(int, int, string)> banners = new();
 
