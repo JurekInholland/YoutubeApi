@@ -104,8 +104,7 @@ app.MapHub<YoutubeHub>("/api/signalr");
 using (IServiceScope scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<YoutubeAppContext>();
-    await dbContext.Database.EnsureCreatedAsync();
-    await dbContext.SaveChangesAsync();
+    await dbContext.Database.MigrateAsync();
 }
 
 await app.RunAsync();
