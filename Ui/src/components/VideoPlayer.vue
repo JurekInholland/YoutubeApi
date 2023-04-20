@@ -520,6 +520,7 @@ const smoothUpdate = () => {
     left: v-bind(currentPositionPercent);
     bottom: 2rem;
     margin-left: -1rem;
+    pointer-events: none;
 }
 
 .timeline-container:hover .cTime {

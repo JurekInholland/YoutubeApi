@@ -9,20 +9,26 @@ const props = defineProps<{
 </script>
 
 <template>
-    <router-link :to="{ name: 'watch', query: { v: video.id }, }" class="video-cont">
-        <div class="thumbnail">
-            <img :src="props.video.youtubeThumbnailUrl" alt="">
-            <div class="play-overlay">{{ formatDuration(props.video.duration) }}</div>
-        </div>
-        <div class="details">
-            <h3 v-html="formatTitle(props.video.title)"></h3>
-            <p>{{ props.video.youtubeChannel?.title }}</p>
-            <p>{{ formatViews(props.video.viewCount) }} views {{ formatDateAgo(props.video.uploadDate) }}</p>
-        </div>
-    </router-link>
+    <div class="sidebar-content">
+
+        <router-link :to="{ name: 'watch', query: { v: video.id }, }" class="video-cont">
+            <div class="thumbnail">
+                <img :src="props.video.youtubeThumbnailUrl" alt="">
+                <div class="play-overlay">{{ formatDuration(props.video.duration) }}</div>
+            </div>
+            <div class="details">
+                <h3 v-html="formatTitle(props.video.title)"></h3>
+                <p>{{ props.video.youtubeChannel?.title }}</p>
+                <p>{{ formatViews(props.video.viewCount) }} views {{ formatDateAgo(props.video.uploadDate) }}</p>
+            </div>
+        </router-link>
+    </div>
 </template>
 
 <style scoped>
+.sidebar-content {
+    display: flex;
+}
 .details p {
     max-height: 18px;
     text-overflow: ellipsis;

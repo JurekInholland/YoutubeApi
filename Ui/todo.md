@@ -10,4 +10,15 @@ api problem: https://www.youtube.com/watch?v=rcZxskQUuZ0
 
 - play/pause to replay on 100%
 
-broken: http://localhost:5175/watch?v=qQHf4eTfFqw
+broken: http://localhost:5173/watch?v=qQHf4eTfFqw
+
+close side nav on navigation
+- handle video having been deleted (after backup)
+- fix volume know not synced
+- fix buffer preview after skipping
+- error handling (404)
+# Ideas
+- geo unblocker
+- auto reupload ripped, from youtube deleted videos as unlisted to private channel
+- replace embedded youtube player ui with custom
+- on download (backup), extract stillframes from video and create tilemap for playback preview

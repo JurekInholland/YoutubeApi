@@ -1,58 +1,9 @@
 <script setup lang="ts">
 import { useYoutubeStore } from '@/stores/youtubeStore';
-import { watch } from 'vue';
-import gsap from 'gsap';
-
 const store = useYoutubeStore();
 
 const paths = ["M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z", "M 11.425 14.285 C 13.899 15.714 18.848 12.857 18.848 10 C 18.848 7.144 13.899 4.287 11.425 5.715 C 8.951 7.144 8.951 12.857 11.425 14.285 Z", "M 10.851 6.289 L 15.136 13.712 L 19.421 6.289 L 10.851 6.289 Z"]
 console.log("store color: " + store.color)
-
-watch(() => store.currentVideo?.localVideo, async (val, oldval) => {
-    return;
-    console.log("watchvals", val, oldval)
-    if (val === undefined) {
-        console.log("if")
-        await gsap.to("#icon",
-            {
-                duration: 0.25,
-                yoyo: false,
-                repeat: 0,
-                ease: "quart.inOut",
-                attr: { d: paths[1] }
-            });
-        await gsap.to("#icon",
-            {
-                duration: 0.25,
-                delay: 0.5,
-                yoyo: false,
-                repeat: 0,
-                ease: "quart.inOut",
-                attr: { d: paths[2] }
-            });
-    }
-    else {
-        console.log("else")
-
-        await gsap.to("#icon",
-            {
-                duration: 0.25,
-                yoyo: false,
-                repeat: 0,
-                ease: "quart.inOut",
-                attr: { d: paths[1] }
-            });
-        await gsap.to("#icon",
-            {
-                duration: 0.25,
-                delay: 0.5,
-                yoyo: false,
-                repeat: 0,
-                ease: "quart.inOut",
-                attr: { d: paths[0] }
-            });
-    }
-})
 
 </script>
 

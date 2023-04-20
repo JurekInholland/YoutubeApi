@@ -23,6 +23,7 @@ const activeIndex: Ref<number> = ref(-1);
 const menuOpen: Ref<boolean> = ref(false);
 
 const userMenuOpen: Ref<boolean> = ref(false);
+const notificationMenuOpen: Ref<boolean> = ref(false);
 
 
 watch(router.currentRoute, (val) => {
@@ -140,6 +141,10 @@ const toggleUserMenu = () => {
     console.log("TOGGLE user menu")
     userMenuOpen.value = !userMenuOpen.value;
 }
+
+const togglenotificationMenu = () => {
+    notificationMenuOpen.value = !notificationMenuOpen.value;
+}
 </script>
 
 <template>
@@ -202,9 +207,16 @@ const toggleUserMenu = () => {
                 <Icon style="font-size: 1.5rem;" icon="carbon:query-queue" />
             </button>
 
-            <button>
+            <button @click.stop="togglenotificationMenu">
                 <Icon style="font-size: 1.5rem;" icon="mdi:bell" />
             </button>
+
+            <PageMenu v-if="notificationMenuOpen" v-click-outside-element="togglenotificationMenu">
+                <div>
+                    Notifications
+                    <p>para</p>
+                </div>
+            </PageMenu>
 
             <button @click.stop="toggleUserMenu">
                 <Icon style="font-size: 1.5rem;" icon="mdi:account" />

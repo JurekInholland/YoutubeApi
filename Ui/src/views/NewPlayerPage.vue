@@ -22,7 +22,7 @@
             <VideoMetadata v-if="store.currentVideo" class="metadata" @update:cinema="toggleCinema"
               :cinema="playerStats.cinema" :useLocalPlayer="playerStats.useLocalPlayer" :modelValue="playerStats.cinema"
               :video="store.currentVideo" @update:custom-player="togglePlayer" />
-            <p>{{ playerStats }}</p>
+            <!-- <p>{{ playerStats }}</p> -->
 
             <div id="primary" v-auto-animate></div>
           </div>
@@ -270,7 +270,11 @@ const toggleCinema = () => {
 
   .meta-cont {
     // max-width: calc(100vw - 2 * var(--gutter-width));
-    max-width: min(calc(100vw - 3 * var(--gutter-width)), 1754px);
+    // calc((100vh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px);
+    width: min(calc((100vh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px), 1754px);
+    max-width: calc(100vw - 4rem);
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
     gap: var(--gutter-width);
     max-height: unset;
     // margin: 0 var(--gutter-width);
@@ -281,6 +285,7 @@ const toggleCinema = () => {
   .layout {
     justify-content: center;
     align-items: center;
+    overflow: hidden;
   }
 
 
@@ -349,6 +354,7 @@ const toggleCinema = () => {
     flex-basis: 300px;
     flex-grow: 1;
     max-width: 402px;
+    min-height: calc(100vh - 96px);
   }
 
   .cinema #primary {

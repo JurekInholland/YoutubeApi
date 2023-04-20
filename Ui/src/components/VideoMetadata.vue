@@ -32,6 +32,10 @@ const toggleDescription = () => {
 }
 const toggleDescriptionButton = () => {
     isDescriptionExpanded.value = !isDescriptionExpanded.value;
+
+    if (!isDescriptionExpanded.value) {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
 }
 
 const emits = defineEmits<{
@@ -97,7 +101,7 @@ watch(props, (val) => {
                 <div class="title" v-html="formatTitle(props.video.title)"></div>
             </h1>
             <ProgressBar v-if="queueItem?.progress" :value="queueItem.progress.progress"
-                :text="queueItem?.progress.progress !== 0 ? `${queueItem.progress.eta}` : 'Waiting for download to start'" />
+                :text="queueItem?.progress.progress !== 0 ? `${queueItem.progress.eta}` : 'Processing queue...'" />
             <!-- <ProgressBar :value="50" text="lel"></ProgressBar> -->
 
         </div>
@@ -143,8 +147,8 @@ watch(props, (val) => {
                 </a>
 
                 <!-- <button v-else class="download-button">
-                                                                <Icon icon="material-symbols:cloud-download-rounded" />
-                                                            </button> -->
+                                                                    <Icon icon="material-symbols:cloud-download-rounded" />
+                                                                </button> -->
                 <button class="cinema-button" @click="toggleCinema">
                     <Icon icon="mdi:cinema" />
                 </button>
@@ -206,12 +210,14 @@ watch(props, (val) => {
 }
 
 #description.collapsed:hover {
-    transition: background-color 0s;
     background-color: rgb(64, 64, 64);
+    transition: background-color 0;
+
 }
 
 #description.collapsed:active {
-    transition: background-color 0s;
+
+    // transition: background-color 0s;
     background-color: rgb(84, 84, 84);
     border: 1px solid rgb(84, 84, 84);
 }
@@ -276,6 +282,7 @@ watch(props, (val) => {
 .metadata {
     // margin-top: 12px;
     width: 100%;
+    transition: unset;
     // flex-grow: 1;
 
 }
@@ -355,6 +362,7 @@ h3 {
     box-sizing: border-box;
     transition: border-color 1.5s ease;
     border: 1px solid transparent;
+    transition: background-color .5s ease;
 
 
     button {
@@ -377,7 +385,9 @@ h3 {
     }
 
 }
-
+#description:not(:hover)::before {
+    transition: background-color 0;
+}
 #description p {
     line-height: 20px;
     margin-top: 1px;
