@@ -265,9 +265,9 @@ const togglenotificationMenu = () => {
             </button>
         </div>
     </div>
+    <!--  :class="menuOpen ? 'visible' : ''" -->
     <transition name="translateX">
-        <!--  :class="menuOpen ? 'visible' : ''" -->
-        <div v-if="menuOpen" class="nav-bg" @click.stop="toggleSidebar(false)">
+    <div v-if="menuOpen" class="nav-bg" @click.stop="toggleSidebar(false)">
             <div class="side-nav" @click.stop="" :class="menuOpen ? 'open' : ''">
                 <div class="left">
                     <button class="menu-button" @click.stop="toggleSidebar(false)">
@@ -348,17 +348,18 @@ hr {
 }
 
 .nav-bg {
+    transition: none;
     pointer-events: all;
     // display: none;
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: calc(100% + 400px);
     height: 100%;
-    background-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, .5);
     z-index: 1000;
     // transition: opacity .2s ease;
-    pointer-events: none;
+    // pointer-events: none;
     overflow: hidden;
     transition: transform .2s ease;
 }

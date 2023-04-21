@@ -96,7 +96,7 @@ onBeforeUnmount(() => {
 <template>
     <div class="yotube-wrapper">
         <div>{{ playerState.duration - playerState.currentTime }}</div>
-        <div class="overlay" v-if="playerState.duration - playerState.currentTime <= 1">
+        <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1">
             <youtube-player-up-next :video="store.relatedVideos[0]" />
         </div>
         <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"

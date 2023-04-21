@@ -98,6 +98,7 @@ const parsedId = computed(() => {
 })
 
 watch(route, async () => {
+  found.value = false
   playerStats.value.currentTime = 0;
   if (parsedId.value === null) return
 
