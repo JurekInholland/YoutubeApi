@@ -216,14 +216,14 @@ const toggleCinema = () => {
 .player {
   width: 100%;
   height: 100%;
-  // height: calc(100vw * 9 / 16);
-  // max-height: v-bind(calcH);
-  // max-height: calc(100% - 2 * var(--gutter-width));
   max-height: var(--max-p-height);
   flex-basis: 100%;
   aspect-ratio: v-bind(aspectRatio);
   min-height: 320px;
-
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
+  // flex-shrink: 1;
   // width: 100%;
   // height: auto;
 }

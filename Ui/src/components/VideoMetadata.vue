@@ -34,7 +34,7 @@ const toggleDescriptionButton = () => {
     isDescriptionExpanded.value = !isDescriptionExpanded.value;
 
     if (!isDescriptionExpanded.value) {
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
@@ -147,8 +147,8 @@ watch(props, (val) => {
                 </a>
 
                 <!-- <button v-else class="download-button">
-                                                                    <Icon icon="material-symbols:cloud-download-rounded" />
-                                                                </button> -->
+                                                                        <Icon icon="material-symbols:cloud-download-rounded" />
+                                                                    </button> -->
                 <button class="cinema-button" @click="toggleCinema">
                     <Icon icon="mdi:cinema" />
                 </button>
@@ -209,22 +209,9 @@ watch(props, (val) => {
     overflow: hidden;
 }
 
-#description.collapsed:hover {
-    background-color: rgb(64, 64, 64);
-    transition: background-color 0;
-
-}
-
-#description.collapsed:active {
-
-    // transition: background-color 0s;
-    background-color: rgb(84, 84, 84);
-    border: 1px solid rgb(84, 84, 84);
-}
 
 .collapsed .desc {
     max-height: 60px;
-
 }
 
 .expanded {
@@ -360,9 +347,8 @@ h3 {
     font-size: 14px;
     position: relative;
     box-sizing: border-box;
-    transition: border-color 1.5s ease;
+    transition: border-color 1.5s ease, background-color 0s;
     border: 1px solid transparent;
-    transition: background-color .5s ease;
 
 
     button {
@@ -385,14 +371,38 @@ h3 {
     }
 
 }
-#description:not(:hover)::before {
-    transition: background-color 0;
-}
+
+// #description:not(:hover)::before {
+//     transition: background-color 0;
+// }
 #description p {
     line-height: 20px;
     margin-top: 1px;
     // white-space: pre-wrap;
 
+}
+
+#description:hover {
+    transition: background-color .2s;
+    background-color: rgb(64, 64, 64);
+
+}
+
+#description.collapsed:hover {
+    background-color: rgb(64, 64, 64);
+    transition: background-color 0s, border-color 0s ease;
+
+}
+
+#description.expanded:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color .5s ease, border-color 2s ease;
+
+}
+
+#description.collapsed:active {
+    background-color: rgb(84, 84, 84);
+    border-color: rgb(92, 92, 92);
 }
 
 #owner p {

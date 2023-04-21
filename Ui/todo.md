@@ -17,6 +17,7 @@ close side nav on navigation
 - fix volume know not synced
 - fix buffer preview after skipping
 - error handling (404)
+- browser history search result page (onMounted)
 # Ideas
 - geo unblocker
 - auto reupload ripped, from youtube deleted videos as unlisted to private channel

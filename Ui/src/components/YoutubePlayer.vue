@@ -2,8 +2,9 @@
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import type { PlayerState } from '@/types';
 import { YoutubeIframe } from '@vue-youtube/component';
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
+import YoutubePlayerUpNext from './player/YoutubePlayerUpNext.vue';
 const route = useRoute();
 const store = useYoutubeStore();
 
@@ -13,8 +14,11 @@ const props = defineProps<{
     videoId: string,
     playerState: PlayerState
 }>()
-const youtube = ref();
+const youtube = ref<HTMLDivElement | undefined>() as any;
 
+const playerWidth = ref(computed(() => {
+    return youtube.value?.$el.offsetWidth + "px";
+}));
 
 const onReady = (event: any) => {
     console.log('ready', event.target);
@@ -27,8 +31,7 @@ const onReady = (event: any) => {
     event.target.startSeconds = props.playerState.currentTime;
     console.log("SEEKING TO ", props.playerState.currentTime)
     event.target.seekTo(props.playerState.currentTime, true);
-    if (!props.playerState.isPlaying)
-    {
+    if (!props.playerState.isPlaying) {
         event.target.pauseVideo();
     }
     props.playerState.duration = duration;
@@ -92,6 +95,10 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="yotube-wrapper">
+        <div>{{ playerState.duration - playerState.currentTime }}</div>
+        <div class="overlay" v-if="playerState.duration - playerState.currentTime <= 1">
+            <youtube-player-up-next :video="store.relatedVideos[0]" />
+        </div>
         <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"
             @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{
                 // https://developers.google.com/youtube/player_parameters#Parameters
@@ -108,12 +115,34 @@ onBeforeUnmount(() => {
 </template>
 
 <style >
+.overlay {
+    background-color: rgba(0, 0, 0, 1);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 1.9rem;
+    top: 3.6rem;
+    right: 0;
+    /* height: 100%; */
+    width: 100%;
+    z-index: 1;
+    /* width: v-bind(playerWidth); */
+
+}
+
 .iframe {
+
+    /* width: 100%; */
     /* max-width: 1920px;
     'max-width': '1920px', width: '100%', 'max-height': 80 + 'vh' */
 }
 
 .youtube-wrapper {
+    /* position: relative; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     /* max-width: calc(100vh - 12rem) !important; */
     /* margin: 0 auto; */
 
@@ -123,6 +152,8 @@ onBeforeUnmount(() => {
     align-items: center;
     justify-content: center;
     margin: 0; */
+    overflow: hidden;
+
 }
 
 iframe {
