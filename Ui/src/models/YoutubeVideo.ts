@@ -2,7 +2,7 @@ import { Model } from 'pinia-orm'
 import YoutubeChannel from './YoutubeChannel'
 
 export default class YoutubeVideo extends Model {
-  static entity = 'users'
+  static entity = 'videos'
   static fields() {
     return {
       id: this.string(''),
@@ -24,7 +24,7 @@ export default class YoutubeVideo extends Model {
       playableInEmbed: this.boolean(false),
 
 
-      youtubeChannel: this.belongsTo(YoutubeChannel, 'postId')
+      youtubeChannel: this.belongsTo(YoutubeChannel, 'id')
     }
   }
 }

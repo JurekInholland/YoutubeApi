@@ -14,6 +14,11 @@ export default class ApiService {
       }
     })
   }
+// ------------------ ORM CALLS ------------------
+
+
+
+// ------------------ API CALLS ------------------
 
   public async getChannelById(id: string): Promise<YoutubeChannel | undefined> {
     const res = await this.request<YoutubeChannel>({

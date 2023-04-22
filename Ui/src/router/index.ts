@@ -21,13 +21,12 @@ const router = createRouter({
     {
       path: '/watch',
       name: 'watch',
-      component: () => import('../views/NewPlayerPage.vue'),
-
+      component: () => import('../views/NewPlayerPage.vue')
     },
     {
       path: '/shorts/:videoId',
       name: 'shorts',
-      component: () => import('../views/NewPlayerPage.vue'),
+      component: () => import('../views/NewPlayerPage.vue')
     },
     {
       path: '/about',
@@ -61,23 +60,23 @@ const router = createRouter({
       component: () => import('../views/SettingsView.vue')
     },
 
-    {
-      path: '/channel/:channelId',
-      name: 'channel-id',
-      component: () => import('../views/ChannelView.vue')
-    },
+    // {
+    //   path: '/channel/:channelId',
+    //   name: 'channel-id',
+    //   component: () => import('../views/ChannelView.vue')
+    // },
 
-    // Channel routes
-    {
-      path: '/@:username',
-      name: 'channel',
-      component: () => import('../views/ChannelView.vue')
-    },
-    {
-      path: '/c/@:username',
-      name: 'channel-c',
-      component: () => import('../views/ChannelView.vue')
-    },
+    // // Channel routes
+    // {
+    //   path: '/@:username',
+    //   name: 'channel',
+    //   component: () => import('../views/ChannelView.vue')
+    // },
+    // {
+    //   path: '/c/@:username',
+    //   name: 'channel-c',
+    //   component: () => import('../views/ChannelView.vue')
+    // },
 
     {
       path: '/playlist',
@@ -97,6 +96,11 @@ const router = createRouter({
       path: '/tags',
       name: 'tags',
       component: () => import('../views/TagsView.vue')
+    },
+    {
+      path: '/orm',
+      name: 'debugorm',
+      component: () => import('../views/OrmTests.vue')
     }
   ],
   scrollBehavior() {

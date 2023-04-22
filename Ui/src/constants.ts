@@ -1,4 +1,5 @@
 import ApiService from './api'
+import OrmService from './api/orm-api'
 
 export const apiUrls = {
   addToQueue: 'Queue/Add',
@@ -21,5 +22,7 @@ export const apiUrls = {
 }
 
 export const apiService: ApiService = new ApiService()
+
+export const ormService: OrmService = new OrmService()
 
 export const defaultColor: string = '#38cd6d'
