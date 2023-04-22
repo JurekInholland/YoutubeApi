@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
 using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Models;
+using Models.DomainModels;
+using Services.ScrapeService;
 
 namespace Services.TaskService;
 
@@ -89,5 +92,19 @@ public class TaskService : BackgroundService, ITaskService
         if (stoppingToken.IsCancellationRequested) return;
 
         _logger.LogInformation("DT: {Date}", DateTime.Now.ToString("O"));
+    }
+
+    private async Task UpdateSubscribedChannels(CancellationToken stoppingToken)
+    {
+        if (stoppingToken.IsCancellationRequested) return;
+
+        var unitOfWork = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var scrapeService = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IScrapeService>();
+
+        var subscribedChannels = await unitOfWork.SubscribedChannels.All().ToListAsync(stoppingToken);
+        foreach (SubscribedChannel channel in subscribedChannels)
+        {
+            var videos  = await scrapeService.ScrapeChannelById(channel.Id);
+        }
     }
 }

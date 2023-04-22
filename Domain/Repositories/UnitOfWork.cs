@@ -3,6 +3,7 @@ using Domain.Repositories.ChannelRepo;
 using Domain.Repositories.LocalVideoRepo;
 using Domain.Repositories.QueuedDownloadRepo;
 using Domain.Repositories.SettingsRepo;
+using Domain.Repositories.SubscribedChannelRepo;
 using Domain.Repositories.YoutubeVideoRepo;
 
 namespace Domain.Repositories;
@@ -14,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     private IQueuedDownloadRepository? _queuedDownloadRepository;
     private IApplicationSettingsRepository? _applicationSettingsRepository;
     private ILocalVideoRepository? _localVideoRepository;
+    private ISubscribedChannelsRepository? _subscribedChannelsRepository;
 
     private IYoutubeChannelRepository? _youtubeChannelRepository;
 
@@ -26,6 +28,9 @@ public class UnitOfWork : IUnitOfWork
     public ILocalVideoRepository LocalVideos => _localVideoRepository ??= new LocalVideoRepository(_context);
 
     public IYoutubeChannelRepository YoutubeChannels => _youtubeChannelRepository ??= new YoutubeChannelRepository(_context);
+
+    public ISubscribedChannelsRepository SubscribedChannels =>
+        _subscribedChannelsRepository ??= new SubscribedChannelRepository(_context);
 
     public UnitOfWork(YoutubeAppContext context)
     {

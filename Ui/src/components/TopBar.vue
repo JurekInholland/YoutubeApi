@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import PageMenu from './menus/PageMenu.vue';
 import UserMenu from './menus/UserMenu.vue';
+import SvgLink from './buttons/SvgLink.vue';
 
 const router = useRouter();
 const store = useYoutubeStore();
@@ -203,11 +204,14 @@ const togglenotificationMenu = () => {
                 <Icon style="font-size: 1.1rem;" icon="simple-line-icons:magnifier" />
             </button>
 
-            <button class="queue" @click="router.push('queue')">
+            <router-link class="button" :to="{name: 'queue'}" text="" >
                 <Icon style="font-size: 1.5rem;" icon="carbon:query-queue" />
-            </button>
+            </router-link>
+            <!-- <button class="queue" @click="router.push('queue')"> -->
+            <!-- <Icon style="font-size: 1.5rem;" icon="carbon:query-queue" /> -->
+            <!-- </button> -->
 
-            <button @click.stop="togglenotificationMenu">
+            <button @click="togglenotificationMenu">
                 <Icon style="font-size: 1.5rem;" icon="mdi:bell" />
             </button>
 
@@ -267,7 +271,7 @@ const togglenotificationMenu = () => {
     </div>
     <!--  :class="menuOpen ? 'visible' : ''" -->
     <transition name="translateX">
-    <div v-if="menuOpen" class="nav-bg" @click.stop="toggleSidebar(false)">
+        <div v-if="menuOpen" class="nav-bg" @click.stop="toggleSidebar(false)">
             <div class="side-nav" @click.stop="" :class="menuOpen ? 'open' : ''">
                 <div class="left">
                     <button class="menu-button" @click.stop="toggleSidebar(false)">
@@ -551,15 +555,7 @@ button {
     border: 1px solid transparent;
 }
 
-.menu-button:hover {
-    transition: all .2s ease;
-    background-color: rgba(255, 255, 255, 0.125);
-}
 
-.menu-button:active {
-    background-color: rgb(84, 84, 84);
-    border: 1px solid rgb(84, 84, 84);
-}
 
 .menu {
     overflow: hidden;
@@ -677,14 +673,14 @@ display: block;
         padding: .65rem;
     }
 
-    button:hover {
-        background-color: rgba(255, 255, 255, .125);
-    }
+    // button:hover {
+    //     background-color: rgba(255, 255, 255, .125);
+    // }
 }
 
-button:hover {
-    background-color: rgba(255, 255, 255, .125);
-}
+// button:hover {
+//     background-color: rgba(255, 255, 255, .125);
+// }
 
 .ytd-searchbox {
     position: relative;
@@ -743,6 +739,23 @@ input:focus-within+.results {
 
 .mobile .search {
     display: flex;
+}
+
+button {
+    border: 1px solid transparent;
+}
+
+button:hover {
+    transition: background .2s ease, border-color 1.5s ease;
+    background-color: rgb(64, 64, 64);
+    // border: 1px solid rgb(64, 64, 64);
+}
+
+button:active {
+    transition: background .2s ease, border-color .2s ease;
+    background-color: rgb(84, 84, 84);
+    border: 1px solid rgb(92, 92, 92);
+    // border: 1px solid red;
 }
 
 @media screen and (min-width: 690px) {

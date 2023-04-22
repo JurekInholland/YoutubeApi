@@ -36,5 +36,9 @@ main {
     margin: 0 auto;
     padding: 0 2rem;
     gap: 2rem;
+    flex-grow: 1;
+}
+hr {
+    border-color: var(--light-grey);
 }
 </style>

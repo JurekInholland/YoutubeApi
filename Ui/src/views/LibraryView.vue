@@ -29,7 +29,7 @@ onMounted(() => {
 
     padding: 1rem;
     // max-width: 2256px;
-    max-width: 100vw;
+    max-width: 100%;
     // background-color: red;
     // margin: 0 auto;
 

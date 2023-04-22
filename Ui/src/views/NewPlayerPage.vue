@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <button @click="inputChange" style="color: white;">test btn</button> -->
     <div class="outer" v-if="found">
       <div class="container" :class="playerStats.cinema ? 'cinema' : ''" id="container1" ref="container">
         <div class="layout">
@@ -22,19 +21,11 @@
             <VideoMetadata v-if="store.currentVideo" class="metadata" @update:cinema="toggleCinema"
               :cinema="playerStats.cinema" :useLocalPlayer="playerStats.useLocalPlayer" :modelValue="playerStats.cinema"
               :video="store.currentVideo" @update:custom-player="togglePlayer" />
-            <!-- <p>{{ playerStats }}</p> -->
-
             <div id="primary" v-auto-animate></div>
           </div>
         </div>
-        <div id="tele" v-auto-animate>
+        <div id="tele" v-auto-animate v-if="!playerStats.cinema">
         </div>
-
-        <!-- <teleport v-if="mounted" :to="toggle ? '#primary' : '#tele'">
-                      <div class="secondary">
-                          this is the secondary
-                      </div>
-                  </teleport> -->
       </div>
       <Sidebar key="sidebar" class="sidebar" v-if="mounted" :toggled="playerStats.cinema" />
     </div>
@@ -174,7 +165,7 @@ const toggleCinema = () => {
   display: flex;
   justify-content: center;
   width: 100%;
-  max-width: 100vw;
+  max-width: 100%;
   margin-top: var(--gutter-width);
   // min-height: calc(100vh - 55px);
 }
@@ -184,7 +175,7 @@ const toggleCinema = () => {
   flex-grow: 1;
   width: 100%;
   max-width: var(--max-content-width);
-  max-height: 100vh;
+  // max-height: 100vh;
   display: flex;
   flex-wrap: wrap;
 }
@@ -221,30 +212,17 @@ const toggleCinema = () => {
   flex-basis: 100%;
   aspect-ratio: v-bind(aspectRatio);
   min-height: 320px;
-  // display: flex;
-  // justify-content: center;
-  // align-items: center;
-  // flex-shrink: 1;
-  // width: 100%;
-  // height: auto;
 }
 
 .container {
-  // background-color: darkblue;
-  // height: 100vh;
-  // width: 100vw;
-  // max-width: 100%;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  // justify-content: center;
-  // flex-grow: 1;
-  // gap: var(--gutter-width);
   max-width: 1754px;
   margin: 0 var(--gutter-width);
   gap: var(--gutter-width);
 
-  width: calc((100vh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px);
+  width: calc((100svh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px);
 
 }
 
@@ -252,7 +230,7 @@ const toggleCinema = () => {
   justify-content: center;
   width: 100%;
   align-items: center;
-  max-width: 100vw;
+  max-width: 100%;
   gap: 0;
   padding: 0;
   margin: 0;
@@ -270,17 +248,12 @@ const toggleCinema = () => {
   }
 
   .meta-cont {
-    // max-width: calc(100vw - 2 * var(--gutter-width));
-    // calc((100vh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px);
-    width: min(calc((100vh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px), 1754px);
-    max-width: calc(100vw - 4rem);
+    width: min(calc((100svh - 3 * var(--gutter-width)) * v-bind(aspectRatio) + 402px), 1754px);
+    max-width: calc(100% - 3rem);
     margin-left: 1.5rem;
     margin-right: 1.5rem;
     gap: var(--gutter-width);
     max-height: unset;
-    // margin: 0 var(--gutter-width);
-    // padding-right: 3rem;
-
   }
 
   .layout {
@@ -289,20 +262,11 @@ const toggleCinema = () => {
     overflow: hidden;
   }
 
-
-  // .layout {
-  //     max-width: calc(1280px + var(--sidebar-width) + 3 * var(--gutter-width));
-  // }
   #primary {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    // justify-content: center;
-    // flex-direction: row;
-    // flex-wrap: wrap;
-    // margin: 0 1rem;
     gap: calc(var(--gutter-width) / 3);
-    // margin: 0 1rem;
     max-width: 1754px;
     flex-basis: 300px;
     width: 100%;
@@ -324,20 +288,16 @@ const toggleCinema = () => {
 .layout {
   display: flex;
   flex-direction: column;
-  //flex-direction: row;
   flex-wrap: wrap;
   flex-basis: 540px;
   flex-grow: 1;
   gap: var(--gutter-width);
   transition: all .5s ease;
-  // max-height: calc(100% - 50vh);
-  // margin-right: 1rem;
 }
 
 #primary {
   flex: 1;
   flex-grow: 1;
-  // height: 100%;
 }
 
 .secondary {
@@ -355,7 +315,11 @@ const toggleCinema = () => {
     flex-basis: 300px;
     flex-grow: 1;
     max-width: 402px;
-    min-height: calc(100vh - 96px);
+    min-height: calc(100svh - 96px);
+  }
+
+  .cinema #tele {
+    display: none;
   }
 
   .cinema #primary {
@@ -368,16 +332,9 @@ const toggleCinema = () => {
 :root {
 
   --nav-height: 56px;
-  --max-p-height: calc(100vh - 204px);
-  /* --max-player-width: calc(100vw - (var(var(--nav-height)) + 2 * var(--gutter-width))); */
-
-
-  --max-player-width: calc(100vw);
-
-  --max-player-height: calc(100vh - (var(--nav-height) + 2 * var(--gutter-width)));
-
+  --max-p-height: calc(100svh - 204px);
+  --max-player-height: calc(100svh - (var(--nav-height) + 2 * var(--gutter-width)));
   --max-content-width: calc(1280px + var(--sidebar-width) + 3 * var(--gutter-width));
-
   --min-player-height: 480px;
   --sidebar-width: 402px;
   --gutter-width: 1.5rem;

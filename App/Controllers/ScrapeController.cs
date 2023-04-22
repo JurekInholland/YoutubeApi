@@ -29,14 +29,16 @@ public class ScrapeController : BaseController
     /// </summary>
     /// <remarks>Only the last ~40 videos are scraped</remarks>
     /// <param name="channelId">The id of the channel to scrape</param>
-    /// <response code="200">List of videos</response>
+    /// <response code="200">YoutubeChannel</response>
     [HttpGet(nameof(YoutubeChannelById))]
+    [ProducesResponseType(typeof(YoutubeChannel), 200)]
+    [ProducesResponseType(400)]
     public async Task<IActionResult> YoutubeChannelById(string channelId)
     {
         try
         {
             var yt = await _scrapeService.ScrapeChannelById(channelId);
-            Response.Headers.Add("Count", yt.Length.ToString());
+            Response.Headers.Add("Count", yt.Videos?.Count.ToString());
             return Ok(yt);
         }
 

@@ -2,6 +2,7 @@
 using Domain.Repositories.LocalVideoRepo;
 using Domain.Repositories.QueuedDownloadRepo;
 using Domain.Repositories.SettingsRepo;
+using Domain.Repositories.SubscribedChannelRepo;
 using Domain.Repositories.YoutubeVideoRepo;
 
 namespace Domain.Repositories;
@@ -14,6 +15,6 @@ public interface IUnitOfWork
     IApplicationSettingsRepository ApplicationSettings { get; }
     ILocalVideoRepository LocalVideos { get; }
     IYoutubeChannelRepository YoutubeChannels { get; }
-
+    ISubscribedChannelsRepository SubscribedChannels { get; }
     Task Save();
 }

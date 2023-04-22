@@ -547,7 +547,7 @@ const smoothUpdate = () => {
 
 .video-container.full-screen {
     height: 100%;
-    max-height: 100vh;
+    max-height: 100%;
 
 }
 
@@ -556,7 +556,7 @@ const smoothUpdate = () => {
 }
 
 .video-container.theater {
-    max-height: 90vh;
+    max-height: 90%;
 
 }
 

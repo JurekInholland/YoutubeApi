@@ -42,9 +42,12 @@ const onReady = (event: any) => {
 
 };
 const onStateChange = (event: any) => {
+    console.log('onStateChange', event.data);
     const isPlaying = event.data === 1;
+    if (event.data === 0) {
+        props.playerState.currentTime = props.playerState.duration;
+    }
     props.playerState.isPlaying = isPlaying;
-    console.log('isPlaying', isPlaying);
 };
 const onError = (event: any) => {
     console.log('error', event);
@@ -96,20 +99,20 @@ onBeforeUnmount(() => {
 <template>
     <div class="yotube-wrapper">
         <div>{{ playerState.duration - playerState.currentTime }}</div>
-        <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1">
+        <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
             <youtube-player-up-next :video="store.relatedVideos[0]" />
         </div>
         <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"
             @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{
-                // https://developers.google.com/youtube/player_parameters#Parameters
-                iv_load_policy: 3,
-                color: 'white',
-                start: props.playerState.currentTime,
-                modestbranding: 1,
-                enablejsapi: 1,
-                rel: 0,
-                autoplay: 1,
-            }">
+                    // https://developers.google.com/youtube/player_parameters#Parameters
+                    iv_load_policy: 3,
+                    color: 'white',
+                    start: props.playerState.currentTime,
+                    modestbranding: 1,
+                    enablejsapi: 1,
+                    rel: 0,
+                    autoplay: 1,
+                }">
         </youtube-iframe>
     </div>
 </template>
@@ -124,34 +127,16 @@ onBeforeUnmount(() => {
     bottom: 1.9rem;
     top: 3.6rem;
     right: 0;
-    /* height: 100%; */
     width: 100%;
     z-index: 1;
-    /* width: v-bind(playerWidth); */
 
 }
 
-.iframe {
-
-    /* width: 100%; */
-    /* max-width: 1920px;
-    'max-width': '1920px', width: '100%', 'max-height': 80 + 'vh' */
-}
 
 .youtube-wrapper {
-    /* position: relative; */
     display: flex;
     justify-content: center;
     align-items: center;
-    /* max-width: calc(100vh - 12rem) !important; */
-    /* margin: 0 auto; */
-
-    /* background-color: red;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0; */
     overflow: hidden;
 
 }
@@ -160,7 +145,5 @@ iframe {
     width: 100%;
     height: 100%;
     max-width: unset;
-    /* margin: 0 auto; */
-    /* aspect-ratio: 16/9; */
 }
 </style>

@@ -170,13 +170,13 @@ watch(cinemaMode, (newVal) => {
 <style scoped>
 .default .player {
     /* margin: 0 auto; */
-    max-height: calc(100vh - 16rem);
-    max-width: calc(100vw - 3rem);
+    /* max-height: calc(100vh - 16rem); */
+    /* max-width: calc(100% - 3rem); */
 }
 
 .cinema .player {
     margin: 0;
-    width: 100vw;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -234,10 +234,10 @@ watch(cinemaMode, (newVal) => {
 
 .cinema {
     /* max-width: 100%; */
-    flex-basis: 100vw;
+    flex-basis: 100%;
     /* margin-left: -1.5rem;
     margin-right: -1.5rem; */
-    max-width: calc(100vw - 1rem);
+    max-width: calc(100% - 1rem);
     max-height: unset;
 }
 

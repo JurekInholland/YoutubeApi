@@ -16,14 +16,19 @@ export enum TaskStatus {
   Error
 }
 
-export interface YoutubeChannel {
+export type YoutubeChannel = {
   id: string
   title: string
   handle: string
   channelUrl: string
   thumbnailUrl: string
+  avatar: string
+  banner: string
+  bannerUrl: string
+  videoCount: string
   subscribers: string
   videos?: YoutubeVideo[]
+  description: string
 }
 
 export interface LocalVideo {

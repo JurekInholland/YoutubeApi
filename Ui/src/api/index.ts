@@ -1,5 +1,5 @@
 import { apiUrls } from '@/constants'
-import type { QueuedDownload, YoutubeVideo } from '@/types'
+import type { QueuedDownload, YoutubeChannel, YoutubeVideo } from '@/types'
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios'
 
 export default class ApiService {
@@ -15,15 +15,14 @@ export default class ApiService {
     })
   }
 
-  public async getChannelById(id: string): Promise<YoutubeVideo[]> {
-    const res = await this.request<YoutubeVideo[]>({
+  public async getChannelById(id: string): Promise<YoutubeChannel | undefined> {
+    const res = await this.request<YoutubeChannel>({
       method: 'GET',
       url: apiUrls.getChannelById,
       params: { channelId: id }
     })
     if (res instanceof Error) {
-      debugger;
-      return []
+      return undefined
     }
     return res
   }

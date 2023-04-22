@@ -10,4 +10,5 @@ public class LocalVideo : BaseEntity
     public long Size { get; set; }
     public float Vbr { get; set; }
     public float Abr { get; set; }
+    public virtual YoutubeVideo YoutubeVideo { get; set; }
 }

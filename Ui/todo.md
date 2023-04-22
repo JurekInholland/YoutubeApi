@@ -18,6 +18,8 @@ close side nav on navigation
 - fix buffer preview after skipping
 - error handling (404)
 - browser history search result page (onMounted)
+- video plays on player change (even if paused)
+- videoplayer: 0-9 <- -> hotkeys
 # Ideas
 - geo unblocker
 - auto reupload ripped, from youtube deleted videos as unlisted to private channel

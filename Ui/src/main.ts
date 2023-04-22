@@ -13,6 +13,7 @@ import router from './router'
 
 import './assets/main.scss'
 import { useYoutubeStore } from './stores/youtubeStore'
+import { createORM } from 'pinia-orm'
 
 const app = createApp(App)
 app.use(vueClickOutsideElement)
@@ -22,6 +23,7 @@ pinia.use(
     auto: true
   })
 )
+pinia.use(createORM())
 app.use(pinia)
 
 const youtubeStore = useYoutubeStore()

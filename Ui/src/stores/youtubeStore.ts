@@ -90,9 +90,15 @@ export const useYoutubeStore = defineStore({
     },
     async fetchChannelById(id: string) {
       const res = await apiService.getChannelById(id)
-      for (const video of res) {
+      if (res?.videos === undefined) return
+      for (const video of res?.videos) {
         if (video === undefined || video === null || video.id === null) continue
+        video.youtubeChannel = res
         if (this.videos.filter((v) => v.id === video.id).length === 0) this.videos.push(video)
+        else {
+          const index = this.videos.findIndex((v) => v.id === video.id)
+          this.videos[index] = video
+        }
       }
     },
 

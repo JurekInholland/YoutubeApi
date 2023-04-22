@@ -16,8 +16,8 @@
     justify-content: center;
     gap: 1rem;
     text-align: center;
-    height: 45vh;
-    min-height: 480px;
+    height: 45svh;
+    min-height: 360px;
 
     img {
         max-width: 278px;

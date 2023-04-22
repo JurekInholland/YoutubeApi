@@ -23,6 +23,7 @@
     "css-reset-and-normalize": "^2.3.6",
     "gsap": "^3.11.4",
     "pinia": "^2.0.32",
+    "pinia-orm": "^1.6.7",
     "pinia-plugin-persistedstate": "^3.1.0",
     "vue": "^3.2.47",
     "vue-click-outside-element": "^3.1.2",

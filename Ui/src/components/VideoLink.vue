@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
-import { formatViews, formatTitle, formatDuration } from '@/utils';
+import { formatViews, formatTitle, formatDuration, formatDateAgo } from '@/utils';
 
 
 const props = defineProps<{
@@ -27,7 +27,8 @@ const props = defineProps<{
                     <router-link :to="{ name: 'channel-id', params: { channelId: video.youtubeChannel?.id } }">{{
                         video.youtubeChannel!.title }}</router-link>
                     <!-- <p>pannenkoek2012</p> -->
-                    <p>{{ formatViews(video.viewCount) }} views <span class="separator"> 2 days ago</span></p>
+                    <p>{{ formatViews(video.viewCount) }} views <span class="separator">{{ formatDateAgo(video.uploadDate)
+                    }}</span></p>
                 </div>
             </div>
         </router-link>

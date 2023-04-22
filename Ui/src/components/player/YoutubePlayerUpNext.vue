@@ -1,29 +1,42 @@
 <script setup lang="ts">
 import type { YoutubeVideo } from '@/types';
 import { formatTitle } from '@/utils';
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
+const route = useRoute();
 const router = useRouter();
 const props = defineProps<{
     video: YoutubeVideo
 }>();
 
+let interval: number;
+
 const countDown = ref(5);
+
+watch(route, (r) => {
+    clearInterval(interval);
+})
+
 onMounted(() => {
     countDown.value = 5;
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
         countDown.value--;
-        if (countDown.value === 0) {
+        if (countDown.value < 0) {
             clearInterval(interval);
             router.push({ name: 'video', params: { videoId: props.video.id } })
+            countDown.value = 5;
         }
     }, 1000);
+})
+
+onBeforeUnmount(() => {
+    clearInterval(interval);
 })
 </script>
 
 <template>
-    <div class="player-up-next">
+    <div class="player-up-next" v-if="countDown >= 0">
         <div class="up-next-header">Up next in <span>{{ countDown }}</span></div>
         <div class="thumbnail-container">
             <img :src="video.youtubeThumbnailUrl" alt="">
