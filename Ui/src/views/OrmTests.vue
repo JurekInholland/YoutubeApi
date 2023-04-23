@@ -3,13 +3,29 @@ import { useRepo } from 'pinia-orm'
 import YoutubeVideo from '@/models/YoutubeVideo';
 import YoutubeChannel from '@/models/YoutubeChannel';
 import { ormService, apiService } from '@/constants'
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, type Ref } from 'vue';
 import { AxiosError } from 'axios';
 import VideoLink from '@/components/VideoLink.vue';
+import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
+import YoutubeChannelRepository from '@/repositories/YoutubeChannelRepository';
+import { computedAsync } from '@vueuse/core';
 const videoRepo = useRepo(YoutubeVideo);
+const repo = useRepo(YoutubeVideoRepository);
+const channels = useRepo(YoutubeChannelRepository);
 
+const chan = computed(() => channels.getById("UCuAXFkgsw1L7xaCfnd5JJOw"));
+
+const channelVids = computed(() =>useRepo(YoutubeVideoRepository).with('youtubeChannel').where('youtubeChannelId', "UCuAXFkgsw1L7xaCfnd5JJOw").orderBy(vid => vid.uploaded).get());
+
+const mountedChannel: Ref<YoutubeChannel | null> = ref(null)
+const newFetch = async () => {
+    await channels.fetchById("UCuAXFkgsw1L7xaCfnd5JJOw")
+}
 
 const fetchVideo = async () => {
+
+    await repo.fetchById("dQw4w9WgXcQ")
+    return;
     // const video = await ormService.getVideoById("WFkSKEo3CVw");
     const video = await apiService.GetVideoInfo("ZHlenYEeNz0")
     // const isVid = video instanceof YoutubeVideo;
@@ -33,8 +49,9 @@ const vids = computed(() => videoRepo.withAll().get());
 const videos = ref<YoutubeVideo[]>([]);
 onMounted(() => {
     // const test = videoRepo.with('youtubeChannel').first();
-    videos.value = videoRepo.with('youtubeChannel').get();
+    videos.value = videoRepo.with('youtubeChannel').all();
     console.log(videoRepo.with('youtubeChannel').first());
+    mountedChannel.value = useRepo(YoutubeChannel).with('videos').first();
 })
 // tryOnMounted(fetchVideo);
 
@@ -43,9 +60,9 @@ onMounted(() => {
 
 <template>
     <div>
-        <button @click="fetchVideo">Fetch Video</button>
+        <button @click="newFetch">Fetch Video</button>
         <div class="container">
-            <VideoLink v-for="video in vids" :video="video" :key="video.id" />
+            <VideoLink v-for="video in channelVids" :video="video" :key="video.id" />
 
         </div>
 

@@ -1,7 +1,7 @@
 import { apiUrls } from '@/constants'
-import type { QueuedDownload, YoutubeChannel, YoutubeVideo } from '@/types'
+import type { QueuedDownload, YoutubeVideo } from '@/types'
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios'
-
+import type YoutubeChannel from '@/models/YoutubeChannel'
 export default class ApiService {
   private axiosInstance: AxiosInstance
 

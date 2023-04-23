@@ -1,10 +1,15 @@
 import { Model } from 'pinia-orm'
 import YoutubeChannel from './YoutubeChannel'
+import { DateCast } from 'pinia-orm/dist/casts'
 
 export default class YoutubeVideo extends Model {
   static entity = 'videos'
   static piniaOptions = {
     persist: true
+  }
+
+  get uploaded() {
+    return new Date(this.uploadDate)
   }
 
   static fields() {
@@ -30,11 +35,11 @@ export default class YoutubeVideo extends Model {
       youtubeChannel: this.belongsTo(YoutubeChannel, 'youtubeChannelId')
     }
   }
-  //   static casts() {
-  //     return {
-  //       dateAdded: Date,
-  //       lastUpdated: Date,
-  //       uploadDate: Date
-  //     }
-  //   }
+  static casts() {
+    return {
+      dateAdded: DateCast,
+      lastUpdated: DateCast,
+      uploadDate: DateCast
+    }
+  }
 }

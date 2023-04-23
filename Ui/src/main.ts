@@ -14,16 +14,18 @@ import router from './router'
 import './assets/main.scss'
 import { useYoutubeStore } from './stores/youtubeStore'
 import { createORM } from 'pinia-orm'
-
+import YoutubeChannel from './models/YoutubeChannel'
+import YoutubeVideo from './models/YoutubeVideo'
 const app = createApp(App)
 app.use(vueClickOutsideElement)
 const pinia = createPinia()
+pinia.use(createORM())
 pinia.use(
   createPersistedState({
     auto: true
   })
 )
-pinia.use(createORM())
+
 app.use(pinia)
 
 const youtubeStore = useYoutubeStore()
