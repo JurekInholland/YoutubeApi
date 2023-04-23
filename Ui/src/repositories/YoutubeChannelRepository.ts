@@ -26,8 +26,8 @@ export default class YoutubeChannelRepository extends Repository {
   public async fetchById(id: string): Promise<void> {
     const res = await apiService.getChannelById(id)
     if (res != undefined) {
-    //   this.save(res)
-        useRepo(YoutubeVideoRepository).save(res.videos)
+      this.save(res)
+        // useRepo(YoutubeVideoRepository).save(res.videos)
     }
   }
 }

@@ -143,6 +143,7 @@ public partial class ScrapeService : IScrapeService
         foreach (var video in channel.Videos)
         {
             video.YoutubeChannelId = channelId;
+            video.YoutubeChannel = null!;
             // video.YoutubeChannel = channel;
         }
 

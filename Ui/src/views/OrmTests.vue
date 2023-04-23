@@ -15,7 +15,7 @@ const channels = useRepo(YoutubeChannelRepository);
 
 const chan = computed(() => channels.getById("UCuAXFkgsw1L7xaCfnd5JJOw"));
 
-const channelVids = computed(() =>useRepo(YoutubeVideoRepository).with('youtubeChannel').where('youtubeChannelId', "UCuAXFkgsw1L7xaCfnd5JJOw").orderBy(vid => vid.uploaded).get());
+const channelVids = computed(() => useRepo(YoutubeVideoRepository).with('youtubeChannel').where('youtubeChannelId', "UCuAXFkgsw1L7xaCfnd5JJOw").orderBy(vid => vid.uploaded).get());
 
 const mountedChannel: Ref<YoutubeChannel | null> = ref(null)
 const newFetch = async () => {
@@ -60,18 +60,17 @@ onMounted(() => {
 
 <template>
     <div>
+        <div v-if="chan">
+            channel:
+            {{ chan.title }}
+        </div>
         <button @click="newFetch">Fetch Video</button>
         <div class="container">
-            <VideoLink v-for="video in channelVids" :video="video" :key="video.id" />
+            <VideoLink v-if="channelVids" v-for="video in channelVids" :video="video" :key="video.id" />
 
         </div>
 
     </div>
-    <!-- <div v-if="vids.length > 0" v-for="video in vids">
-        {{ video.title }}
-        {{ video.id }}
-        {{ video.youtubeChannel.title }}
-    </div> -->
 </template>
 
 <style scoped>

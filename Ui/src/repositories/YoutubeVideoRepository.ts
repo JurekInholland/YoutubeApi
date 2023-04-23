@@ -17,8 +17,8 @@ export default class YoutubeVideoRepository extends Repository {
   public deleteAll() {
     this.flush()
   }
-  public getChannelVideos(channelId: string) {
-    return this.all().filter((video) => video.youtubeChannelId === channelId)
+  public getChannelVideos(channelId: string) : YoutubeVideo[] {
+    return this.all().filter((video) => video.youtubeChannelId === channelId) as YoutubeVideo[]
   }
 
   public async fetchById(id: string) {
