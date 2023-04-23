@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Services.ThumbnailService;
 
 namespace App.Controllers;
@@ -30,8 +29,8 @@ public class ThumbnailController : BaseController
         Console.WriteLine("GetChannelThumbnail");
         try
         {
-            byte[]? file = await _thumbnailService.GetChannelThumbnail(channelId);
-            return File(file!, "image/jpeg");
+            byte[] file = await _thumbnailService.GetChannelThumbnail(channelId);
+            return File(file, "image/jpeg");
         }
         catch (FileNotFoundException e)
         {
@@ -56,8 +55,8 @@ public class ThumbnailController : BaseController
     {
         try
         {
-            byte[]? file = await _thumbnailService.GetChannelBanner(channelId);
-            return File(file!, "image/jpeg");
+            byte[] file = await _thumbnailService.GetChannelBanner(channelId);
+            return File(file, "image/jpeg");
         }
         catch (FileNotFoundException e)
         {

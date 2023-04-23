@@ -2,10 +2,8 @@
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import type { PlayerState } from '@/types';
 import { YoutubeIframe } from '@vue-youtube/component';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import YoutubePlayerUpNext from './player/YoutubePlayerUpNext.vue';
-const route = useRoute();
 const store = useYoutubeStore();
 
 const isInitialized = ref(false);
@@ -16,17 +14,11 @@ const props = defineProps<{
 }>()
 const youtube = ref<HTMLDivElement | undefined>() as any;
 
-const playerWidth = ref(computed(() => {
-    return youtube.value?.$el.offsetWidth + "px";
-}));
 
 const onReady = (event: any) => {
     console.log('ready', event.target);
     const duration = event.target.getDuration()
-    // const isMuted = event.target.isMuted()
-    // const vol = event.target.getVolume()
     const isPlaying = event.target.getPlayerState() === 1;
-    const tar = event.target;
     event.target.setVolume(props.playerState.volume * 100);
     event.target.startSeconds = props.playerState.currentTime;
     console.log("SEEKING TO ", props.playerState.currentTime)
@@ -38,7 +30,6 @@ const onReady = (event: any) => {
     props.playerState.isPlaying = isPlaying;
     isInitialized.value = true;
     event.target.playVideo();
-    // props.playerState.volume = isMuted ? 0 : vol;
 
 };
 const onStateChange = (event: any) => {
@@ -63,15 +54,12 @@ const onMessage = (event: MessageEvent) => {
     }
 
     var data = JSON.parse(event.data);
-    // console.log("data", data);
-
     if (data.info?.currentTime !== undefined) {
         props.playerState.currentTime = data.info.currentTime;
     }
 
     if (data.info?.volume !== undefined) {
         props.playerState.volume = data.info.volume / 100;
-        // console.log("volume", data.info.volume);
     }
 };
 
@@ -112,6 +100,7 @@ onBeforeUnmount(() => {
                     enablejsapi: 1,
                     rel: 0,
                     autoplay: 1,
+                    controls: 2
                 }">
         </youtube-iframe>
     </div>

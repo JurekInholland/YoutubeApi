@@ -1,8 +1,5 @@
 using Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Extensions.Options;
-using Models;
 using Models.DomainModels;
 using Models.Requests;
 using Services.QueueService;
