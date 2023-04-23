@@ -45,5 +45,6 @@ public class YoutubeVideo : BaseEntity
 
     public virtual LocalVideo? LocalVideo { get; set; }
 
+    public string YoutubeChannelId { get; set; } = "";
     public virtual YoutubeChannel YoutubeChannel { get; set; }
 }

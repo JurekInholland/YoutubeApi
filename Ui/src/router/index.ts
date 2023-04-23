@@ -60,23 +60,23 @@ const router = createRouter({
       component: () => import('../views/SettingsView.vue')
     },
 
-    // {
-    //   path: '/channel/:channelId',
-    //   name: 'channel-id',
-    //   component: () => import('../views/ChannelView.vue')
-    // },
+    {
+      path: '/channel/:channelId',
+      name: 'channel-id',
+      component: () => import('../views/ChannelView.vue')
+    },
 
-    // // Channel routes
-    // {
-    //   path: '/@:username',
-    //   name: 'channel',
-    //   component: () => import('../views/ChannelView.vue')
-    // },
-    // {
-    //   path: '/c/@:username',
-    //   name: 'channel-c',
-    //   component: () => import('../views/ChannelView.vue')
-    // },
+    // Channel routes
+    {
+      path: '/@:username',
+      name: 'channel',
+      component: () => import('../views/ChannelView.vue')
+    },
+    {
+      path: '/c/@:username',
+      name: 'channel-c',
+      component: () => import('../views/ChannelView.vue')
+    },
 
     {
       path: '/playlist',

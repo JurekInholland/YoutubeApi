@@ -3,6 +3,10 @@ import YoutubeVideo from './YoutubeVideo'
 
 export default class YoutubeChannel extends Model {
   static entity = 'channels'
+  static piniaOptions = {
+    persist: true
+  }
+
   static fields() {
     return {
       id: this.string(''),
@@ -17,7 +21,7 @@ export default class YoutubeChannel extends Model {
       banner: this.string(''),
       description: this.string(''),
 
-      videos: this.hasMany(YoutubeVideo, 'id')
+      videos: this.hasMany(YoutubeVideo, 'youtubeChannelId')
     }
   }
 }

@@ -3,6 +3,10 @@ import YoutubeChannel from './YoutubeChannel'
 
 export default class YoutubeVideo extends Model {
   static entity = 'videos'
+  static piniaOptions = {
+    persist: true
+  }
+
   static fields() {
     return {
       id: this.string(''),
@@ -22,15 +26,15 @@ export default class YoutubeVideo extends Model {
       categories: this.attr([]),
       relatedVideos: this.attr([]),
       playableInEmbed: this.boolean(false),
-
-      youtubeChannel: this.belongsTo(YoutubeChannel, 'youtubeChannel')
+      youtubeChannelId: this.attr(null),
+      youtubeChannel: this.belongsTo(YoutubeChannel, 'youtubeChannelId')
     }
   }
-//   static casts() {
-//     return {
-//       dateAdded: Date,
-//       lastUpdated: Date,
-//       uploadDate: Date
-//     }
-//   }
+  //   static casts() {
+  //     return {
+  //       dateAdded: Date,
+  //       lastUpdated: Date,
+  //       uploadDate: Date
+  //     }
+  //   }
 }

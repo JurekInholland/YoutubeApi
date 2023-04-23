@@ -3,6 +3,9 @@ import YoutubeVideo from './YoutubeVideo'
 
 export default class LocalVideo extends Model {
   static entity = 'localVideos'
+  static piniaOptions = {
+    persist: true
+  }
   static fields() {
     return {
       id: this.string(''),

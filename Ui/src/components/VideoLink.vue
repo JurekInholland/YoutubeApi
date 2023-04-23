@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YoutubeVideo } from '@/types';
+import type YoutubeVideo from '@/models/YoutubeVideo'
 import { formatViews, formatTitle, formatDuration, formatDateAgo } from '@/utils';
 
 

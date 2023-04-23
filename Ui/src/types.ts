@@ -57,6 +57,7 @@ export interface YoutubeVideo {
   relatedVideos: string[]
   playableInEmbed: boolean
   localVideo: LocalVideo | null
+  YoutubeChannelId: string
   youtubeChannel: YoutubeChannel | null
 }
 

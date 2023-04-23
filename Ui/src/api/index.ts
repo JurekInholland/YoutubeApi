@@ -27,6 +27,7 @@ export default class ApiService {
       params: { channelId: id }
     })
     if (res instanceof Error) {
+      debugger;
       return undefined
     }
     return res

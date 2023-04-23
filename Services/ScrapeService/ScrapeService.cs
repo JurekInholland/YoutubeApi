@@ -22,7 +22,7 @@ public partial class ScrapeService : IScrapeService
     [GeneratedRegex(@"""playabilityStatus"":{""status"":""([^""]+)"",""messages"":\[""([^""]+)""")]
     private static partial Regex PlayabilityStatus();
 
-    [GeneratedRegex("(?<=watch\\?v=)[\\w-]+")]
+    [GeneratedRegex("(?<=watch\\?v=)[\\w-]{11}")]
     private static partial Regex VideoIdRegex();
 
     [GeneratedRegex(@"description"":\{""simpleText"":""([^&]+(?:&quot;[^&]+)*|[^&]+(?:""[^""]+)*?)""\},""lengthSeconds")]
@@ -124,7 +124,7 @@ public partial class ScrapeService : IScrapeService
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
         var channelMetadata = await ScrapeChannelInfo(sourceCode);
-        var videos = await ScrapeVideos(sourceCode);
+        var videos = (await ScrapeVideos(sourceCode)).Where(v => v != null && v.YoutubeChannel.Id == channelId).Select(v => v!).ToArray();
 
         var channel = new YoutubeChannel
         {
@@ -142,8 +142,10 @@ public partial class ScrapeService : IScrapeService
 
         foreach (var video in channel.Videos)
         {
-            video.YoutubeChannel = channel;
+            video.YoutubeChannelId = channelId;
+            // video.YoutubeChannel = channel;
         }
+
         // foreach (var video in channel.Videos)
         // {
         //     video.YoutubeChannel = null!;
@@ -231,7 +233,7 @@ public partial class ScrapeService : IScrapeService
         var res = await Task.WhenAll(tasks);
 
 
-        return res.Select(y => y!).ToArray();
+        return res.Where(y => y != null).Select(y => y!).ToArray();
     }
 
 
