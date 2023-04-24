@@ -5,7 +5,7 @@ import { DateCast } from 'pinia-orm/dist/casts'
 export default class YoutubeVideo extends Model {
   static entity = 'videos'
   static piniaOptions = {
-    persist: true
+    // persist: true
   }
 
   get uploaded() {

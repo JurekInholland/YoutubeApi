@@ -1,9 +1,18 @@
 import { Repository, type Item } from 'pinia-orm'
 import YoutubeVideo from '@/models/YoutubeVideo'
 import { apiService } from '@/constants'
+import type LocalVideo from '@/models/LocalVideo'
 
 export default class YoutubeVideoRepository extends Repository {
   use = YoutubeVideo
+
+  public addLocalVideo(video: LocalVideo) {
+    const existing = this.getById(video.id)
+    if (existing) {
+      existing.localVideo = video
+      this.save(existing)
+    }
+  }
 
   public getAll() {
     return this.withAll().get()

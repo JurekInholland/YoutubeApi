@@ -19,7 +19,7 @@ onMounted(() => {
         <!-- <h1>home</h1>
         <p>{{ route }}</p> -->
 
-        <VideoRow :videos="store.videos" />
+        <VideoRow :videos="store.videos" :offset="0" />
         <VideoRow :videos="store.videos" :offset="1" />
         <hr>
 
