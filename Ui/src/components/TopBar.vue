@@ -87,10 +87,11 @@ const onMouseLeave = () => {
     activeIndex.value = -1;
 }
 const onSearch = () => {
+
     console.log("SEARCHING FOR ", searchQuery.value)
     searchFocs.value = false;
 
-    if (store.searchQuery === "") {
+    if (searchQuery.value === "") {
         return;
     }
     store.searchQuery = searchQuery.value;
@@ -140,10 +141,13 @@ const toggleSidebar = (val: boolean) => {
 }
 const toggleUserMenu = () => {
     console.log("TOGGLE user menu")
+    notificationMenuOpen.value = false;
     userMenuOpen.value = !userMenuOpen.value;
 }
 
 const togglenotificationMenu = () => {
+    userMenuOpen.value = false;
+    console.log("TOGGLE NOTIFICATION menu", notificationMenuOpen.value)
     notificationMenuOpen.value = !notificationMenuOpen.value;
 }
 </script>
@@ -204,20 +208,27 @@ const togglenotificationMenu = () => {
                 <Icon style="font-size: 1.1rem;" icon="simple-line-icons:magnifier" />
             </button>
 
-            <router-link class="button" :to="{name: 'queue'}" text="" >
+            <router-link class="button" to="/queue">
                 <Icon style="font-size: 1.5rem;" icon="carbon:query-queue" />
             </router-link>
+            <!-- <router-link class="button" :to="{name: 'queue'}" >
+                <Icon style="font-size: 1.5rem;" icon="simple-line-icons:magnifier" />
+            </router-link> -->
             <!-- <button class="queue" @click="router.push('queue')"> -->
             <!-- <Icon style="font-size: 1.5rem;" icon="carbon:query-queue" /> -->
             <!-- </button> -->
 
-            <button @click="togglenotificationMenu">
+            <button @click.stop="togglenotificationMenu">
                 <Icon style="font-size: 1.5rem;" icon="mdi:bell" />
             </button>
-
             <PageMenu v-if="notificationMenuOpen" v-click-outside-element="togglenotificationMenu">
                 <div>
                     Notifications
+                    <p>para</p>
+                    <p>para</p>
+                    <p>para</p>
+                    <p>para</p>
+                    <p>para</p>
                     <p>para</p>
                 </div>
             </PageMenu>
@@ -671,6 +682,9 @@ display: block;
         transition: all .2s ease;
         margin: 0;
         padding: .65rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     // button:hover {
@@ -741,8 +755,10 @@ input:focus-within+.results {
     display: flex;
 }
 
+.button,
 button {
     border: 1px solid transparent;
+    box-sizing: border-box;
 }
 
 button:hover {
@@ -751,6 +767,7 @@ button:hover {
     // border: 1px solid rgb(64, 64, 64);
 }
 
+.button:active,
 button:active {
     transition: background .2s ease, border-color .2s ease;
     background-color: rgb(84, 84, 84);

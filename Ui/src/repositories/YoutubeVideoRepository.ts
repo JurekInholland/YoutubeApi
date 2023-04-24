@@ -1,4 +1,4 @@
-import { Repository } from 'pinia-orm'
+import { Repository, type Item } from 'pinia-orm'
 import YoutubeVideo from '@/models/YoutubeVideo'
 import { apiService } from '@/constants'
 
@@ -6,10 +6,10 @@ export default class YoutubeVideoRepository extends Repository {
   use = YoutubeVideo
 
   public getAll() {
-    return this.all()
+    return this.withAll().get()
   }
-  public getById(id: string) {
-    return this.withAll().find(id)
+  public getById(id: string): YoutubeVideo {
+    return this.withAll().find(id) as YoutubeVideo
   }
   public addVideo(video: YoutubeVideo) {
     this.save(video)
@@ -18,7 +18,9 @@ export default class YoutubeVideoRepository extends Repository {
     this.flush()
   }
   public getChannelVideos(channelId: string): YoutubeVideo[] {
-    return this.with('youtubeChannel').all().filter((video) => video.youtubeChannelId === channelId) as YoutubeVideo[]
+    return this.withAll()
+      .where((video) => video.channelId === channelId)
+      .get() as YoutubeVideo[]
   }
 
   public async fetchById(id: string) {
@@ -29,8 +31,10 @@ export default class YoutubeVideoRepository extends Repository {
     this.save(res)
   }
 
-  public getRelatedVideos(ids: string[]): YoutubeVideo[] {
-    return this.withAll().all().filter((video) => ids.includes(video.id)) as YoutubeVideo[]
+  public getRelatedVideos(ids: string[]) : YoutubeVideo[] {
+    return this.withAll()
+      .where((video) => ids.includes(video.id))
+      .get() as YoutubeVideo[]
   }
 
   public async fetchRelatedVideos(ids: string[]) {

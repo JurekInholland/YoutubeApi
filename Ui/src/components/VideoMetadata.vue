@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 import { Icon } from '@iconify/vue';
 
-import type { YoutubeVideo } from '@/types';
+import type YoutubeVideo from '@/models/YoutubeVideo';
 import { formatDateAgo, formatDescription, formatViews, formatDate, formatTitle } from '@/utils';
 import ToggleButton from "@/components/ToggleButton.vue";
 import ProgressBar from "@/components/ProgressBar.vue";
@@ -79,7 +79,8 @@ const backupVideo = async () => {
 }
 
 const runtimeSeconds = computed(() => {
-    const [hours, minutes, seconds] = props.video.duration.split(":").map(part => parseInt(part));
+    const duration = props.video.duration as string;
+    const [hours, minutes, seconds] = duration.split(":").map(part => parseInt(part));
     // console.log("runtimeSeconds", hours, minutes, seconds, hours * 3600 + minutes * 60 + seconds)
     return hours * 3600 + minutes * 60 + seconds;
 })
@@ -111,7 +112,8 @@ watch(props, (val) => {
             <div id="owner">
                 <router-link v-if="video.youtubeChannel"
                     :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }" id="avatar">
-                    <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" />
+                    <img :src="`${video.youtubeChannel.thumbnailUrl}`" alt="avatar" />    
+                    <!-- <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" /> -->
                 </router-link>
                 <div class="upload-info">
                     <router-link v-if="video.youtubeChannel"

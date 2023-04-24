@@ -2,8 +2,11 @@
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import type { PlayerState } from '@/types';
 import { YoutubeIframe } from '@vue-youtube/component';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import YoutubePlayerUpNext from './player/YoutubePlayerUpNext.vue';
+import { useRepo } from 'pinia-orm';
+import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
+import type YoutubeVideo from '@/models/YoutubeVideo';
 const store = useYoutubeStore();
 
 const isInitialized = ref(false);
@@ -14,6 +17,10 @@ const props = defineProps<{
 }>()
 const youtube = ref<HTMLDivElement | undefined>() as any;
 
+const upNextVideo = computed(() => {
+    const vid = useRepo(YoutubeVideoRepository).getById(props.videoId)
+    return useRepo(YoutubeVideoRepository).getById(vid?.relatedVideos[0]) as YoutubeVideo;
+});
 
 const onReady = (event: any) => {
     console.log('ready', event.target);
@@ -88,7 +95,7 @@ onBeforeUnmount(() => {
     <div class="yotube-wrapper">
         <div>{{ playerState.duration - playerState.currentTime }}</div>
         <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
-            <youtube-player-up-next :video="store.relatedVideos[0]" />
+            <youtube-player-up-next :video="upNextVideo" />
         </div>
         <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"
             @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{

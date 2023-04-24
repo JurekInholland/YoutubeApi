@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YoutubeVideo } from '@/types';
+import type  YoutubeVideo  from '@/models/YoutubeVideo';
 import { formatTitle } from '@/utils';
 import { onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';

@@ -17,13 +17,15 @@ public class TaskService : BackgroundService, ITaskService
 
     private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(1000));
     private PeriodicTimer _cleaningTaskTimer = new(TimeSpan.FromMilliseconds(5000));
+    private readonly YoutubeHub _hub;
 
 
-    public TaskService(ILogger<TaskService> logger, IServiceScopeFactory scopeFactory)
+    public TaskService(ILogger<TaskService> logger, IServiceScopeFactory scopeFactory, YoutubeHub hub)
 
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
+        _hub = hub;
     }
 
     /// <summary>
@@ -90,6 +92,8 @@ public class TaskService : BackgroundService, ITaskService
     private async Task DoWorkAsync(CancellationToken stoppingToken)
     {
         if (stoppingToken.IsCancellationRequested) return;
+
+        await _hub.SendTaskUpdate(Enums.ApplicationTask.CleanUpDownloadQueue, Enums.TaskStatus.Started);
 
         _logger.LogInformation("DT: {Date}", DateTime.Now.ToString("O"));
     }
