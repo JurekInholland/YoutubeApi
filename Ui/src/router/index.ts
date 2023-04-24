@@ -101,6 +101,18 @@ const router = createRouter({
       path: '/orm',
       name: 'debugorm',
       component: () => import('../views/OrmTests.vue')
+    },
+
+
+    {
+      path: '/ormvideo',
+      name: 'debugormvideo',
+      component: () => import('../views/OrmVideoPage.vue')
+    },
+    {
+      path: '/ormvideo/:videoId',
+      name: 'debugormvideo',
+      component: () => import('../views/OrmVideoPage.vue')
     }
   ],
   scrollBehavior() {

@@ -43,7 +43,6 @@ import { useRoute } from "vue-router"
 import { formatTitle } from "@/utils"
 import VideoPlayer from "@/components/VideoPlayer.vue"
 import NotFound from "@/components/NotFound.vue"
-import { useFavicon } from '@vueuse/core'
 import type { PlayerState } from "@/types"
 
 // const toggle = ref(false)
@@ -54,7 +53,7 @@ const route = useRoute()
 const store = useYoutubeStore()
 const calcH = ref("100%")
 
-const playerStats: Ref<PlayerState> = ref<PlayerState>({
+const playerStats = ref<PlayerState>({
   isPlaying: false,
   volume: 0.5,
   currentTime: 0,

@@ -3,7 +3,7 @@ import { useRepo } from 'pinia-orm'
 import YoutubeVideo from '@/models/YoutubeVideo';
 import YoutubeChannel from '@/models/YoutubeChannel';
 import { ormService, apiService } from '@/constants'
-import { computed, onMounted, ref, type Ref } from 'vue';
+import { computed, onMounted, ref, type ComputedRef, type Ref } from 'vue';
 import { AxiosError } from 'axios';
 import VideoLink from '@/components/VideoLink.vue';
 import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
@@ -15,7 +15,7 @@ const channels = useRepo(YoutubeChannelRepository);
 
 const chan = computed(() => channels.getById("UCuAXFkgsw1L7xaCfnd5JJOw"));
 
-const channelVids = computed(() => useRepo(YoutubeVideoRepository).with('youtubeChannel').where('youtubeChannelId', "UCuAXFkgsw1L7xaCfnd5JJOw").orderBy(vid => vid.uploaded).get());
+const channelVids = computed(() => useRepo(YoutubeVideoRepository).with('youtubeChannel').where('youtubeChannelId', "UCuAXFkgsw1L7xaCfnd5JJOw").orderBy(vid => vid.uploaded).get()) as ComputedRef<YoutubeVideo[]>;
 
 const mountedChannel: Ref<YoutubeChannel | null> = ref(null)
 const newFetch = async () => {
@@ -24,24 +24,7 @@ const newFetch = async () => {
 
 const fetchVideo = async () => {
 
-    await repo.fetchById("dQw4w9WgXcQ")
-    return;
-    // const video = await ormService.getVideoById("WFkSKEo3CVw");
-    const video = await apiService.GetVideoInfo("ZHlenYEeNz0")
-    // const isVid = video instanceof YoutubeVideo;
-    if (!(video instanceof AxiosError)) {
-        const channel = await apiService.getChannelById(video.youtubeChannel!.id);
-        console.log("CHANNEL: ", channel)
-        debugger;
-        if (channel !== undefined) {
-            // const inserted = videoRepo.insert(channel.videos!)
-            const inserted = useRepo(YoutubeChannel).save(channel)
-            console.log(inserted);
-            // debugger;
-        }
-    }
-    // videoRepo.save(video);
-    // console.log(video);
+    await repo.fetchById("dQw4w9WgXcQ");
 }
 
 const vids = computed(() => videoRepo.withAll().get());
