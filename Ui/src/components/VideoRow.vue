@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YoutubeVideo } from '@/types';
+import type  YoutubeVideo from '@/models/YoutubeVideo';
 import { computed } from '@vue/reactivity';
 import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import VideoLink from './VideoLink.vue';

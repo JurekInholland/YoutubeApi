@@ -7,13 +7,7 @@ export default class YoutubeChannelRepository extends Repository {
   use = YoutubeChannel
 
   public getById(channelId: string): YoutubeChannel | null {
-    const channel = this.find(channelId)
-    const videos = useRepo(YoutubeVideoRepository).getChannelVideos(channelId)
-    // debugger;
-    // if (channel != null && videos != null) {
-    //     channel.videos = videos
-    // }
-    // console.log('getById: ', channel)
+    const channel = this.withAll().find(channelId)
     return channel
   }
 

@@ -213,8 +213,8 @@ public partial class ScrapeService : IScrapeService
         Console.WriteLine();
         return new ChannelMetadata
         {
-            AvatarUrl = bestAva.Item3,
-            BannerUrl = bestBan.Item3,
+            AvatarUrl = $"https://yt3.googleusercontent.com/{bestAva.Item3}",
+            BannerUrl = $"https://yt3.googleusercontent.com/{bestBan.Item3}",
             VideoCount = c1 + c2,
             Description = desc,
         };

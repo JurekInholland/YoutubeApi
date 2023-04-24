@@ -15,18 +15,18 @@ const router = createRouter({
     {
       path: '/:videoId',
       name: 'video',
-      component: () => import('../views/NewPlayerPage.vue'),
+      component: () => import('../views/OrmVideoPage.vue'),
       meta: { layout: DefaultLayout }
     },
     {
       path: '/watch',
       name: 'watch',
-      component: () => import('../views/NewPlayerPage.vue')
+      component: () => import('../views/OrmVideoPage.vue')
     },
     {
       path: '/shorts/:videoId',
       name: 'shorts',
-      component: () => import('../views/NewPlayerPage.vue')
+      component: () => import('../views/OrmVideoPage.vue')
     },
     {
       path: '/about',
@@ -89,7 +89,7 @@ const router = createRouter({
     {
       path: '/new',
       name: 'new',
-      component: () => import('../views/NewPlayerPage.vue')
+      component: () => import('../views/OrmVideoPage.vue')
     },
 
     {
@@ -113,6 +113,11 @@ const router = createRouter({
       path: '/ormvideo/:videoId',
       name: 'debugormvideo',
       component: () => import('../views/OrmVideoPage.vue')
+    },
+    {
+      path: '/ormchannel/:channelId',
+      name: 'debugormchannel',
+      component: () => import('../views/OrmChannel.vue')
     }
   ],
   scrollBehavior() {
