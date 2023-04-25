@@ -16,7 +16,9 @@ public partial class ScrapeService : IScrapeService
     public ScrapeService(ILogger<ScrapeService> logger, IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
+
         _httpClient = httpClientFactory.CreateClient();
+        _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
     }
 
     [GeneratedRegex(@"""playabilityStatus"":{""status"":""([^""]+)"",""messages"":\[""([^""]+)""")]
@@ -87,6 +89,23 @@ public partial class ScrapeService : IScrapeService
     private static partial Regex ChannelDescription();
 
 
+    [GeneratedRegex(@"<title>([^<]+) - YouTube<\/title>")]
+    private static partial Regex PlaylistTitle();
+
+    [GeneratedRegex(@"""ownerText"":\{""runs"":\[\{""text"":""([^""]+)""")]
+    private static partial Regex PlaylistOwner();
+
+    [GeneratedRegex(@"viewCountText"":\{""simpleText"":""([^""]+)""}")]
+    private static partial Regex PlaylistViewCount();
+
+
+    [GeneratedRegex(@"""numVideosText"":\{""runs"":\[\{""text"":""([^""]+)""\}")]
+    private static partial Regex PlaylistVideosCount();
+
+
+    [GeneratedRegex(@"\{""text"":""Last updated on ""\},\{""text"":""([^""]+)""\}")]
+    private static partial Regex PlaylistLastUpdated();
+
     public async Task<string> GetRawHtml(string url)
     {
         HtmlDocument htmlDocument = await GetHtmlDocument(url);
@@ -116,6 +135,35 @@ public partial class ScrapeService : IScrapeService
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
         return await ScrapeVideos(sourceCode);
+    }
+
+    public async Task<YoutubePlaylist> ScrapePlaylist(string playlistId)
+    {
+        var url = $"https://www.youtube.com/playlist?list={playlistId}";
+        HtmlDocument document = await GetHtmlDocument(url);
+        string sourceCode = document.DocumentNode.OuterHtml;
+
+        var title = PlaylistTitle().Match(sourceCode).Groups[1].Value;
+        var owner = PlaylistOwner().Match(sourceCode).Groups[1].Value;
+
+        var viewCount = PlaylistViewCount().Match(sourceCode).Groups[1].Value;
+        var lastUpdated = PlaylistLastUpdated().Match(sourceCode).Groups[1].Value;
+        var videos = await ScrapeVideos(sourceCode);
+        int.TryParse(PlaylistVideosCount().Match(sourceCode).Groups[1].Value, out int numVideos);
+        YoutubePlaylist playlist = new YoutubePlaylist
+        {
+            Id = playlistId,
+            Title = title,
+            Author = owner,
+            Videos = videos,
+            ViewCount = viewCount,
+            VideoCount = numVideos,
+
+            LastUpdated = lastUpdated
+        };
+
+        Console.WriteLine(title + " " + owner);
+        return playlist;
     }
 
     public async Task<YoutubeChannel> ScrapeChannelById(string channelId)

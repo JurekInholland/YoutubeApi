@@ -16,6 +16,9 @@ public class YoutubeAppContext : DbContext
 
     public DbSet<LocalVideo> LocalVideos { get; set; } = null!;
 
+
+    public DbSet<SubscribedChannel> SubscribedChannels { get; set; } = null!;
+
     public YoutubeAppContext(DbContextOptions<YoutubeAppContext> options) : base(options)
     {
     }

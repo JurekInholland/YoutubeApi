@@ -8,6 +8,7 @@
   --link-color: #3EA6FF;
   --suggested-action: #263850;
   --text-color: #fff;
+  --text-color-soft: rgb(170, 170, 170);
   --background-color: #0f0f0f;
 }
 
@@ -22,6 +23,7 @@
 
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
+
   }
 }
 

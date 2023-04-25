@@ -81,6 +81,15 @@ public class ScrapeController : BaseController
         return Ok(res);
     }
 
+    [HttpGet(nameof(ScrapePlaylist))]
+    public async Task<IActionResult> ScrapePlaylist(string playlistId)
+    {
+         var plalist = await _scrapeService.ScrapePlaylist(playlistId);
+        // Response.Headers.Add("Count", res.Length.ToString());
+
+        return Ok(plalist);
+    }
+
     /// <summary>
     /// Scrape youtube search results for a given query
     /// </summary>

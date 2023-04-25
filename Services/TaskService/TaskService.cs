@@ -62,7 +62,8 @@ public class TaskService : BackgroundService, ITaskService
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            await DoWorkAsync(stoppingToken);
+            await UpdateSubscribedChannels(stoppingToken);
+            // await DoWorkAsync(stoppingToken);
         }
     }
 
@@ -100,6 +101,8 @@ public class TaskService : BackgroundService, ITaskService
 
     private async Task UpdateSubscribedChannels(CancellationToken stoppingToken)
     {
+        Console.WriteLine("### Updating subscribed channels ###");
+
         if (stoppingToken.IsCancellationRequested) return;
 
         var unitOfWork = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -108,7 +111,22 @@ public class TaskService : BackgroundService, ITaskService
         var subscribedChannels = await unitOfWork.SubscribedChannels.All().ToListAsync(stoppingToken);
         foreach (SubscribedChannel channel in subscribedChannels)
         {
-            var videos  = await scrapeService.ScrapeChannelById(channel.Id);
+            Console.WriteLine($"Updating channel {channel.Channel.Title}");
+
+            YoutubeChannel chan = await scrapeService.ScrapeChannelById(channel.Id);
+            foreach (var video in chan.Videos!)
+            {
+                var found = await unitOfWork.YoutubeVideos.Where(x => x.Id == video.Id).FirstOrDefaultAsync();
+
+                if (found is null)
+                {
+                    Console.WriteLine($"Adding video {video.Title}");
+                }
+                else
+                {
+                    Console.WriteLine($"Updating video {video.Title}");
+                }
+            }
         }
     }
 }

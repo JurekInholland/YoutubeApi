@@ -33,7 +33,7 @@ const parallax = ref<number>(-15)
 
 const computedStyle = computed(() => {
     return {
-        transform: `translateY(-${parallax.value / 3}px)`
+        transform: `translateY(-${parallax.value / 2}px)`
     }
 })
 </script>
@@ -46,53 +46,77 @@ const computedStyle = computed(() => {
             <div class="channel-content ">
 
                 <div class="header">
-
-                    <img class="avatar" :src="channel.thumbnailUrl" alt="">
+                    <div class="avatar">
+                        <img :src="channel.thumbnailUrl" alt="">
+                    </div>
                     <div class="info">
                         <h1>{{ channel.title }}</h1>
-                        <div>
+                        <div class="stats">
                             {{ channel.handle }}&nbsp;
                             {{ channel.subscribers }} subscribers&nbsp;
                             {{ channel.videoCount }}&nbsp;
                         </div>
-                        <div v-html="formatDescription(channel.description)"></div>
+                        <div class="description" v-html="formatDescription(channel.description)"></div>
 
                     </div>
                 </div>
 
-                <VideoRow :videos="videos" :offset="0" />
-                <VideoRow :videos="videos" :offset="1" />
+                <div class="video-grid">
+                    <VideoLink v-for="video in videos" :video="video" :key="video.id" />
+                </div>
+
+                </div>
+                <!-- <VideoRow :videos="videos" :offset="0" />
+                <VideoRow :videos="videos" :offset="1" /> -->
                 <hr>
-            </div>
-            <!-- <VideoLink v-for="video in videos" :video="video" :key="video.id" /> -->
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
-hr
-{
+hr {
     margin-bottom: 15rem;
 }
+
 .header {
     display: flex;
     gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: center;
     h1 {
         font-size: 1.5rem;
         line-height: normal;
     }
 }
+.info {
+}
+.stats {
+    font-size: 14px;
+    color: var(--text-color-soft);
+    margin-bottom: 1rem;
+    font-weight: 500;
+
+}
+
+.description {
+    color: var(--text-color-soft);
+
+}
 
 .avatar {
-
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: center;
+    width: 175px;
+    min-width: 125px;
+    img {
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: center;
+        width: 100%;
+    }
 }
 
 .banner {
     width: 100%;
-    height: 16vw;
+    height: 17vw;
     object-fit: contain;
     // object-position: center;
     position: sticky;
@@ -103,7 +127,13 @@ hr
 }
 
 .channel-content {
-    padding: 1rem;
+    padding: 3rem;
     background-color: var(--background-color);
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
 </style>
