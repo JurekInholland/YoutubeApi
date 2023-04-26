@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -172,7 +172,7 @@ public partial class ScrapeService : IScrapeService
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
         var channelMetadata = await ScrapeChannelInfo(sourceCode);
-        var videos = (await ScrapeVideos(sourceCode)).Where(v => v != null && v.YoutubeChannel.Id == channelId).Select(v => v!).ToArray();
+        var videos = (await ScrapeVideos(sourceCode, maxResults)).Where(v => v != null && v.YoutubeChannel.Id == channelId).Select(v => v!).ToArray();
 
         var channel = new YoutubeChannel
         {

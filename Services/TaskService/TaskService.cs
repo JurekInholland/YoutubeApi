@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.DomainModels;
+using Services.QueueService;
 using Services.ScrapeService;
 
 namespace Services.TaskService;
@@ -101,32 +102,36 @@ public class TaskService : BackgroundService, ITaskService
 
     private async Task UpdateSubscribedChannels(CancellationToken stoppingToken)
     {
-        Console.WriteLine("### Updating subscribed channels ###");
-
         if (stoppingToken.IsCancellationRequested) return;
+        _logger.LogInformation("### Updating subscribed channels ###");
 
-        var unitOfWork = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var scrapeService = _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IScrapeService>();
+        using var scope = _scopeFactory.CreateScope();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var scrapeService = scope.ServiceProvider.GetRequiredService<IScrapeService>();
+        var queueService = scope.ServiceProvider.GetRequiredService<IQueueService>();
 
         var subscribedChannels = await unitOfWork.SubscribedChannels.All().ToListAsync(stoppingToken);
-        foreach (SubscribedChannel channel in subscribedChannels)
-        {
-            Console.WriteLine($"Updating channel {channel.Channel.Title}");
 
-            YoutubeChannel chan = await scrapeService.ScrapeChannelById(channel.Id);
-            foreach (var video in chan.Videos!)
+        foreach (var channel in subscribedChannels)
+        {
+            _logger.LogInformation("Updating channel {ChannelId}", channel.Id);
+
+            YoutubeChannel chan = await scrapeService.ScrapeChannelById(channel.Id, 64);
+            if (chan.Videos == null) continue;
+
+            foreach (YoutubeVideo video in chan.Videos)
             {
-                var found = await unitOfWork.YoutubeVideos.Where(x => x.Id == video.Id).FirstOrDefaultAsync();
+                var found = await unitOfWork.YoutubeVideos.Where(x => x.Id == video.Id).FirstOrDefaultAsync(stoppingToken);
+
+                _logger.LogInformation(found is null ? $"Adding video {video.Title}" : $"Updating video {video.Title}");
 
                 if (found is null)
                 {
-                    Console.WriteLine($"Adding video {video.Title}");
-                }
-                else
-                {
-                    Console.WriteLine($"Updating video {video.Title}");
+                    await queueService.EnqueueDownload(video.Id);
                 }
             }
         }
+        _logger.LogInformation("Finished updating subscribed channels. Processing queue");
+        await queueService.ProcessQueue(stoppingToken);
     }
 }
