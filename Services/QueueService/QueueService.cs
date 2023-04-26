@@ -162,6 +162,7 @@ public class QueueService : BackgroundService, IQueueService
         LocalVideo localVideo = new()
         {
             Id = queuedDownload.Video.Id,
+            YoutubeVideo = queuedDownload.Video,
             Path = videoPath,
             Width = width,
             Height = height,
