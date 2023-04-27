@@ -18,7 +18,7 @@ public class YoutubeHub : Hub
 
     public async Task SendTaskUpdate(Enums.ApplicationTask task, Enums.TaskStatus status)
     {
-        await Clients.All.SendAsync("taskUpdate", new TaskProgress
+        await Send("taskUpdate", new TaskProgress
         {
             Time = DateTime.Now,
             Task = task,
@@ -28,17 +28,29 @@ public class YoutubeHub : Hub
 
     public async Task SendDownloadProgress(DownloadProgress progress)
     {
-        await Clients.All.SendAsync("downloadProgress", progress);
+        await Send("downloadProgress", progress);
     }
 
     public async Task SendObject(string user, string callbackName, object obj)
     {
         // _logger.LogInformation("Sending object to {User}", user);
-        await Clients.All.SendAsync(callbackName, obj);
+        await Send(callbackName, obj);
     }
 
     public async Task SendLocalVideo(LocalVideo local)
     {
-        await Clients.All.SendAsync("localVideo", local);
+        await Send("localVideo", local);
+    }
+
+    private async Task Send(string method, object? obj)
+    {
+        try
+        {
+            await Clients.All.SendAsync(method, obj);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning("Exception during send: {Exception}", e);
+        }
     }
 }

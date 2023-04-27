@@ -21,7 +21,7 @@ export default class YoutubeChannel extends Model {
       avatar: this.string(''),
       banner: this.string(''),
       description: this.string(''),
-      // videos: this.hasMany(YoutubeVideo, 'id', 'id')
+      videos: this.hasMany(YoutubeVideo, 'youtubeChannelId', 'id')
     }
   }
     static casts() {

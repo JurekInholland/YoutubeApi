@@ -14,11 +14,9 @@ export default class ApiService {
       }
     })
   }
-// ------------------ ORM CALLS ------------------
+  // ------------------ ORM CALLS ------------------
 
-
-
-// ------------------ API CALLS ------------------
+  // ------------------ API CALLS ------------------
 
   public async getChannelById(id: string): Promise<YoutubeChannel | undefined> {
     const res = await this.request<YoutubeChannel>({
@@ -27,7 +25,6 @@ export default class ApiService {
       params: { channelId: id }
     })
     if (res instanceof Error) {
-      debugger;
       return undefined
     }
     return res
@@ -85,12 +82,14 @@ export default class ApiService {
     return res
   }
 
-  public async GetVideos(): Promise<YoutubeVideo[] | AxiosError> {
+  public async GetVideos(): Promise<YoutubeVideo[]> {
     const res = await this.request<YoutubeVideo[]>({
       method: 'GET',
-      url: apiUrls.getVideos
+      url: apiUrls.getAllVideos
     })
-    console.log(res)
+    if (res instanceof Error) {
+      return []
+    }
     return res
   }
 
@@ -109,7 +108,7 @@ export default class ApiService {
   public async GetVideoInfo(videoId: string): Promise<YoutubeVideo | AxiosError> {
     const res = await this.request<YoutubeVideo>({
       method: 'GET',
-      url: `${apiUrls.getVideoInfo}`,
+      url: `${apiUrls.getVideo}`,
       params: { videoId: videoId }
     })
     console.log(res)

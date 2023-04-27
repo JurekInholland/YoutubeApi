@@ -121,15 +121,15 @@ const calculateHeight = (width: number) => {
 <template>
     <div>
         <div class="outer" v-if="found && mounted">
-            <div class="container" :class="playerStats.cinema ? 'cinema' : ''" id="container1" ref="container">
+            <div class="container" :class="playerStats.cinema ? 'cinema' : ''" ref="container">
                 <div class="layout">
                     <div class="player-box">
                         <YoutubePlayer v-if="currentVid && !playerStats.useLocalPlayer && currentVid?.playableInEmbed"
                             :player-state="playerStats" ref="playerEl" v-bind="$attrs" class="player" id="player"
                             :videoId="currentVid.id" />
 
-                        <VideoPlayer :player-state="playerStats" :cinema="playerStats.cinema" :related-videos="relatedVideos"
-                            v-else-if="playerStats.useLocalPlayer" ref="playerEl"
+                        <VideoPlayer :player-state="playerStats" :cinema="playerStats.cinema"
+                            :related-videos="relatedVideos" v-else-if="playerStats.useLocalPlayer" ref="playerEl"
                             :src="`/api/LocalVideo/GetVideoStream?videoId=${currentVid?.id}`" :color="store.color"
                             @update:cinema="toggleCinema" @update:picture-in-picture="onPictureInPicture" />
 
@@ -141,7 +141,7 @@ const calculateHeight = (width: number) => {
                         <VideoMetadata v-if="currentVid" class="metadata" @update:cinema="toggleCinema"
                             :cinema="playerStats.cinema" :useLocalPlayer="playerStats.useLocalPlayer"
                             :modelValue="playerStats.cinema" :video="currentVid" @update:custom-player="togglePlayer" />
-                            {{ playerStats }}
+                        {{ playerStats }}
                         <div id="primary" v-auto-animate></div>
                     </div>
                 </div>
@@ -281,7 +281,7 @@ const calculateHeight = (width: number) => {
     flex-basis: 540px;
     flex-grow: 1;
     gap: var(--gutter-width);
-    transition: all .5s ease;
+    // transition: all .5s ease;
 }
 
 #primary {

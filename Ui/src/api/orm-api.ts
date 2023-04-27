@@ -7,7 +7,7 @@ export default class OrmService extends BaseApiService {
   public async getVideoById(videoId: string): Promise<YoutubeVideo | null> {
     const res = await this.request<YoutubeChannel>({
       method: 'GET',
-      url: `${apiUrls.getVideoInfo}`,
+      url: `${apiUrls.getVideo}`,
       params: { videoId: videoId }
     })
     if (res instanceof Error) {

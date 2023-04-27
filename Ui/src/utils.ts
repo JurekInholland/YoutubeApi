@@ -19,11 +19,11 @@ export function formatTitle(title: string): string {
     .replaceAll('&quot;', '"')
     .replaceAll("''", "'")
   
-  if (formatted.includes('#')) {
-    const split = formatted.split('<span class="tag">')
-    console.log("split: ", split)
-    return formatted.replace(split[0], '<span dir="auto" class="main">' + split[0] + '&nbsp;</span>')
-  }
+  // if (formatted.includes('#')) {
+  //   const split = formatted.split('<span class="tag">')
+  //   console.log("split: ", split)
+  //   return formatted.replace(split[0], '<span dir="auto" class="main">' + split[0] + '&nbsp;</span>')
+  // }
   return formatted
 }
 

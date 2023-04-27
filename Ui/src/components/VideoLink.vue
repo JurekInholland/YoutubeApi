@@ -19,13 +19,15 @@ const props = defineProps<{
             </div>
 
             <div class="infos">
-                <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+                <router-link v-if="video.youtubeChannel"
+                    :to="{ name: 'channel', params: { username: video.youtubeChannel.title } }">
                     <img :src="`/api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" />
                 </router-link>
                 <div class="text">
                     <h3 v-html="formatTitle(video.title)" class="title"></h3>
-                    <router-link :to="{ name: 'channel-id', params: { channelId: video.youtubeChannel?.id } }">{{
-                        video.youtubeChannel!.title }}</router-link>
+                    <router-link v-if="video.youtubeChannel"
+                        :to="{ name: 'channel-id', params: { channelId: video.youtubeChannel.id } }">{{
+                            video.youtubeChannel!.title }}</router-link>
                     <!-- <p>pannenkoek2012</p> -->
                     <p>{{ formatViews(video.viewCount) }} views <span class="separator">{{ formatDateAgo(video.uploadDate)
                     }}</span></p>

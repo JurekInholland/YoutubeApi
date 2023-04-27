@@ -33,7 +33,7 @@ public class YoutubeAppContext : DbContext
                 NamingFormat = "{id} - {title}s{ext}",
                 MaxVideoDuration = TimeSpan.FromMinutes(60),
                 CleanUpInterval = 5000,
-                WorkInterval = 1000
+                WorkInterval = 10000
             });
         // modelBuilder.Entity<RelatedVideo>().Property(e => e.Tags)
         //     .HasConversion(

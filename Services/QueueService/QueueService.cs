@@ -98,9 +98,8 @@ public class QueueService : BackgroundService, IQueueService
         }
         catch (Exception e)
         {
-            await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Error);
-
             _logger.LogError(e, "Error processing queue");
+            await _hub.SendTaskUpdate(Enums.ApplicationTask.ProcessDownloadQueue, Enums.TaskStatus.Error);
         }
         finally
         {
@@ -272,6 +271,7 @@ public class QueueService : BackgroundService, IQueueService
 
     public async Task<QueuedDownload> EnqueueDownload(string videoId)
     {
+        _logger.LogInformation("EnqueueDownload {VideoId}", videoId);
         var unitOfWork = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         if (videoId is null or "")
@@ -282,6 +282,7 @@ public class QueueService : BackgroundService, IQueueService
         var queued = unitOfWork.QueuedDownloads.Where(x => x.Id == videoId);
         if (queued.Any())
         {
+            _logger.LogWarning("Video already in queue");
             throw new InvalidOperationException("Video already in queue");
         }
 
@@ -289,6 +290,7 @@ public class QueueService : BackgroundService, IQueueService
 
         if (video?.Duration > TimeSpan.FromMinutes(60))
         {
+            _logger.LogWarning("Video too long");
             throw new InvalidOperationException("Video is too long");
         }
 
@@ -307,7 +309,7 @@ public class QueueService : BackgroundService, IQueueService
         }
         catch (Exception e)
         {
-            Console.WriteLine("ERROR");
+            _logger.LogError(e, "Error while enqueuing download");
             Console.WriteLine(e);
         }
 

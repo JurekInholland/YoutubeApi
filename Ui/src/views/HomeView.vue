@@ -7,21 +7,24 @@ import { useRepo } from 'pinia-orm';
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
+const videoRepo = useRepo(YoutubeVideoRepository);
+
 const store = useYoutubeStore();
 const route = useRoute()
 
 const path = route.path;
 
 const videos = computed(() => {
-    return useRepo(YoutubeVideoRepository).getAll()
+    return videoRepo.getAll()
 })
 
 const local = computed(() => {
     return videos.value.filter(v => v.localVideo !== null)
 })
 
-onMounted(() => {
+onMounted(async () => {
     document.title = "Youtube Clone"
+    await videoRepo.fetchAll()
 })
 </script>
 

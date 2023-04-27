@@ -40,7 +40,7 @@ const computedStyle = computed(() => {
 
 <template>
     <div>
-        <div v-if="channel">
+        <div v-if="channel" class="channel">
 
             <img class="banner" :style="computedStyle" :src="channel?.bannerUrl" alt="">
             <div class="channel-content ">
@@ -77,7 +77,9 @@ const computedStyle = computed(() => {
 hr {
     margin-bottom: 15rem;
 }
-
+.channel {
+    min-height: calc(100svh + 16vw);
+}
 .header {
     display: flex;
     gap: 1rem;

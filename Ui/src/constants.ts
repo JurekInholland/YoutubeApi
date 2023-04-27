@@ -9,8 +9,8 @@ export const apiUrls = {
   processQueue: 'Queue/Process',
   resetQueue: 'Queue/Reset',
 
-  getVideoInfo: 'YoutubeVideo/GetVideo',
-  getVideos: 'YoutubeVideo/GetAll',
+  getVideo: 'YoutubeVideo/GetVideo',
+  getAllVideos: 'YoutubeVideo/GetAll',
 
   getSearchCompletion: 'Youtube/searchCompletion',
   getLocalVideos: 'LocalVideo',

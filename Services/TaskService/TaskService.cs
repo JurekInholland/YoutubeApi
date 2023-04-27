@@ -16,17 +16,20 @@ public class TaskService : BackgroundService, ITaskService
     private readonly ILogger<TaskService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(1000));
-    private PeriodicTimer _cleaningTaskTimer = new(TimeSpan.FromMilliseconds(5000));
+    private PeriodicTimer _timer;
+    private PeriodicTimer _cleaningTaskTimer;
     private readonly YoutubeHub _hub;
+    private readonly IHostApplicationLifetime _lifetime;
 
 
-    public TaskService(ILogger<TaskService> logger, IServiceScopeFactory scopeFactory, YoutubeHub hub)
+    public TaskService(ILogger<TaskService> logger, IServiceScopeFactory scopeFactory, YoutubeHub hub, IHostApplicationLifetime lifetime)
 
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
         _hub = hub;
+
+        _lifetime = lifetime;
     }
 
     /// <summary>
@@ -63,8 +66,8 @@ public class TaskService : BackgroundService, ITaskService
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            // await UpdateSubscribedChannels(stoppingToken);
-            await DoWorkAsync(stoppingToken);
+            await UpdateSubscribedChannels(stoppingToken);
+            // await DoWorkAsync(stoppingToken);
         }
     }
 
@@ -121,17 +124,35 @@ public class TaskService : BackgroundService, ITaskService
 
             foreach (YoutubeVideo video in chan.Videos)
             {
-                var found = await unitOfWork.YoutubeVideos.Where(x => x.Id == video.Id).FirstOrDefaultAsync(stoppingToken);
+                var found = await unitOfWork.YoutubeVideos.All().Where(x => x.Id == video.Id)
+                    .Include(x => x.YoutubeChannel)
+                    .Include(x => x.LocalVideo)
+                    .FirstOrDefaultAsync(stoppingToken);
 
                 _logger.LogInformation(found is null ? $"Adding video {video.Title}" : $"Updating video {video.Title}");
 
                 if (found is null)
                 {
-                    await queueService.EnqueueDownload(video.Id);
+                    var qd = await queueService.EnqueueDownload(video.Id);
+                    Console.WriteLine(qd);
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine("found is found " + found);
                 }
             }
         }
+
         _logger.LogInformation("Finished updating subscribed channels. Processing queue");
-        await queueService.ProcessQueue(stoppingToken);
+        try
+        {
+            await queueService.ProcessQueue(stoppingToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error processing queue");
+            _lifetime.StopApplication();
+        }
     }
 }

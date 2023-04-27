@@ -14,6 +14,11 @@ export default class YoutubeVideoRepository extends Repository {
     }
   }
 
+  public async fetchAll() {
+    const videos = await apiService.GetVideos()
+    this.save(videos)
+  }
+
   public getAll() : YoutubeVideo[] {
     return this.withAll().get() as YoutubeVideo[]
   }
