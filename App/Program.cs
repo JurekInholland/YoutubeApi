@@ -64,7 +64,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<ISettingsManager, SettingsManager>();
 
-builder.Services.AddScoped<IScrapeService, ScrapeService>();
+// TODO: verify scrape service transient
+builder.Services.AddTransient<IScrapeService, ScrapeService>();
 builder.Services.AddScoped<IQueueService, QueueService>();
 builder.Services.AddTransient<ITaskService, TaskService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ITaskService>());

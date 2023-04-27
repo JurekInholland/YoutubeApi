@@ -103,7 +103,6 @@ const router = createRouter({
       component: () => import('../views/OrmTests.vue')
     },
 
-
     {
       path: '/ormvideo',
       name: 'debugormvideo',
@@ -118,11 +117,24 @@ const router = createRouter({
       path: '/ormchannel/:channelId',
       name: 'debugormchannel',
       component: () => import('../views/OrmChannel.vue')
+    },
+    {
+      path: '/debug',
+      name: 'debugormplaylist',
+      component: () => import('../views/DebugView.vue')
     }
   ],
   scrollBehavior() {
     window.scrollTo(0, 0)
   }
+})
+
+router.beforeEach((to, from, next) => {
+  console.log("ROUTE TO:", to)
+  if (to.name === 'watch' && to.query.v?.length !== 11) {
+    console.log('INVALID VIDEO ID')
+  }
+  next()
 })
 
 export default router

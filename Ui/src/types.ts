@@ -37,9 +37,13 @@ export interface LocalVideo {
   height: number
   size: number
   path: string
+  extension: string
+  fps: number
+  vbr: number
+  abr: number
 }
 
-export interface YoutubeVideo {
+export type YoutubeVideo = {
   id: string
   title: string
   thumbnail: string
@@ -111,4 +115,6 @@ export type PlayerState = {
   cinema: boolean
   pictureInPicture: boolean
   useLocalPlayer: boolean
+  width: number
+  height: number
 }

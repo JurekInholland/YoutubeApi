@@ -1,6 +1,5 @@
 import { Model } from 'pinia-orm'
 import YoutubeVideo from './YoutubeVideo'
-import type { V } from 'pinia-orm/dist/Data-77556be8'
 import { ArrayCast } from 'pinia-orm/dist/casts'
 
 export default class YoutubeChannel extends Model {
@@ -11,7 +10,7 @@ export default class YoutubeChannel extends Model {
 
   static fields() {
     return {
-      id: this.string(''),
+      id: this.attr(null),
       title: this.string(''),
       handle: this.string(''),
       thumbnailUrl: this.string(''),
@@ -22,10 +21,10 @@ export default class YoutubeChannel extends Model {
       avatar: this.string(''),
       banner: this.string(''),
       description: this.string(''),
-      videos: this.hasMany(YoutubeVideo, 'youtubeChannelId')
+      // videos: this.hasMany(YoutubeVideo, 'id', 'id')
     }
   }
-    static casts(): V {
+    static casts() {
       return {
         videos: ArrayCast
       }

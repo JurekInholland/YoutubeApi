@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -11,12 +11,13 @@ namespace Services.ScrapeService;
 public partial class ScrapeService : IScrapeService
 {
     private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ScrapeService> _logger;
 
     public ScrapeService(ILogger<ScrapeService> logger, IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
-
+        _httpClientFactory = httpClientFactory;
         _httpClient = httpClientFactory.CreateClient();
         _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
     }
@@ -115,7 +116,8 @@ public partial class ScrapeService : IScrapeService
 
     private async Task<HtmlDocument> GetHtmlDocument(string url)
     {
-        var html = await _httpClient.GetStringAsync(url);
+        HttpClient client = _httpClientFactory.CreateClient();
+        var html = await client.GetStringAsync(url);
         var htmlDocument = new HtmlDocument();
         htmlDocument.LoadHtml(html);
         return htmlDocument;
@@ -166,8 +168,9 @@ public partial class ScrapeService : IScrapeService
         return playlist;
     }
 
-    public async Task<YoutubeChannel> ScrapeChannelById(string channelId)
+    public async Task<YoutubeChannel> ScrapeChannelById(string channelId, int maxResults=20)
     {
+        Console.WriteLine("Scraping channel " + channelId);
         var url = $"https://www.youtube.com/channel/{channelId}";
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
@@ -398,6 +401,7 @@ public partial class ScrapeService : IScrapeService
                 Comments = null!,
                 RelatedVideos = relatedVideoIds.Skip(1).ToArray(),
                 playableInEmbed = playableInEmbed == "true",
+                YoutubeChannelId = externalChannelId,
                 YoutubeChannel = new YoutubeChannel
                 {
                     Id = externalChannelId,

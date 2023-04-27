@@ -51,7 +51,7 @@ const toggleCinema = () => {
     // emits('update:modelValue', !props.modelValue);
 }
 
-const tog: Ref<boolean> = ref(props.modelValue);
+const tog = ref(false);
 
 watch(tog, (val) => {
     console.log('watch tog' + val)
@@ -112,7 +112,7 @@ watch(props, (val) => {
             <div id="owner">
                 <router-link v-if="video.youtubeChannel"
                     :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }" id="avatar">
-                    <img :src="`${video.youtubeChannel.thumbnailUrl}`" alt="avatar" />    
+                    <img :src="`${video.youtubeChannel.thumbnailUrl}`" alt="avatar" />
                     <!-- <img :src="`api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" /> -->
                 </router-link>
                 <div class="upload-info">
@@ -135,8 +135,6 @@ watch(props, (val) => {
                 </div>
                 <ToggleButton v-if="props.video.localVideo" v-model="tog">{{ tog ? 'Custom Player' : 'Youtube Player' }}
                 </ToggleButton>
-
-                <!-- <Vue3ToggleButton v-model="tog" :handleColor="'#cc00cc'"> </Vue3ToggleButton> -->
                 <button v-if="!props.video.localVideo" :disabled="runtimeSeconds > 3600 || queueItem !== undefined"
                     @click="backupVideo" class="backup-button">
                     <Icon icon="material-symbols:cloud-download-rounded" />

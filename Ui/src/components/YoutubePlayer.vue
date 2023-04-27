@@ -40,8 +40,29 @@ const onReady = (event: any) => {
 
 };
 const onStateChange = (event: any) => {
-    console.log('onStateChange', event.data);
+
+    const events: { [key: string]: string } = {
+        "-1": "unstarted",
+        "0": "ended",
+        "1": "playing",
+        "2": "paused",
+        "3": "buffering",
+        "5": "video cued"
+    }
+    console.log('onStateChange', events[event.data.toString()]);
+    // -1 (unstarted)
+    // 0 (ended)
+    // 1 (playing)
+    // 2 (paused)
+    // 3 (buffering)
+    // 5 (video cued).
+
     const isPlaying = event.data === 1;
+
+    if (isPlaying) {
+        props.playerState.duration = event.target.getDuration();
+    }
+
     if (event.data === 0) {
         props.playerState.currentTime = props.playerState.duration;
     }
@@ -66,7 +87,12 @@ const onMessage = (event: MessageEvent) => {
     }
 
     if (data.info?.volume !== undefined) {
-        props.playerState.volume = data.info.volume / 100;
+        if (data.info.muted) {
+            props.playerState.volume = 0
+        }
+        else {
+            props.playerState.volume = data.info.volume / 100;
+        }
     }
 };
 

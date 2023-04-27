@@ -15,7 +15,6 @@ export const addSeperators = (num: number, separator: string = ','): string => {
 }
 export function formatTitle(title: string): string {
   const formatted = title
-    .replaceAll(/(?<!&)#([\w-]+)/g, '<span class="tag"><a href="/tags/$1"> #$1&nbsp; </a></span> ')
     .replaceAll('&#39;', "'")
     .replaceAll('&quot;', '"')
     .replaceAll("''", "'")

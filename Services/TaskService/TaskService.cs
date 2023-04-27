@@ -63,8 +63,8 @@ public class TaskService : BackgroundService, ITaskService
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            await UpdateSubscribedChannels(stoppingToken);
-            // await DoWorkAsync(stoppingToken);
+            // await UpdateSubscribedChannels(stoppingToken);
+            await DoWorkAsync(stoppingToken);
         }
     }
 

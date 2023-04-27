@@ -2,20 +2,16 @@
 import type YoutubeVideo from '@/models/YoutubeVideo';
 import { useRepo } from 'pinia-orm'
 import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
-
-
 import VideoMetadata from "@/components/VideoMetadata.vue"
 import YoutubePlayer from "@/components/YoutubePlayer.vue"
 import { useYoutubeStore } from "@/stores/youtubeStore"
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from "vue"
-import { useResizeObserver } from "@vueuse/core"
 import Sidebar from "@/components/Sidebar.vue"
-import { useRoute } from "vue-router"
-import { formatTitle } from "@/utils"
+import { useRoute, useRouter } from "vue-router"
 import VideoPlayer from "@/components/VideoPlayer.vue"
 import NotFound from "@/components/NotFound.vue"
 import type { PlayerState } from "@/types"
-import { defaultState } from '@/constants';
+
 
 const route = useRoute();
 const store = useYoutubeStore();
@@ -23,8 +19,10 @@ const playerEl = ref<HTMLDivElement | null>(null) as any
 const mounted = ref(false)
 const calcH = ref("100%")
 const found = computed(() => {
-    return currentVid.value !== null && currentVid.value !== undefined
+    return currentVid && currentVid.value !== null && currentVid.value !== undefined
 })
+
+// const found = ref(false)
 
 const videoRepo = useRepo(YoutubeVideoRepository);
 const parsedId = computed(() => {
@@ -40,51 +38,13 @@ const aspectRatio = computed(() => {
     return currentVid.value.width / currentVid.value.height
 })
 const currentVid = computed(() => {
-    return videoRepo.getById(parsedId.value!) as YoutubeVideo
+    return videoRepo.getById(parsedId.value!)
 })
 
-onMounted(() => {
-    mounted.value = true
+const relatedVideos = computed(() => {
+    if (!currentVid.value) return []
+    return videoRepo.getRelatedVideos(currentVid.value.relatedVideos)
 })
-
-watch(route, async () => {
-    // found.value = false
-    // playerStats.value.currentTime = 0;
-    if (parsedId.value === null) return
-    await videoRepo.fetchById(parsedId.value);
-    playerStats.value.useLocalPlayer = currentVid.value?.localVideo !== undefined
-    if (currentVid.value && currentVid.value !== null && currentVid.value !== undefined) found.value = true
-    // found.value = true
-}, { immediate: true });
-
-
-
-watch(currentVid, async (val) => {
-    if (val === null) {
-        await videoRepo.fetchById(parsedId.value!)
-        // found.value = true
-    }
-    console.log("WATCH CURRENT VID", val)
-    await nextTick()
-    calculateHeight(playerEl.value?.$el.offsetWidth)
-}, { immediate: true })
-
-// function storeTestData() {
-//     useRepo(Channel).save({
-//         id: "test",
-//         title: "test channel",
-//         videos: [
-//             { id: "vid1id", title: 'vid1', channelId: 'test' },
-//             { id: "vid2id", title: 'vid2', channelId: 'test' },
-//             { id: "vid3id", title: 'vid3', channelId: 'test' }
-//         ]
-//     })
-// }
-// const dbgVids = computed(() => {
-//     // working?
-//     return useRepo(Video).withAll().where('channelId', 'test').get()
-//     // return useRepo(Channel).withAll().first()?.videos ?? []
-// })
 
 const playerStats = ref<PlayerState>({
     isPlaying: false,
@@ -96,8 +56,47 @@ const playerStats = ref<PlayerState>({
     settings: false,
     cinema: false,
     pictureInPicture: false,
-    useLocalPlayer: false
+    useLocalPlayer: false,
+    width: 1280,
+    height: 720
 })
+onMounted(() => {
+    mounted.value = true
+})
+
+watch(route, async () => {
+    // found.value = false
+    playerStats.value.currentTime = 0;
+    playerStats.value.duration = 100;
+    if (parsedId.value === null) return
+    await videoRepo.fetchById(parsedId.value);
+    await nextTick()
+    // playerStats.value.useLocalPlayer = true
+
+    // const clocal = currentVid.value?.localVideo
+    // debugger;
+    // if (currentVid.value && currentVid.value !== null && currentVid.value !== undefined) found.value = true
+    // await nextTick()
+    // found.value = true
+}, { immediate: true });
+
+
+
+watch(currentVid, async (val) => {
+    if (val === null) {
+        await videoRepo.fetchById(parsedId.value!)
+        return;
+    }
+    console.log("WATCH CURRENT VID", val)
+    await nextTick()
+    calculateHeight(playerEl.value?.$el.offsetWidth)
+    playerStats.value.width = val.width
+    playerStats.value.height = val.height
+    playerStats.value.useLocalPlayer = val.localVideo !== null
+}, { immediate: true })
+
+
+
 const togglePlayer = (val: boolean) => {
     console.log("toggle player" + val)
     playerStats.value.useLocalPlayer = val
@@ -129,12 +128,11 @@ const calculateHeight = (width: number) => {
                             :player-state="playerStats" ref="playerEl" v-bind="$attrs" class="player" id="player"
                             :videoId="currentVid.id" />
 
-                        <VideoPlayer :player-state="playerStats" :cinema="playerStats.cinema"
+                        <VideoPlayer :player-state="playerStats" :cinema="playerStats.cinema" :related-videos="relatedVideos"
                             v-else-if="playerStats.useLocalPlayer" ref="playerEl"
                             :src="`/api/LocalVideo/GetVideoStream?videoId=${currentVid?.id}`" :color="store.color"
-                            @update:cinema="toggleCinema" @update:picture-in-picture="onPictureInPicture">
+                            @update:cinema="toggleCinema" @update:picture-in-picture="onPictureInPicture" />
 
-                        </VideoPlayer>
                         <div v-else-if="!currentVid!.playableInEmbed">NOT EMEBEDDABLE</div>
                         <div v-else>NOT FOUND</div>
 
@@ -143,6 +141,7 @@ const calculateHeight = (width: number) => {
                         <VideoMetadata v-if="currentVid" class="metadata" @update:cinema="toggleCinema"
                             :cinema="playerStats.cinema" :useLocalPlayer="playerStats.useLocalPlayer"
                             :modelValue="playerStats.cinema" :video="currentVid" @update:custom-player="togglePlayer" />
+                            {{ playerStats }}
                         <div id="primary" v-auto-animate></div>
                     </div>
                 </div>

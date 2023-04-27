@@ -1,11 +1,12 @@
 import { Model } from 'pinia-orm'
 import YoutubeChannel from './YoutubeChannel'
 import { DateCast } from 'pinia-orm/dist/casts'
+import LocalVideo from './LocalVideo'
 
 export default class YoutubeVideo extends Model {
   static entity = 'videos'
   static piniaOptions = {
-    // persist: true
+    persist: true
   }
 
   get uploaded() {
@@ -14,7 +15,7 @@ export default class YoutubeVideo extends Model {
 
   static fields() {
     return {
-      id: this.string(''),
+      id: this.attr(null),
       title: this.string(''),
       thumbnail: this.string(''),
       youtubeThumbnailUrl: this.string(''),
@@ -32,7 +33,8 @@ export default class YoutubeVideo extends Model {
       relatedVideos: this.attr([]),
       playableInEmbed: this.boolean(false),
       youtubeChannelId: this.attr(null),
-      youtubeChannel: this.belongsTo(YoutubeChannel, 'youtubeChannelId')
+      youtubeChannel: this.belongsTo(YoutubeChannel, 'youtubeChannelId'),
+      localVideo: this.hasOne(LocalVideo, 'id')
     }
   }
   static casts() {

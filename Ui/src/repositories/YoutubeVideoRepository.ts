@@ -1,4 +1,4 @@
-import { Repository, type Item } from 'pinia-orm'
+import { Repository, type Item, useRepo } from 'pinia-orm'
 import YoutubeVideo from '@/models/YoutubeVideo'
 import { apiService } from '@/constants'
 import type LocalVideo from '@/models/LocalVideo'
@@ -14,8 +14,8 @@ export default class YoutubeVideoRepository extends Repository {
     }
   }
 
-  public getAll() {
-    return this.withAll().get()
+  public getAll() : YoutubeVideo[] {
+    return this.withAll().get() as YoutubeVideo[]
   }
   public getById(id: string): YoutubeVideo {
     return this.withAll().find(id) as YoutubeVideo
@@ -33,14 +33,19 @@ export default class YoutubeVideoRepository extends Repository {
   }
 
   public async fetchById(id: string) {
+    console.log('fetching video by id:', id)
     const res = await apiService.GetVideoInfo(id)
     if (res instanceof Error) {
       console.log('Error fetching video by id: ', res)
+      return null
     }
+    console.log('RES ID: ', res)
+    // var insert = useRepo(YoutubeVideo).make(res)
+    // var insert = this.make(res)
     this.save(res)
   }
 
-  public getRelatedVideos(ids: string[]) : YoutubeVideo[] {
+  public getRelatedVideos(ids: string[]): YoutubeVideo[] {
     return this.withAll()
       .where((video) => ids.includes(video.id))
       .get() as YoutubeVideo[]

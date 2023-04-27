@@ -9,20 +9,21 @@ import SvgButton from '@/components/buttons/SvgButton.vue';
 import UpNext from '@/components/player/UpNext.vue';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import type { PlayerState } from '@/types';
-import { useRoute } from 'vue-router';
 import PlayerTooltip from './player/PlayerTooltip.vue';
 import SvgLink from './buttons/SvgLink.vue';
 import { roundTo } from '@/utils';
-import router from '@/router';
+import { useRouter } from 'vue-router';
+import type YoutubeVideo from '@/models/YoutubeVideo';
 
-const route = useRoute();
-const store = useYoutubeStore();
+const router = useRouter();
+// const store = useYoutubeStore();
 
 const props = defineProps<{
     src: string,
     color: string,
     cinema: boolean,
-    playerState: PlayerState
+    playerState: PlayerState,
+    relatedVideos: YoutubeVideo[]
 }>()
 
 const emits = defineEmits<{
@@ -64,9 +65,12 @@ const currentHoverTime: Ref<string> = ref("0:00");
 const currentPositionOffset: Ref<number> = ref(0);
 const currentPositionPercent: Ref<string> = ref("0%");
 
-const volString: Ref<string> = ref(props.playerState.volume.toString());
+const volString = ref<string>(props.playerState.volume.toString());
 const mounted = ref(false);
 
+watch(() => props.playerState.volume, () => {
+    volString.value = props.playerState.volume.toString();
+})
 
 const handleBuffer = (evt: Event) => {
     if (video.value == null) return;
@@ -116,7 +120,6 @@ onMounted(() => {
     window.addEventListener('fullscreenchange', onFullscreenChange)
 
     if (video.value != null) {
-        video.value.volume = props.playerState.volume;
         setupPlayer();
 
         video.value.onplaying = async () => {
@@ -228,7 +231,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "N" && e.shiftKey) {
         console.log("shift n")
         e.preventDefault();
-        router.push({ name: 'watch', query: { v: store.relatedVideos[0].id } });
+        router.push({ name: 'watch', query: { v: props.relatedVideos[0].id } });
     }
     if (e.key === "p") {
         if (e.shiftKey) {
@@ -375,6 +378,8 @@ const onReplay = () => {
     props.playerState.currentTime = 0;
     video.value?.play();
     props.playerState.isPlaying = true;
+    props.playerState.width = video.value?.videoWidth ?? 0;
+    props.playerState.height = video.value?.videoHeight ?? 0;
     // animationId.value = requestAnimationFrame(smoothUpdate);
 }
 
@@ -430,15 +435,12 @@ const smoothUpdate = () => {
                     <PlayerTooltip text="Replay" />
                 </SvgButton>
 
-                <SvgLink v-if="store.relatedVideos[0]" class="button"
+                <SvgLink v-if="props.relatedVideos[0]" class="button"
                     path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z" text=""
-                    :href="{ name: 'watch', query: { v: store.relatedVideos[0].id } }">
-                    <UpNext :video="store.relatedVideos[0]" />
+                    :href="{ name: 'watch', query: { v: props.relatedVideos[0].id } }">
+                    <UpNext :video="props.relatedVideos[0]" />
                 </SvgLink>
 
-                <!-- <SvgButton class="next-button" path="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z">
-                                                                                                                <UpNext :video="store.relatedVideos[0]" />
-                                                                                                            </SvgButton> -->
                 <div class="volume-container">
                     <VolumeButton id="volume-btn" @click.stop="toggleMute" :volume="playerState.volume">
 
@@ -447,7 +449,7 @@ const smoothUpdate = () => {
                     </VolumeButton>
                     <input class="volume-input" @click.stop="" @input="onVolumeChange"
                         :style="{ 'background-size': Math.round(Math.floor(playerState.volume * 100)) + '% 100%' }" :min="0"
-                        :max="1" step="any" :v-model="volString" type="range">
+                        :max="1" step="any" v-model="volString" type="range">
                 </div>
 
 
@@ -455,8 +457,7 @@ const smoothUpdate = () => {
                     {{ formatTime(playerState.currentTime) }} / {{ formatTime(playerState.duration) }}
 
                 </div>
-                {{ store.currentVideo!.height }}p
-                <SettingsButton :toggled="playerState.settings" :hd="store.currentVideo!.width >= 960"
+                <SettingsButton :toggled="playerState.settings" :hd="playerState.width >= 960"
                     @click.stop="playerState.settings = !playerState.settings">
                     <PlayerTooltip v-if="!playerState.settings" text="Settings" />
                 </SettingsButton>

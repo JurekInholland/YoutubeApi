@@ -43,12 +43,15 @@ public class QueueController : BaseController
     [HttpGet(nameof(Process))]
     public async Task<IActionResult> Process()
     {
-        if ((await _unitOfWork.ApplicationSettings.GetSettings()).CurrentTask != null)
+        var currentTask = (await _unitOfWork.ApplicationSettings.GetSettings()).CurrentTask;
+        if (currentTask != null)
         {
+            _logger.LogWarning("Task already running " + currentTask);
             return BadRequest("Task already running");
         }
 
         Task.Run(() => _queueService.ProcessQueue(CancellationToken.None));
+        _logger.LogInformation("Started processing queue");
         return Ok();
     }
 
