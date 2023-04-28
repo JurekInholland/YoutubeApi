@@ -37,5 +37,7 @@ export const defaultState: PlayerState = {
   settings: false,
   cinema: false,
   pictureInPicture: false,
-  useLocalPlayer: false
+  useLocalPlayer: false,
+  width: 0,
+  height: 0
 }

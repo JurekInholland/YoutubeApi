@@ -5,7 +5,7 @@ import type YoutubeVideo from '@/models/YoutubeVideo'
 
 export default class OrmService extends BaseApiService {
   public async getVideoById(videoId: string): Promise<YoutubeVideo | null> {
-    const res = await this.request<YoutubeChannel>({
+    const res = await this.request<YoutubeVideo>({
       method: 'GET',
       url: `${apiUrls.getVideo}`,
       params: { videoId: videoId }
