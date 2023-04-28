@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(YoutubeAppContext))]
-    [Migration("20230410030607_SettingsIntervals")]
-    partial class SettingsIntervals
+    [Migration("20230427211602_New")]
+    partial class New
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,16 @@ namespace Domain.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("BackupIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CheckForNewVideosIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("CleanUpInterval")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CurrentTask")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("DownloadPath")
@@ -39,6 +48,12 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("UpdateChannelsIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UpdateVideosIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("WorkInterval")
                         .HasColumnType("INTEGER");
 
@@ -50,11 +65,15 @@ namespace Domain.Migrations
                         new
                         {
                             Id = "1",
+                            BackupIntervalSeconds = 0L,
+                            CheckForNewVideosIntervalSeconds = 0L,
                             CleanUpInterval = 5000L,
                             DownloadPath = "data/videos",
                             MaxVideoDuration = new TimeSpan(0, 1, 0, 0, 0),
                             NamingFormat = "{id} - {title}s{ext}",
-                            WorkInterval = 1000L
+                            UpdateChannelsIntervalSeconds = 0L,
+                            UpdateVideosIntervalSeconds = 0L,
+                            WorkInterval = 10000L
                         });
                 });
 
@@ -80,7 +99,7 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Size")
+                    b.Property<long>("Size")
                         .HasColumnType("INTEGER");
 
                     b.Property<float>("Vbr")
@@ -115,9 +134,38 @@ namespace Domain.Migrations
                     b.ToTable("QueuedDownloads");
                 });
 
+            modelBuilder.Entity("Models.DomainModels.SubscribedChannel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ChannelId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastChecked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SubscriptionType")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("SubscribedChannels");
+                });
+
             modelBuilder.Entity("Models.DomainModels.YoutubeChannel", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BannerUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Handle")
@@ -133,6 +181,10 @@ namespace Domain.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VideoCount")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -251,6 +303,9 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("playableInEmbed")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("YoutubeChannelId");
@@ -274,6 +329,15 @@ namespace Domain.Migrations
                         .HasForeignKey("VideoId");
 
                     b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("Models.DomainModels.SubscribedChannel", b =>
+                {
+                    b.HasOne("Models.DomainModels.YoutubeChannel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId");
+
+                    b.Navigation("Channel");
                 });
 
             modelBuilder.Entity("Models.DomainModels.YoutubeComment", b =>

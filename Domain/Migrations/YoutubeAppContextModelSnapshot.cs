@@ -70,7 +70,7 @@ namespace Domain.Migrations
                             NamingFormat = "{id} - {title}s{ext}",
                             UpdateChannelsIntervalSeconds = 0L,
                             UpdateVideosIntervalSeconds = 0L,
-                            WorkInterval = 1000L
+                            WorkInterval = 10000L
                         });
                 });
 

@@ -11,14 +11,107 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(YoutubeAppContext))]
-    [Migration("20230402213424_VirtualTwo")]
-    partial class VirtualTwo
+    [Migration("20230428013858_Ints")]
+    partial class Ints
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
+
+            modelBuilder.Entity("Models.ApplicationSettings", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("BackupIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CheckForNewVideosIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CleanUpInterval")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CurrentTask")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DownloadPath")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan>("MaxVideoDuration")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NamingFormat")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdateChannelsIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UpdateVideosIntervalSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("WorkInterval")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1",
+                            BackupIntervalSeconds = 0L,
+                            CheckForNewVideosIntervalSeconds = 0L,
+                            CleanUpInterval = 5000L,
+                            DownloadPath = "data/videos",
+                            MaxVideoDuration = new TimeSpan(0, 1, 0, 0, 0),
+                            NamingFormat = "{id} - {title}s{ext}",
+                            UpdateChannelsIntervalSeconds = 0L,
+                            UpdateVideosIntervalSeconds = 0L,
+                            WorkInterval = 10000L
+                        });
+                });
+
+            modelBuilder.Entity("Models.DomainModels.LocalVideo", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Abr")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Fps")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("Vbr")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LocalVideos");
+                });
 
             modelBuilder.Entity("Models.DomainModels.QueuedDownload", b =>
                 {
@@ -41,16 +134,33 @@ namespace Domain.Migrations
                     b.ToTable("QueuedDownloads");
                 });
 
-            modelBuilder.Entity("Models.DomainModels.RelatedVideo", b =>
+            modelBuilder.Entity("Models.DomainModels.SubscribedChannel", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ChannelId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ChannelTitle")
+                    b.Property<DateTime?>("LastChecked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SubscriptionType")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("SubscribedChannels");
+                });
+
+            modelBuilder.Entity("Models.DomainModels.YoutubeChannel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BannerUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -58,17 +168,14 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("LikeCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("PublishTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Tags")
+                    b.Property<string>("Handle")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Thumbnail")
+                    b.Property<int>("SubscriberCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ThumbnailUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -76,12 +183,12 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ViewCount")
+                    b.Property<int>("VideoCount")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.ToTable("RelatedVideo");
+                    b.ToTable("YoutubeChannels");
                 });
 
             modelBuilder.Entity("Models.DomainModels.YoutubeComment", b =>
@@ -142,18 +249,7 @@ namespace Domain.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<float>("Abr")
-                        .HasColumnType("REAL");
-
                     b.Property<string>("Categories")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelUrl")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -167,17 +263,6 @@ namespace Domain.Migrations
                     b.Property<TimeSpan>("Duration")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DurationString")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("FileSize")
-                        .HasColumnType("INTEGER")
-                        .HasAnnotation("Relational:JsonPropertyName", "filesize_approx");
-
-                    b.Property<int>("Fps")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Height")
                         .HasColumnType("INTEGER");
 
@@ -186,6 +271,10 @@ namespace Domain.Migrations
 
                     b.Property<long>("LikeCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("RelatedVideos")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Thumbnail")
                         .IsRequired()
@@ -198,18 +287,6 @@ namespace Domain.Migrations
                     b.Property<DateTime>("UploadDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Uploader")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UploaderId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasAnnotation("Relational:JsonPropertyName", "uploader_id");
-
-                    b.Property<float>("Vbr")
-                        .HasColumnType("REAL");
-
                     b.Property<long>("ViewCount")
                         .HasColumnType("INTEGER");
 
@@ -220,9 +297,27 @@ namespace Domain.Migrations
                     b.Property<int>("Width")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("YoutubeChannelId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("playableInEmbed")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("YoutubeChannelId");
+
                     b.ToTable("YoutubeVideos");
+                });
+
+            modelBuilder.Entity("Models.DomainModels.LocalVideo", b =>
+                {
+                    b.HasOne("Models.DomainModels.YoutubeVideo", null)
+                        .WithOne("LocalVideo")
+                        .HasForeignKey("Models.DomainModels.LocalVideo", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Models.DomainModels.QueuedDownload", b =>
@@ -234,6 +329,15 @@ namespace Domain.Migrations
                     b.Navigation("Video");
                 });
 
+            modelBuilder.Entity("Models.DomainModels.SubscribedChannel", b =>
+                {
+                    b.HasOne("Models.DomainModels.YoutubeChannel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId");
+
+                    b.Navigation("Channel");
+                });
+
             modelBuilder.Entity("Models.DomainModels.YoutubeComment", b =>
                 {
                     b.HasOne("Models.DomainModels.YoutubeVideo", null)
@@ -243,7 +347,25 @@ namespace Domain.Migrations
 
             modelBuilder.Entity("Models.DomainModels.YoutubeVideo", b =>
                 {
+                    b.HasOne("Models.DomainModels.YoutubeChannel", "YoutubeChannel")
+                        .WithMany("Videos")
+                        .HasForeignKey("YoutubeChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("YoutubeChannel");
+                });
+
+            modelBuilder.Entity("Models.DomainModels.YoutubeChannel", b =>
+                {
+                    b.Navigation("Videos");
+                });
+
+            modelBuilder.Entity("Models.DomainModels.YoutubeVideo", b =>
+                {
                     b.Navigation("Comments");
+
+                    b.Navigation("LocalVideo");
                 });
 #pragma warning restore 612, 618
         }
