@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import VideoLink from '@/components/VideoLink.vue';
+import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
 import { useYoutubeStore } from '@/stores/youtubeStore';
+import { useRepo } from 'pinia-orm';
 import { onMounted } from 'vue';
 
 const store = useYoutubeStore();
 
-onMounted(() => {
+const videos = useRepo(YoutubeVideoRepository).getAll();
+
+onMounted(async () => {
     // store.fetchVideos();
-    store.fetchLocalVideos();
+    // store.fetchLocalVideos();
+    await useRepo(YoutubeVideoRepository).fetchAll();
 })
 
 </script>
@@ -15,7 +20,7 @@ onMounted(() => {
 <template>
     <div class="container">
         <div class="content">
-            <VideoLink v-for="video of store.localVideos" :video="video" />
+            <VideoLink v-for="video of videos" :video="video" />
         </div>
     </div>
 </template>

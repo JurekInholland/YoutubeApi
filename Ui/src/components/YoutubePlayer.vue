@@ -130,13 +130,13 @@ const onBlur = () => {
     <div class="yotube-wrapper" @click.prevent.stop="onContext">
         <!-- <div>{{ playerState.duration - playerState.currentTime }}</div> -->
         <transition name="fade">
-            <!-- <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
+            <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
                 <YoutubePlayerUpNext :video="upNextVideo" />
-            </div> -->
-
-            <div class="overlay">
-                <UpNextGrid :videos="props.relatedVideos" />
             </div>
+
+            <!-- <div class="overlay">
+                <UpNextGrid :videos="props.relatedVideos" />
+            </div> -->
 
         </transition>
         <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"

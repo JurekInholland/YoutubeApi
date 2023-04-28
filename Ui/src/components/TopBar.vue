@@ -99,7 +99,8 @@ const onSearch = () => {
         router.push({ name: "results", query: { search_query: store.searchQuery } })
     }
     else {
-        store.fetchSearchResults(store.searchQuery);
+        // TODO: fix this
+        // store.fetchSearchResults(store.searchQuery);
     }
     // store.fetchSearchResults(store.searchQuery)
 }

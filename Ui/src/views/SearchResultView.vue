@@ -16,7 +16,8 @@ watch(() => route.query.search_query, async (newVal, oldVal) => {
     store.searchQuery = newVal as string
     store.clearSearchResults()
     if (newVal !== oldVal && newVal !== "") {
-        await store.fetchSearchResults(newVal as string)
+        // TODO: Fix this
+        // await store.fetchSearchResults(newVal as string)
     }
 })
 onMounted(async () => {
@@ -26,7 +27,7 @@ onMounted(async () => {
     if (store.searchResults[searchQuery]) {
         return
     }
-    await store.fetchSearchResults(searchQuery)
+    // await store.fetchSearchResults(searchQuery)
 
 })
 

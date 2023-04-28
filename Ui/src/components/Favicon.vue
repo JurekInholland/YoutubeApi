@@ -21,16 +21,16 @@ function createFavicon(backgroundColor: string, foregroundColor: string, rotated
 function setAppIcon() {
     icon.value = createFavicon(store.color.replace('#', ''), "fff", true)
     return;
-    if (route.name === "video") {
-        if (store.currentVideo?.localVideo !== undefined) {
-            return;
-        }
-        else {
-            console.log("local video ICONS", store.currentVideo?.localVideo)
+    // if (route.name === "video") {
+    //     if (store.currentVideo?.localVideo !== undefined) {
+    //         return;
+    //     }
+    //     else {
+    //         console.log("local video ICONS", store.currentVideo?.localVideo)
 
-        }
-    }
-    icon.value = createFavicon("ff0000", "fff", false)
+    //     }
+    // }
+    // icon.value = createFavicon("ff0000", "fff", false)
 }
 
 
@@ -38,9 +38,9 @@ watch(() => route.path, async () => {
     setAppIcon();
 })
 
-watch(() => store.currentVideo, () => {
-    setAppIcon();
-}) 
+// watch(() => store.currentVideo, () => {
+//     setAppIcon();
+// }) 
 
 watch(() => store.color, () => {
     setAppIcon();
