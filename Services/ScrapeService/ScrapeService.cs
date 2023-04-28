@@ -131,13 +131,6 @@ public partial class ScrapeService : IScrapeService
         return await ScrapeVideos(sourceCode);
     }
 
-    public async Task<YoutubeVideo[]> ScrapeChannelByHandle(string userName)
-    {
-        var url = $"https://www.youtube.com/@{userName}";
-        HtmlDocument document = await GetHtmlDocument(url);
-        string sourceCode = document.DocumentNode.OuterHtml;
-        return await ScrapeVideos(sourceCode);
-    }
 
     public async Task<YoutubePlaylist> ScrapePlaylist(string playlistId)
     {
@@ -168,14 +161,46 @@ public partial class ScrapeService : IScrapeService
         return playlist;
     }
 
-    public async Task<YoutubeChannel> ScrapeChannelById(string channelId, int maxResults=20)
+    public async Task<YoutubeChannel> ScrapeChannelByHandle(string userName, int maxResults = 20)
+    {
+        var url = $"https://www.youtube.com/@{userName}";
+        HtmlDocument document = await GetHtmlDocument(url);
+        string sourceCode = document.DocumentNode.OuterHtml;
+        var channelMetadata = await ScrapeChannelInfo(sourceCode);
+
+        var videos = await ScrapeVideos(sourceCode);
+        var channel = new YoutubeChannel
+        {
+            Id = videos[0].YoutubeChannel.Id,
+            Videos = videos,
+            Title = videos[0].YoutubeChannel.Title,
+            Handle = videos[0].YoutubeChannel.Handle,
+
+            ThumbnailUrl = channelMetadata.AvatarUrl,
+            BannerUrl = channelMetadata.BannerUrl,
+            SubscriberCount = videos[0].YoutubeChannel.SubscriberCount,
+            VideoCount = channelMetadata.VideoCount,
+            Description = channelMetadata.Description,
+        };
+
+        foreach (var video in channel.Videos)
+        {
+            video.YoutubeChannelId = channel.Id;
+            video.YoutubeChannel = null!;
+        }
+
+        return channel;
+    }
+
+    public async Task<YoutubeChannel> ScrapeChannelById(string channelId, int maxResults = 20)
     {
         Console.WriteLine("Scraping channel " + channelId);
         var url = $"https://www.youtube.com/channel/{channelId}";
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
         var channelMetadata = await ScrapeChannelInfo(sourceCode);
-        var videos = (await ScrapeVideos(sourceCode, maxResults)).Where(v => v != null && v.YoutubeChannel.Id == channelId).Select(v => v!).ToArray();
+        var videos = (await ScrapeVideos(sourceCode, maxResults)).Where(v => v != null && v.YoutubeChannel.Id == channelId).Select(v => v!)
+            .ToArray();
 
         var channel = new YoutubeChannel
         {
@@ -186,7 +211,7 @@ public partial class ScrapeService : IScrapeService
 
             ThumbnailUrl = channelMetadata.AvatarUrl,
             BannerUrl = channelMetadata.BannerUrl,
-            Subscribers = videos[0].YoutubeChannel.Subscribers,
+            SubscriberCount = videos[0].YoutubeChannel.SubscriberCount,
             VideoCount = channelMetadata.VideoCount,
             Description = channelMetadata.Description,
         };
@@ -195,13 +220,8 @@ public partial class ScrapeService : IScrapeService
         {
             video.YoutubeChannelId = channelId;
             video.YoutubeChannel = null!;
-            // video.YoutubeChannel = channel;
         }
 
-        // foreach (var video in channel.Videos)
-        // {
-        //     video.YoutubeChannel = null!;
-        // }
         return channel;
     }
 
@@ -260,13 +280,14 @@ public partial class ScrapeService : IScrapeService
         // _logger.LogInformation(c1 + " " + c2);
 
         var desc = ChannelDescription().Match(sourceCode).Groups[1].Value;
+        int.TryParse(c1, out int numVideos);
 
         Console.WriteLine();
         return new ChannelMetadata
         {
             AvatarUrl = $"https://yt3.googleusercontent.com/{bestAva.Item3}",
             BannerUrl = $"https://yt3.googleusercontent.com/{bestBan.Item3}",
-            VideoCount = c1 + c2,
+            VideoCount = numVideos,
             Description = desc,
         };
     }
@@ -374,12 +395,14 @@ public partial class ScrapeService : IScrapeService
         string playabilityStatus = PlayabilityStatus().Match(sourceCode).Groups[1].Value;
         string playabilityStatusMessage = PlayabilityStatus().Match(sourceCode).Groups[2].Value;
 
+        int.TryParse(followerCount, out int subscriberCount);
         if (likeCount is "No" or "") likeCount = "0";
 
         if (playabilityStatus != "")
         {
             throw new ArgumentException(playabilityStatusMessage != "" ? playabilityStatusMessage : playabilityStatus);
         }
+
 
         try
         {
@@ -408,7 +431,7 @@ public partial class ScrapeService : IScrapeService
                     Title = channelName,
                     Handle = ownerProfileUrl.Replace("http://www.youtube.com/", ""),
                     ThumbnailUrl = avatarUrl,
-                    Subscribers = followerCount,
+                    SubscriberCount = subscriberCount,
                     Videos = null!
                 }
             };

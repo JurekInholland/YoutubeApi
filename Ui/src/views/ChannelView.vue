@@ -24,13 +24,14 @@ const channelVideos = ref<YoutubeVideo[]>([]);
 onMounted(async () => {
     document.title = `@${username}`;
     console.log("CH ID", id)
-    await store.fetchChannelById(id);
-    channelVideos.value = store.channelVideos(id);
+    // await store.fetchChannelById(id);
+    // channelVideos.value = store.channelVideos(id);
     // await store.fetchChannelByHandle(username);
 });
 </script>
 <template>
-    <div class="container" v-if="channelVideos.length > 0">
+    <p>{{ route }}</p>
+    <!-- <div class="container" v-if="channelVideos.length > 0">
         <div class="banner">
             <img src="" alt="">
         </div>
@@ -41,12 +42,11 @@ onMounted(async () => {
         <p v-html="formatDescription(channelVideos[0].youtubeChannel!.description)"></p>
         <div class="container">
             <section class="videos">
-                <!-- <VideoLink v-for="video of store.videos" :video="video" /> -->
                 <VideoLink v-for="video of channelVideos" :video="video" />
 
             </section>
         </div>
-    </div>
+    </div> -->
 </template>
 
 <style scoped lang="scss">

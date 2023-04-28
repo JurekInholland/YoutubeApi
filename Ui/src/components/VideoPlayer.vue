@@ -14,6 +14,7 @@ import SvgLink from './buttons/SvgLink.vue';
 import { roundTo } from '@/utils';
 import { useRouter } from 'vue-router';
 import type YoutubeVideo from '@/models/YoutubeVideo';
+import YoutubePlayerUpNext from './player/YoutubePlayerUpNext.vue';
 
 const router = useRouter();
 // const store = useYoutubeStore();
@@ -406,6 +407,10 @@ const smoothUpdate = () => {
         :class="[playerState.isPlaying ? '' : 'paused', playerState.settings ? 'settings' : '', idleTime > 50 ? 'cursor-hidden' : '']"
         @click="onClick">
 
+        <div class="overlay" @click.stop="" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
+            <YoutubePlayerUpNext :video="props.relatedVideos[0]" />
+        </div>
+
         <div class="video-controls-container" :class="idleTime > 50 && playerState.isFullscreen ? 'hidden' : ''">
             <div ref="timeline_container" class="timeline-container" @mousemove="onMouseMove" @click.stop="onTimelineClick"
                 @mousedown="">
@@ -487,6 +492,8 @@ const smoothUpdate = () => {
                 </div>
             </div>
         </div>
+
+
         <video :muted="false" class="player" id="vid" aria-description="video" :src="props.src" ref="video">
         </video>
     </div>
@@ -498,7 +505,10 @@ const smoothUpdate = () => {
 *::after {
     box-sizing: border-box;
 }
-
+.overlay {
+    top: 0;
+    bottom: 0;
+}
 .tp {
     width: 0;
     position: absolute;

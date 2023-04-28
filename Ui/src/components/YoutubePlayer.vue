@@ -7,13 +7,15 @@ import YoutubePlayerUpNext from './player/YoutubePlayerUpNext.vue';
 import { useRepo } from 'pinia-orm';
 import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
 import type YoutubeVideo from '@/models/YoutubeVideo';
+import UpNextGrid from './player/UpNextGrid.vue';
 const store = useYoutubeStore();
 
 const isInitialized = ref(false);
 
 const props = defineProps<{
     videoId: string,
-    playerState: PlayerState
+    playerState: PlayerState,
+    relatedVideos: YoutubeVideo[]
 }>()
 const youtube = ref<HTMLDivElement | undefined>() as any;
 
@@ -115,16 +117,30 @@ onBeforeUnmount(() => {
 
 });
 
+const onContext = (e: Event) => {
+    e.preventDefault();
+    console.log("ytplayer context");
+}
+const onBlur = () => {
+    console.log("ytplayer blur");
+}
 </script>
 
 <template>
-    <div class="yotube-wrapper">
-        <div>{{ playerState.duration - playerState.currentTime }}</div>
-        <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
-            <youtube-player-up-next :video="upNextVideo" />
-        </div>
+    <div class="yotube-wrapper" @click.prevent.stop="onContext">
+        <!-- <div>{{ playerState.duration - playerState.currentTime }}</div> -->
+        <transition name="fade">
+            <!-- <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
+                <YoutubePlayerUpNext :video="upNextVideo" />
+            </div> -->
+
+            <div class="overlay">
+                <UpNextGrid :videos="props.relatedVideos" />
+            </div>
+
+        </transition>
         <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"
-            @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{
+            @state-change="onStateChange" @error="onError" @message="onMessage" @blur="onBlur" :player-vars="{
                     // https://developers.google.com/youtube/player_parameters#Parameters
                     iv_load_policy: 3,
                     color: 'white',
@@ -139,22 +155,19 @@ onBeforeUnmount(() => {
     </div>
 </template>
 
-<style >
+<style scoped lang="scss">
 .overlay {
-    background-color: rgba(0, 0, 0, 1);
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     bottom: 1.9rem;
     top: 3.6rem;
-    right: 0;
-    width: 100%;
-    z-index: 1;
-
+    // top: 0;
+    // bottom: 0;
+    // position: relative;
+    // max-height: 100%;
+    overflow: hidden;
 }
+</style>
 
-
+<style>
 .youtube-wrapper {
     display: flex;
     justify-content: center;

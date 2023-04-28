@@ -59,7 +59,7 @@ public class ScrapeController : BaseController
         {
             var yt = await _scrapeService.ScrapeChannelByHandle(handle);
 
-            Response.Headers.Add("Count", yt.Length.ToString());
+            Response.Headers.Add("Count", yt.Videos?.Count.ToString());
             return Ok(yt);
         }
         catch (Exception e)
@@ -84,7 +84,7 @@ public class ScrapeController : BaseController
     [HttpGet(nameof(ScrapePlaylist))]
     public async Task<IActionResult> ScrapePlaylist(string playlistId)
     {
-         var plalist = await _scrapeService.ScrapePlaylist(playlistId);
+        var plalist = await _scrapeService.ScrapePlaylist(playlistId);
         // Response.Headers.Add("Count", res.Length.ToString());
 
         return Ok(plalist);

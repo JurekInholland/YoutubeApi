@@ -6,9 +6,16 @@ import YoutubeVideoRepository from './YoutubeVideoRepository'
 export default class YoutubeChannelRepository extends Repository {
   use = YoutubeChannel
 
-  public getById(channelId: string): YoutubeChannel | null {
+  public getById(channelId: string): YoutubeChannel | undefined {
     const channel = this.withAll().find(channelId)
-    return channel
+    return channel ?? undefined
+  }
+
+  public getByHandle(handle: string): YoutubeChannel | undefined {
+    const channel = this.withAll()
+      .where((channel) => channel.handle === handle)
+      .first()
+    return channel ?? undefined
   }
 
   public getChannelVideos(channelId: string): YoutubeVideo[] | null {
@@ -17,11 +24,17 @@ export default class YoutubeChannelRepository extends Repository {
     return useRepo(YoutubeVideoRepository).getChannelVideos(channelId)
   }
 
+  public async fetchByHandle(handle: string): Promise<void> {
+    const res = await apiService.getChannelByHandle(handle)
+    if (res != null) {
+      this.save(res)
+    }
+  }
+
   public async fetchById(id: string): Promise<void> {
     const res = await apiService.getChannelById(id)
-    if (res != undefined) {
+    if (res != null) {
       this.save(res)
-        // useRepo(YoutubeVideoRepository).save(res.videos)
     }
   }
 }

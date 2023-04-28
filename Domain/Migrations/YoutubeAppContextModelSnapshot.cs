@@ -169,9 +169,8 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Subscribers")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("SubscriberCount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
@@ -181,9 +180,8 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("VideoCount")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("VideoCount")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

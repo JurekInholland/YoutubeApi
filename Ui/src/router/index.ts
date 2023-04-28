@@ -70,7 +70,7 @@ const router = createRouter({
     {
       path: '/@:username',
       name: 'channel',
-      component: () => import('../views/ChannelView.vue')
+      component: () => import('../views/OrmChannel.vue')
     },
     {
       path: '/c/@:username',

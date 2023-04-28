@@ -11,7 +11,7 @@ public interface IScrapeService
 
     // public Task<YoutubeVideo[]> ScrapeYoutubeChannel(string url);
     public Task<YoutubeChannel> ScrapeChannelById(string channelId, int maxResults = 20);
-    public Task<YoutubeVideo[]> ScrapeChannelByHandle(string userName);
+    public Task<YoutubeChannel> ScrapeChannelByHandle(string userName, int maxResults = 20);
 
     public Task<YoutubeVideo[]> ScrapeHashtag(string tag);
 

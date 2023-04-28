@@ -356,8 +356,6 @@ const togglenotificationMenu = () => {
 }
 
 hr {
-    border-color: rgba(255, 255, 255, .2);
-    border-top: 0px solid transparent;
     margin: .75rem 1rem;
     margin-left: 0;
 }

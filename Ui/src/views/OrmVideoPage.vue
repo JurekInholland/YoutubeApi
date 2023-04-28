@@ -22,8 +22,6 @@ const found = computed(() => {
     return currentVid && currentVid.value !== null && currentVid.value !== undefined
 })
 
-// const found = ref(false)
-
 const videoRepo = useRepo(YoutubeVideoRepository);
 const parsedId = computed(() => {
     const substring = route.path.substring(1);
@@ -65,19 +63,11 @@ onMounted(() => {
 })
 
 watch(route, async () => {
-    // found.value = false
     playerStats.value.currentTime = 0;
     playerStats.value.duration = 100;
     if (parsedId.value === null) return
-    await videoRepo.fetchById(parsedId.value);
-    await nextTick()
-    // playerStats.value.useLocalPlayer = true
-
-    // const clocal = currentVid.value?.localVideo
-    // debugger;
-    // if (currentVid.value && currentVid.value !== null && currentVid.value !== undefined) found.value = true
-    // await nextTick()
-    // found.value = true
+    if (!currentVid)
+        await videoRepo.fetchById(parsedId.value);
 }, { immediate: true });
 
 
@@ -126,7 +116,7 @@ const calculateHeight = (width: number) => {
                     <div class="player-box">
                         <YoutubePlayer v-if="currentVid && !playerStats.useLocalPlayer && currentVid?.playableInEmbed"
                             :player-state="playerStats" ref="playerEl" v-bind="$attrs" class="player" id="player"
-                            :videoId="currentVid.id" />
+                            :videoId="currentVid.id" :related-videos="relatedVideos" />
 
                         <VideoPlayer :player-state="playerStats" :cinema="playerStats.cinema"
                             :related-videos="relatedVideos" v-else-if="playerStats.useLocalPlayer" ref="playerEl"
@@ -142,10 +132,10 @@ const calculateHeight = (width: number) => {
                             :cinema="playerStats.cinema" :useLocalPlayer="playerStats.useLocalPlayer"
                             :modelValue="playerStats.cinema" :video="currentVid" @update:custom-player="togglePlayer" />
                         {{ playerStats }}
-                        <div id="primary" v-auto-animate></div>
+                        <div id="primary-sidebar"></div>
                     </div>
                 </div>
-                <div id="tele" v-auto-animate v-if="!playerStats.cinema">
+                <div id="cinema-sidebar" v-if="!playerStats.cinema">
                 </div>
             </div>
             <Sidebar :video="currentVid" key="sidebar" class="sidebar" v-if="mounted" :toggled="playerStats.cinema" />
@@ -175,7 +165,7 @@ const calculateHeight = (width: number) => {
     flex-wrap: wrap;
 }
 
-#tele {
+#cinema-sidebar {
     flex-basis: 300px;
     flex-grow: 1;
     display: flex;
@@ -251,7 +241,7 @@ const calculateHeight = (width: number) => {
         overflow: hidden;
     }
 
-    #primary {
+    #primary-sidebar {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -259,6 +249,7 @@ const calculateHeight = (width: number) => {
         max-width: 1754px;
         flex-basis: 300px;
         width: 100%;
+        margin-bottom: 1.5rem;
     }
 
     #regular,
@@ -298,7 +289,7 @@ const calculateHeight = (width: number) => {
 
 @media screen and (min-width: 1036px) {
 
-    #tele {
+    #cinema-sidebar {
         display: flex;
         flex-direction: column;
         flex-basis: 300px;
@@ -307,7 +298,7 @@ const calculateHeight = (width: number) => {
         min-height: calc(100svh - 96px);
     }
 
-    .cinema #tele {
+    .cinema #cinema-sidebar {
         display: none;
     }
 

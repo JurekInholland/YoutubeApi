@@ -25,8 +25,8 @@ export type YoutubeChannel = {
   avatar: string
   banner: string
   bannerUrl: string
-  videoCount: string
-  subscribers: string
+  videoCount: number
+  subscriberCount: number
   videos?: YoutubeVideo[]
   description: string
 }

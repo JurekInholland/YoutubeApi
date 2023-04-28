@@ -4,17 +4,28 @@ import type YoutubeVideo from '@/models/YoutubeVideo';
 import YoutubeChannelRepository from '@/repositories/YoutubeChannelRepository';
 import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
 import { useRepo } from 'pinia-orm';
-import { computed, onMounted, type ComputedRef, ref, onBeforeUnmount, watch } from 'vue';
+import { computed, onMounted, type ComputedRef, ref, onBeforeUnmount, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import VideoRow from '@/components/VideoRow.vue';
 import { formatDescription } from '@/utils';
+import type YoutubeChannel from '@/models/YoutubeChannel';
 
 const route = useRoute()
 
 const channelId = computed(() => route.params.channelId) as ComputedRef<string>
-const channel = computed(() => useRepo(YoutubeChannelRepository).getById(channelId.value))
+const channelUsername = computed(() => route.params.username) as ComputedRef<string>
+// const channel = computed(() => {
+//     console.log(channelId.value, channelUsername.value)
+//     if (channelId.value !== undefined)
+//         return useRepo(YoutubeChannelRepository).getById(channelId.value)
+//     if (channelUsername.value !== undefined)
+//         return useRepo(YoutubeChannelRepository).getByHandle(channelUsername.value)
+//     // return null
+// })
 
-const videos = computed(() => useRepo(YoutubeVideoRepository).with('youtubeChannel').where('youtubeChannelId', channelId.value).orderBy(vid => vid.uploaded).get()) as ComputedRef<YoutubeVideo[]>;
+const channel = ref<YoutubeChannel>()
+
+const videos = computed(() => useRepo(YoutubeVideoRepository).withAll().where('youtubeChannelId', channel.value?.id).orderBy(vid => vid.uploaded).get()) as ComputedRef<YoutubeVideo[]>;
 
 const onScroll = () => {
     parallax.value = window.scrollY
@@ -24,7 +35,17 @@ const onScroll = () => {
 onMounted(async () => {
     console.log(channel.value)
     window.addEventListener('scroll', onScroll)
-    await useRepo(YoutubeChannelRepository).fetchById(channelId.value)
+    await nextTick()
+    if (channelId.value !== undefined) {
+        console.log("fetchById")
+        await useRepo(YoutubeChannelRepository).fetchById(channelId.value)
+        channel.value = useRepo(YoutubeChannelRepository).getById(channelId.value)
+    }
+    if (channelUsername.value !== undefined) {
+        console.log("fetchByHandle")
+        await useRepo(YoutubeChannelRepository).fetchByHandle(channelUsername.value)
+        channel.value = useRepo(YoutubeChannelRepository).getByHandle(`@${channelUsername.value}`)
+    }
 })
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', onScroll)
@@ -65,10 +86,10 @@ const computedStyle = computed(() => {
                     <VideoLink v-for="video in videos" :video="video" :key="video.id" />
                 </div>
 
-                </div>
-                <!-- <VideoRow :videos="videos" :offset="0" />
+            </div>
+            <!-- <VideoRow :videos="videos" :offset="0" />
                 <VideoRow :videos="videos" :offset="1" /> -->
-                <hr>
+            <hr>
         </div>
     </div>
 </template>
@@ -77,21 +98,25 @@ const computedStyle = computed(() => {
 hr {
     margin-bottom: 15rem;
 }
+
 .channel {
     min-height: calc(100svh + 16vw);
 }
+
 .header {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
     align-items: center;
+
     h1 {
         font-size: 1.5rem;
         line-height: normal;
     }
 }
-.info {
-}
+
+.info {}
+
 .stats {
     font-size: 14px;
     color: var(--text-color-soft);
@@ -108,6 +133,7 @@ hr {
 .avatar {
     width: 175px;
     min-width: 125px;
+
     img {
         border-radius: 50%;
         object-fit: cover;

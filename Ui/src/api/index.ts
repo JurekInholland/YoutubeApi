@@ -18,26 +18,27 @@ export default class ApiService {
 
   // ------------------ API CALLS ------------------
 
-  public async getChannelById(id: string): Promise<YoutubeChannel | undefined> {
+  public async getChannelById(id: string): Promise<YoutubeChannel | null> {
     const res = await this.request<YoutubeChannel>({
       method: 'GET',
       url: apiUrls.getChannelById,
       params: { channelId: id }
     })
     if (res instanceof Error) {
-      return undefined
+      return null
     }
     return res
   }
 
-  public async getChannelByHandle(handle: string): Promise<YoutubeVideo[]> {
-    const res = await this.request<YoutubeVideo[]>({
+  public async getChannelByHandle(handle: string): Promise<YoutubeChannel | null> {
+    console.log("getChannelByHandle: ", handle)
+    const res = await this.request<YoutubeChannel>({
       method: 'POST',
       url: apiUrls.getChannelByHandle,
       data: handle
     })
     if (res instanceof Error) {
-      return []
+      return null
     }
     return res
   }

@@ -44,7 +44,7 @@ public class ScrapeServiceTests
 
             Assert.That(video.YoutubeChannel.Id, Is.EqualTo("UCuAXFkgsw1L7xaCfnd5JJOw"));
             Assert.That(video.YoutubeChannel.Title, Is.EqualTo("Rick Astley"));
-            Assert.That(video.YoutubeChannel.Subscribers, Does.EndWith("M"));
+            Assert.That(video.YoutubeChannel.SubscriberCount, Does.EndWith("M"));
         });
     }
 }
