@@ -2,31 +2,32 @@
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import type { PlayerState } from '@/types';
 import { YoutubeIframe } from '@vue-youtube/component';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import YoutubePlayerUpNext from './player/YoutubePlayerUpNext.vue';
-const route = useRoute();
+import { useRepo } from 'pinia-orm';
+import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
+import type YoutubeVideo from '@/models/YoutubeVideo';
+import UpNextGrid from './player/UpNextGrid.vue';
 const store = useYoutubeStore();
 
 const isInitialized = ref(false);
 
 const props = defineProps<{
     videoId: string,
-    playerState: PlayerState
+    playerState: PlayerState,
+    relatedVideos: YoutubeVideo[]
 }>()
 const youtube = ref<HTMLDivElement | undefined>() as any;
 
-const playerWidth = ref(computed(() => {
-    return youtube.value?.$el.offsetWidth + "px";
-}));
+const upNextVideo = computed(() => {
+    const vid = useRepo(YoutubeVideoRepository).getById(props.videoId)
+    return useRepo(YoutubeVideoRepository).getById(vid?.relatedVideos[0]) as YoutubeVideo;
+});
 
 const onReady = (event: any) => {
     console.log('ready', event.target);
     const duration = event.target.getDuration()
-    // const isMuted = event.target.isMuted()
-    // const vol = event.target.getVolume()
     const isPlaying = event.target.getPlayerState() === 1;
-    const tar = event.target;
     event.target.setVolume(props.playerState.volume * 100);
     event.target.startSeconds = props.playerState.currentTime;
     console.log("SEEKING TO ", props.playerState.currentTime)
@@ -38,13 +39,36 @@ const onReady = (event: any) => {
     props.playerState.isPlaying = isPlaying;
     isInitialized.value = true;
     event.target.playVideo();
-    // props.playerState.volume = isMuted ? 0 : vol;
 
 };
 const onStateChange = (event: any) => {
+
+    const events: { [key: string]: string } = {
+        "-1": "unstarted",
+        "0": "ended",
+        "1": "playing",
+        "2": "paused",
+        "3": "buffering",
+        "5": "video cued"
+    }
+    console.log('onStateChange', events[event.data.toString()]);
+    // -1 (unstarted)
+    // 0 (ended)
+    // 1 (playing)
+    // 2 (paused)
+    // 3 (buffering)
+    // 5 (video cued).
+
     const isPlaying = event.data === 1;
+
+    if (isPlaying) {
+        props.playerState.duration = event.target.getDuration();
+    }
+
+    if (event.data === 0) {
+        props.playerState.currentTime = props.playerState.duration;
+    }
     props.playerState.isPlaying = isPlaying;
-    console.log('isPlaying', isPlaying);
 };
 const onError = (event: any) => {
     console.log('error', event);
@@ -60,15 +84,17 @@ const onMessage = (event: MessageEvent) => {
     }
 
     var data = JSON.parse(event.data);
-    // console.log("data", data);
-
     if (data.info?.currentTime !== undefined) {
         props.playerState.currentTime = data.info.currentTime;
     }
 
     if (data.info?.volume !== undefined) {
-        props.playerState.volume = data.info.volume / 100;
-        // console.log("volume", data.info.volume);
+        if (data.info.muted) {
+            props.playerState.volume = 0
+        }
+        else {
+            props.playerState.volume = data.info.volume / 100;
+        }
     }
 };
 
@@ -91,67 +117,61 @@ onBeforeUnmount(() => {
 
 });
 
+const onContext = (e: Event) => {
+    e.preventDefault();
+    console.log("ytplayer context");
+}
+const onBlur = () => {
+    console.log("ytplayer blur");
+}
 </script>
 
 <template>
-    <div class="yotube-wrapper">
-        <div>{{ playerState.duration - playerState.currentTime }}</div>
-        <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1">
-            <youtube-player-up-next :video="store.relatedVideos[0]" />
-        </div>
+    <div class="yotube-wrapper" @click.prevent.stop="onContext">
+        <!-- <div>{{ playerState.duration - playerState.currentTime }}</div> -->
+        <transition name="fade">
+            <!-- <div class="overlay" v-if="playerState.duration - playerState.currentTime < 1 && !playerState.isPlaying">
+                <YoutubePlayerUpNext :video="upNextVideo" />
+            </div> -->
+
+            <div class="overlay">
+                <UpNextGrid :videos="props.relatedVideos" />
+            </div>
+
+        </transition>
         <youtube-iframe ref="youtube" class="iframe" :preserve="true" :video-id="props.videoId" @ready="onReady"
-            @state-change="onStateChange" @error="onError" @message="onMessage" :player-vars="{
-                // https://developers.google.com/youtube/player_parameters#Parameters
-                iv_load_policy: 3,
-                color: 'white',
-                start: props.playerState.currentTime,
-                modestbranding: 1,
-                enablejsapi: 1,
-                rel: 0,
-                autoplay: 1,
-            }">
+            @state-change="onStateChange" @error="onError" @message="onMessage" @blur="onBlur" :player-vars="{
+                    // https://developers.google.com/youtube/player_parameters#Parameters
+                    iv_load_policy: 3,
+                    color: 'white',
+                    start: props.playerState.currentTime,
+                    modestbranding: 1,
+                    enablejsapi: 1,
+                    rel: 0,
+                    autoplay: 1,
+                    controls: 2
+                }">
         </youtube-iframe>
     </div>
 </template>
 
-<style >
+<style scoped lang="scss">
 .overlay {
-    background-color: rgba(0, 0, 0, 1);
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     bottom: 1.9rem;
     top: 3.6rem;
-    right: 0;
-    /* height: 100%; */
-    width: 100%;
-    z-index: 1;
-    /* width: v-bind(playerWidth); */
-
-}
-
-.iframe {
-
-    /* width: 100%; */
-    /* max-width: 1920px;
-    'max-width': '1920px', width: '100%', 'max-height': 80 + 'vh' */
-}
-
-.youtube-wrapper {
-    /* position: relative; */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* max-width: calc(100vh - 12rem) !important; */
-    /* margin: 0 auto; */
-
-    /* background-color: red;
+    // top: 0;
+    // bottom: 0;
+    // position: relative;
+    // max-height: 100%;
     overflow: hidden;
+}
+</style>
+
+<style>
+.youtube-wrapper {
     display: flex;
-    align-items: center;
     justify-content: center;
-    margin: 0; */
+    align-items: center;
     overflow: hidden;
 
 }
@@ -160,7 +180,5 @@ iframe {
     width: 100%;
     height: 100%;
     max-width: unset;
-    /* margin: 0 auto; */
-    /* aspect-ratio: 16/9; */
 }
 </style>

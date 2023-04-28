@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Models;
 using Models.DomainModels;
 
 namespace Services.ScrapeService;
@@ -10,18 +11,21 @@ namespace Services.ScrapeService;
 public partial class ScrapeService : IScrapeService
 {
     private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ScrapeService> _logger;
 
     public ScrapeService(ILogger<ScrapeService> logger, IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
+        _httpClientFactory = httpClientFactory;
         _httpClient = httpClientFactory.CreateClient();
+        _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
     }
 
     [GeneratedRegex(@"""playabilityStatus"":{""status"":""([^""]+)"",""messages"":\[""([^""]+)""")]
     private static partial Regex PlayabilityStatus();
 
-    [GeneratedRegex("(?<=watch\\?v=)[\\w-]+")]
+    [GeneratedRegex("(?<=watch\\?v=)[\\w-]{11}")]
     private static partial Regex VideoIdRegex();
 
     [GeneratedRegex(@"description"":\{""simpleText"":""([^&]+(?:&quot;[^&]+)*|[^&]+(?:""[^""]+)*?)""\},""lengthSeconds")]
@@ -82,6 +86,26 @@ public partial class ScrapeService : IScrapeService
     [GeneratedRegex("""videosCountText":{"runs":\[{"text":"([^"]+)"},{"text":"([^"]+)"}\]}""")]
     private static partial Regex ChannelVideosCount();
 
+    [GeneratedRegex("""><meta property="og:description" content="([^"]+)">""")]
+    private static partial Regex ChannelDescription();
+
+
+    [GeneratedRegex(@"<title>([^<]+) - YouTube<\/title>")]
+    private static partial Regex PlaylistTitle();
+
+    [GeneratedRegex(@"""ownerText"":\{""runs"":\[\{""text"":""([^""]+)""")]
+    private static partial Regex PlaylistOwner();
+
+    [GeneratedRegex(@"viewCountText"":\{""simpleText"":""([^""]+)""}")]
+    private static partial Regex PlaylistViewCount();
+
+
+    [GeneratedRegex(@"""numVideosText"":\{""runs"":\[\{""text"":""([^""]+)""\}")]
+    private static partial Regex PlaylistVideosCount();
+
+
+    [GeneratedRegex(@"\{""text"":""Last updated on ""\},\{""text"":""([^""]+)""\}")]
+    private static partial Regex PlaylistLastUpdated();
 
     public async Task<string> GetRawHtml(string url)
     {
@@ -92,7 +116,8 @@ public partial class ScrapeService : IScrapeService
 
     private async Task<HtmlDocument> GetHtmlDocument(string url)
     {
-        var html = await _httpClient.GetStringAsync(url);
+        HttpClient client = _httpClientFactory.CreateClient();
+        var html = await client.GetStringAsync(url);
         var htmlDocument = new HtmlDocument();
         htmlDocument.LoadHtml(html);
         return htmlDocument;
@@ -106,21 +131,98 @@ public partial class ScrapeService : IScrapeService
         return await ScrapeVideos(sourceCode);
     }
 
-    public async Task<YoutubeVideo[]> ScrapeChannelByHandle(string userName)
+
+    public async Task<YoutubePlaylist> ScrapePlaylist(string playlistId)
+    {
+        var url = $"https://www.youtube.com/playlist?list={playlistId}";
+        HtmlDocument document = await GetHtmlDocument(url);
+        string sourceCode = document.DocumentNode.OuterHtml;
+
+        var title = PlaylistTitle().Match(sourceCode).Groups[1].Value;
+        var owner = PlaylistOwner().Match(sourceCode).Groups[1].Value;
+
+        var viewCount = PlaylistViewCount().Match(sourceCode).Groups[1].Value;
+        var lastUpdated = PlaylistLastUpdated().Match(sourceCode).Groups[1].Value;
+        var videos = await ScrapeVideos(sourceCode);
+        int.TryParse(PlaylistVideosCount().Match(sourceCode).Groups[1].Value, out int numVideos);
+        YoutubePlaylist playlist = new YoutubePlaylist
+        {
+            Id = playlistId,
+            Title = title,
+            Author = owner,
+            Videos = videos,
+            ViewCount = viewCount,
+            VideoCount = numVideos,
+
+            LastUpdated = lastUpdated
+        };
+
+        Console.WriteLine(title + " " + owner);
+        return playlist;
+    }
+
+    public async Task<YoutubeChannel> ScrapeChannelByHandle(string userName, int maxResults = 20)
     {
         var url = $"https://www.youtube.com/@{userName}";
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
-        return await ScrapeVideos(sourceCode);
+        var channelMetadata = await ScrapeChannelInfo(sourceCode);
+
+        var videos = await ScrapeVideos(sourceCode);
+        var channel = new YoutubeChannel
+        {
+            Id = videos[0].YoutubeChannel.Id,
+            Videos = videos,
+            Title = videos[0].YoutubeChannel.Title,
+            Handle = videos[0].YoutubeChannel.Handle,
+
+            ThumbnailUrl = channelMetadata.AvatarUrl,
+            BannerUrl = channelMetadata.BannerUrl,
+            SubscriberCount = videos[0].YoutubeChannel.SubscriberCount,
+            VideoCount = channelMetadata.VideoCount,
+            Description = channelMetadata.Description,
+        };
+
+        foreach (var video in channel.Videos)
+        {
+            video.YoutubeChannelId = channel.Id;
+            video.YoutubeChannel = null!;
+        }
+
+        return channel;
     }
 
-    public async Task<YoutubeVideo[]> ScrapeChannelById(string channelId)
+    public async Task<YoutubeChannel> ScrapeChannelById(string channelId, int maxResults = 20)
     {
+        Console.WriteLine("Scraping channel " + channelId);
         var url = $"https://www.youtube.com/channel/{channelId}";
         HtmlDocument document = await GetHtmlDocument(url);
         string sourceCode = document.DocumentNode.OuterHtml;
-        await ScrapeChannelInfo(sourceCode);
-        return await ScrapeVideos(sourceCode);
+        var channelMetadata = await ScrapeChannelInfo(sourceCode);
+        var videos = (await ScrapeVideos(sourceCode, maxResults)).Where(v => v != null && v.YoutubeChannel.Id == channelId).Select(v => v!)
+            .ToArray();
+
+        var channel = new YoutubeChannel
+        {
+            Id = channelId,
+            Videos = videos,
+            Title = videos[0].YoutubeChannel.Title,
+            Handle = videos[0].YoutubeChannel.Handle,
+
+            ThumbnailUrl = channelMetadata.AvatarUrl,
+            BannerUrl = channelMetadata.BannerUrl,
+            SubscriberCount = videos[0].YoutubeChannel.SubscriberCount,
+            VideoCount = channelMetadata.VideoCount,
+            Description = channelMetadata.Description,
+        };
+
+        foreach (var video in channel.Videos)
+        {
+            video.YoutubeChannelId = channelId;
+            video.YoutubeChannel = null!;
+        }
+
+        return channel;
     }
 
     public async Task DownloadChannelThumbnail(string channelId)
@@ -146,7 +248,7 @@ public partial class ScrapeService : IScrapeService
         await File.WriteAllBytesAsync($"data/thumbnails/{channelId}.jpg", bytes);
     }
 
-    private async Task ScrapeChannelInfo(string sourceCode)
+    private async Task<ChannelMetadata> ScrapeChannelInfo(string sourceCode)
     {
         List<(int, int, string)> avatars = new();
         List<(int, int, string)> banners = new();
@@ -170,13 +272,24 @@ public partial class ScrapeService : IScrapeService
         var bestAva = avatars.OrderByDescending(b => b.Item1).ToArray()[1];
         var bestBan = banners.OrderByDescending(b => b.Item1).ToArray()[0];
 
-        _logger.LogInformation(bestAva + " " + bestBan);
+        // _logger.LogInformation(bestAva + " " + bestBan);
 
         Match count = ChannelVideosCount().Match(sourceCode);
         var c1 = count.Groups[1].Value;
         var c2 = count.Groups[2].Value;
-        _logger.LogInformation(c1 + " " + c2);
+        // _logger.LogInformation(c1 + " " + c2);
+
+        var desc = ChannelDescription().Match(sourceCode).Groups[1].Value;
+        int.TryParse(c1, out int numVideos);
+
         Console.WriteLine();
+        return new ChannelMetadata
+        {
+            AvatarUrl = $"https://yt3.googleusercontent.com/{bestAva.Item3}",
+            BannerUrl = $"https://yt3.googleusercontent.com/{bestBan.Item3}",
+            VideoCount = numVideos,
+            Description = desc,
+        };
     }
 
     private async Task<YoutubeVideo[]> ScrapeVideos(string sourceCode, int maxResults = 20)
@@ -193,7 +306,7 @@ public partial class ScrapeService : IScrapeService
         var res = await Task.WhenAll(tasks);
 
 
-        return res.Select(y => y!).ToArray();
+        return res.Where(y => y != null).Select(y => y!).ToArray();
     }
 
 
@@ -282,12 +395,14 @@ public partial class ScrapeService : IScrapeService
         string playabilityStatus = PlayabilityStatus().Match(sourceCode).Groups[1].Value;
         string playabilityStatusMessage = PlayabilityStatus().Match(sourceCode).Groups[2].Value;
 
+        int.TryParse(followerCount, out int subscriberCount);
         if (likeCount is "No" or "") likeCount = "0";
 
         if (playabilityStatus != "")
         {
             throw new ArgumentException(playabilityStatusMessage != "" ? playabilityStatusMessage : playabilityStatus);
         }
+
 
         try
         {
@@ -309,13 +424,14 @@ public partial class ScrapeService : IScrapeService
                 Comments = null!,
                 RelatedVideos = relatedVideoIds.Skip(1).ToArray(),
                 playableInEmbed = playableInEmbed == "true",
+                YoutubeChannelId = externalChannelId,
                 YoutubeChannel = new YoutubeChannel
                 {
                     Id = externalChannelId,
                     Title = channelName,
                     Handle = ownerProfileUrl.Replace("http://www.youtube.com/", ""),
                     ThumbnailUrl = avatarUrl,
-                    Subscribers = followerCount,
+                    SubscriberCount = subscriberCount,
                     Videos = null!
                 }
             };

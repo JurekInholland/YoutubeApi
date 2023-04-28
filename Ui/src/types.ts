@@ -16,14 +16,19 @@ export enum TaskStatus {
   Error
 }
 
-export interface YoutubeChannel {
+export type YoutubeChannel = {
   id: string
   title: string
   handle: string
   channelUrl: string
   thumbnailUrl: string
-  subscribers: string
+  avatar: string
+  banner: string
+  bannerUrl: string
+  videoCount: number
+  subscriberCount: number
   videos?: YoutubeVideo[]
+  description: string
 }
 
 export interface LocalVideo {
@@ -32,9 +37,13 @@ export interface LocalVideo {
   height: number
   size: number
   path: string
+  extension: string
+  fps: number
+  vbr: number
+  abr: number
 }
 
-export interface YoutubeVideo {
+export type YoutubeVideo = {
   id: string
   title: string
   thumbnail: string
@@ -52,6 +61,7 @@ export interface YoutubeVideo {
   relatedVideos: string[]
   playableInEmbed: boolean
   localVideo: LocalVideo | null
+  YoutubeChannelId: string
   youtubeChannel: YoutubeChannel | null
 }
 
@@ -105,4 +115,6 @@ export type PlayerState = {
   cinema: boolean
   pictureInPicture: boolean
   useLocalPlayer: boolean
+  width: number
+  height: number
 }

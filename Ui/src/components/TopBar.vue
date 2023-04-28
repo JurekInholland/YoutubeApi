@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import PageMenu from './menus/PageMenu.vue';
 import UserMenu from './menus/UserMenu.vue';
+import SvgLink from './buttons/SvgLink.vue';
 
 const router = useRouter();
 const store = useYoutubeStore();
@@ -86,10 +87,11 @@ const onMouseLeave = () => {
     activeIndex.value = -1;
 }
 const onSearch = () => {
+
     console.log("SEARCHING FOR ", searchQuery.value)
     searchFocs.value = false;
 
-    if (store.searchQuery === "") {
+    if (searchQuery.value === "") {
         return;
     }
     store.searchQuery = searchQuery.value;
@@ -139,10 +141,13 @@ const toggleSidebar = (val: boolean) => {
 }
 const toggleUserMenu = () => {
     console.log("TOGGLE user menu")
+    notificationMenuOpen.value = false;
     userMenuOpen.value = !userMenuOpen.value;
 }
 
 const togglenotificationMenu = () => {
+    userMenuOpen.value = false;
+    console.log("TOGGLE NOTIFICATION menu", notificationMenuOpen.value)
     notificationMenuOpen.value = !notificationMenuOpen.value;
 }
 </script>
@@ -203,17 +208,27 @@ const togglenotificationMenu = () => {
                 <Icon style="font-size: 1.1rem;" icon="simple-line-icons:magnifier" />
             </button>
 
-            <button class="queue" @click="router.push('queue')">
+            <router-link class="button" to="/queue">
                 <Icon style="font-size: 1.5rem;" icon="carbon:query-queue" />
-            </button>
+            </router-link>
+            <!-- <router-link class="button" :to="{name: 'queue'}" >
+                <Icon style="font-size: 1.5rem;" icon="simple-line-icons:magnifier" />
+            </router-link> -->
+            <!-- <button class="queue" @click="router.push('queue')"> -->
+            <!-- <Icon style="font-size: 1.5rem;" icon="carbon:query-queue" /> -->
+            <!-- </button> -->
 
             <button @click.stop="togglenotificationMenu">
                 <Icon style="font-size: 1.5rem;" icon="mdi:bell" />
             </button>
-
             <PageMenu v-if="notificationMenuOpen" v-click-outside-element="togglenotificationMenu">
                 <div>
                     Notifications
+                    <p>para</p>
+                    <p>para</p>
+                    <p>para</p>
+                    <p>para</p>
+                    <p>para</p>
                     <p>para</p>
                 </div>
             </PageMenu>
@@ -267,7 +282,7 @@ const togglenotificationMenu = () => {
     </div>
     <!--  :class="menuOpen ? 'visible' : ''" -->
     <transition name="translateX">
-    <div v-if="menuOpen" class="nav-bg" @click.stop="toggleSidebar(false)">
+        <div v-if="menuOpen" class="nav-bg" @click.stop="toggleSidebar(false)">
             <div class="side-nav" @click.stop="" :class="menuOpen ? 'open' : ''">
                 <div class="left">
                     <button class="menu-button" @click.stop="toggleSidebar(false)">
@@ -341,8 +356,6 @@ const togglenotificationMenu = () => {
 }
 
 hr {
-    border-color: rgba(255, 255, 255, .2);
-    border-top: 0px solid transparent;
     margin: .75rem 1rem;
     margin-left: 0;
 }
@@ -551,15 +564,7 @@ button {
     border: 1px solid transparent;
 }
 
-.menu-button:hover {
-    transition: all .2s ease;
-    background-color: rgba(255, 255, 255, 0.125);
-}
 
-.menu-button:active {
-    background-color: rgb(84, 84, 84);
-    border: 1px solid rgb(84, 84, 84);
-}
 
 .menu {
     overflow: hidden;
@@ -675,16 +680,19 @@ display: block;
         transition: all .2s ease;
         margin: 0;
         padding: .65rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    button:hover {
-        background-color: rgba(255, 255, 255, .125);
-    }
+    // button:hover {
+    //     background-color: rgba(255, 255, 255, .125);
+    // }
 }
 
-button:hover {
-    background-color: rgba(255, 255, 255, .125);
-}
+// button:hover {
+//     background-color: rgba(255, 255, 255, .125);
+// }
 
 .ytd-searchbox {
     position: relative;
@@ -743,6 +751,26 @@ input:focus-within+.results {
 
 .mobile .search {
     display: flex;
+}
+
+.button,
+button {
+    border: 1px solid transparent;
+    box-sizing: border-box;
+}
+
+button:hover {
+    transition: background .2s ease, border-color 1.5s ease;
+    background-color: rgb(64, 64, 64);
+    // border: 1px solid rgb(64, 64, 64);
+}
+
+.button:active,
+button:active {
+    transition: background .2s ease, border-color .2s ease;
+    background-color: rgb(84, 84, 84);
+    border: 1px solid rgb(92, 92, 92);
+    // border: 1px solid red;
 }
 
 @media screen and (min-width: 690px) {

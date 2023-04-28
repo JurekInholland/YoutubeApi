@@ -62,6 +62,7 @@ public class YoutubeVideoController : BaseController
         _logger.LogInformation("Getting all videos");
         var videos = await _unitOfWork.YoutubeVideos.All()
             .Include(x => x.LocalVideo)
+            .Include(x => x.YoutubeChannel)
             .Where(y => y.LocalVideo != null).ToListAsync();
         return Ok(videos);
     }

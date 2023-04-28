@@ -76,7 +76,7 @@ public class QueuedDownloadRepository : RepositoryBase<QueuedDownload>, IQueuedD
 
         YoutubeContext.Entry(existing).CurrentValues.SetValues(queuedDownload);
 
-        var video = YoutubeContext.YoutubeVideos.Find(queuedDownload.Video.Id);
+        var video = await YoutubeContext.YoutubeVideos.FindAsync(queuedDownload.Video.Id);
         if (video is not null)
         {
             YoutubeContext.Entry(video).CurrentValues.SetValues(queuedDownload.Video);
@@ -86,7 +86,7 @@ public class QueuedDownloadRepository : RepositoryBase<QueuedDownload>, IQueuedD
             await YoutubeContext.YoutubeVideos.AddAsync(queuedDownload.Video);
         }
 
-        var localVideo = YoutubeContext.LocalVideos.Find(queuedDownload.Video.LocalVideo.Id);
+        var localVideo = await YoutubeContext.LocalVideos.FindAsync(queuedDownload.Video.LocalVideo.Id);
         if (localVideo is not null)
         {
             YoutubeContext.Entry(localVideo).CurrentValues.SetValues(queuedDownload.Video.LocalVideo);

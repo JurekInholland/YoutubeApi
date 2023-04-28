@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import type { YoutubeVideo } from '@/types';
-import { formatViews, formatTitle, formatDuration } from '@/utils';
+import type YoutubeVideo from '@/models/YoutubeVideo'
+import { useYoutubeStore } from '@/stores/youtubeStore';
+import { formatViews, formatTitle, formatDuration, formatDateAgo } from '@/utils';
+import { Icon } from '@iconify/vue';
 
+const store = useYoutubeStore();
 
 const props = defineProps<{
     video: YoutubeVideo
@@ -19,15 +22,25 @@ const props = defineProps<{
             </div>
 
             <div class="infos">
-                <router-link :to="{ name: 'channel', params: { username: video.youtubeChannel?.title } }">
+                <router-link v-if="video.youtubeChannel"
+                    :to="{ name: 'channel', params: { username: video.youtubeChannel.title } }">
                     <img :src="`/api/Thumbnail/channel?channelId=${video.youtubeChannel?.id}`" alt="avatar" />
                 </router-link>
                 <div class="text">
-                    <h3 v-html="formatTitle(video.title)" class="title"></h3>
-                    <router-link :to="{ name: 'channel-id', params: { channelId: video.youtubeChannel?.id } }">{{
-                        video.youtubeChannel!.title }}</router-link>
+                    <div class="flex">
+
+                        <h3 class="h3" v-html="formatTitle(video.title)"></h3>
+                        <div class="svg" v-if="video.localVideo" :style="{ color: store.color }">
+                            <Icon icon="material-symbols:arrow-circle-down-rounded" />
+
+                        </div>
+                    </div>
+                    <router-link v-if="video.youtubeChannel"
+                        :to="{ name: 'channel-id', params: { channelId: video.youtubeChannel.id } }">{{
+                            video.youtubeChannel!.title }}</router-link>
                     <!-- <p>pannenkoek2012</p> -->
-                    <p>{{ formatViews(video.viewCount) }} views <span class="separator"> 2 days ago</span></p>
+                    <p>{{ formatViews(video.viewCount) }} views <span class="separator">{{ formatDateAgo(video.uploadDate)
+                    }}</span></p>
                 </div>
             </div>
         </router-link>
@@ -37,6 +50,42 @@ const props = defineProps<{
 <style scoped lang="scss">
 .separator::before {
     content: "•";
+}
+
+.flex {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: .5rem;
+
+    .h3 {
+        color: var(--text-color);
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 22px;
+        // width: 100%;
+        // flex: 0 1;
+        flex-grow: 0;
+        word-break: break-all;
+        margin-bottom: .33rem;
+    }
+
+    .svg {
+        flex-grow: 1;
+        align-items: flex-start;
+        margin-top: .15rem;
+        font-size: 1rem;
+
+    }
+
+
+    // justify-content: center;
+}
+
+svg {
+
+    padding: -4px;
+    box-sizing: border-box;
+
 }
 
 .thumbnail {
@@ -54,8 +103,11 @@ const props = defineProps<{
 }
 
 .text {
-
+    display: inline-flex;
+    flex-direction: column;
     text-overflow: ellipsis;
+    font-size: .9rem;
+    line-height: normal;
 }
 
 .infos {
@@ -153,5 +205,11 @@ const props = defineProps<{
     a:hover {
         color: white;
     }
+
+    .flex,
+    a:hover .flex {
+        color: white;
+    }
+
 }
 </style>

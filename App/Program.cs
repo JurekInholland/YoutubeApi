@@ -64,7 +64,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<ISettingsManager, SettingsManager>();
 
-builder.Services.AddScoped<IScrapeService, ScrapeService>();
+// TODO: verify scrape service transient
+builder.Services.AddTransient<IScrapeService, ScrapeService>();
 builder.Services.AddScoped<IQueueService, QueueService>();
 builder.Services.AddTransient<ITaskService, TaskService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ITaskService>());
@@ -101,6 +102,24 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
+app.UseAuthentication();
+// app.UseAuthentication(x =>
+// {
+//     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//     x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+// }).AddJwtBearer(x =>
+// {
+//     x.Authority = "https://securetoken.google.com/youtube-juri-lol";
+//     x.TokenValidationParameters = new TokenValidationParameters
+//     {
+//         ValidateIssuer = true,
+//         ValidIssuer = "https://securetoken.google.com/youtube-juri-lol",
+//         ValidateAudience = true,
+//         ValidAudience = "youtube-juri-lol",
+//         ValidateLifetime = true
+//     };
+// });
 
 app.UseAuthorization();
 app.UseStaticFiles();

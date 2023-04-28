@@ -1,7 +1,7 @@
 import { apiUrls } from '@/constants'
 import type { QueuedDownload, YoutubeVideo } from '@/types'
 import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios'
-
+import type YoutubeChannel from '@/models/YoutubeChannel'
 export default class ApiService {
   private axiosInstance: AxiosInstance
 
@@ -14,28 +14,31 @@ export default class ApiService {
       }
     })
   }
+  // ------------------ ORM CALLS ------------------
 
-  public async getChannelById(id: string): Promise<YoutubeVideo[]> {
-    const res = await this.request<YoutubeVideo[]>({
+  // ------------------ API CALLS ------------------
+
+  public async getChannelById(id: string): Promise<YoutubeChannel | null> {
+    const res = await this.request<YoutubeChannel>({
       method: 'GET',
       url: apiUrls.getChannelById,
       params: { channelId: id }
     })
     if (res instanceof Error) {
-      debugger;
-      return []
+      return null
     }
     return res
   }
 
-  public async getChannelByHandle(handle: string): Promise<YoutubeVideo[]> {
-    const res = await this.request<YoutubeVideo[]>({
+  public async getChannelByHandle(handle: string): Promise<YoutubeChannel | null> {
+    console.log("getChannelByHandle: ", handle)
+    const res = await this.request<YoutubeChannel>({
       method: 'POST',
       url: apiUrls.getChannelByHandle,
       data: handle
     })
     if (res instanceof Error) {
-      return []
+      return null
     }
     return res
   }
@@ -80,12 +83,14 @@ export default class ApiService {
     return res
   }
 
-  public async GetVideos(): Promise<YoutubeVideo[] | AxiosError> {
+  public async GetVideos(): Promise<YoutubeVideo[]> {
     const res = await this.request<YoutubeVideo[]>({
       method: 'GET',
-      url: apiUrls.getVideos
+      url: apiUrls.getAllVideos
     })
-    console.log(res)
+    if (res instanceof Error) {
+      return []
+    }
     return res
   }
 
@@ -104,7 +109,7 @@ export default class ApiService {
   public async GetVideoInfo(videoId: string): Promise<YoutubeVideo | AxiosError> {
     const res = await this.request<YoutubeVideo>({
       method: 'GET',
-      url: `${apiUrls.getVideoInfo}`,
+      url: `${apiUrls.getVideo}`,
       params: { videoId: videoId }
     })
     console.log(res)

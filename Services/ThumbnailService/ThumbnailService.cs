@@ -17,7 +17,7 @@ public class ThumbnailService : IThumbnailService
         _scrapeService = scrapeService;
     }
 
-    public async Task<byte[]?> GetChannelThumbnail(string channelId)
+    public async Task<byte[]> GetChannelThumbnail(string channelId)
     {
         var path = $"data/thumbnails/{channelId}.jpg";
 
@@ -27,15 +27,28 @@ public class ThumbnailService : IThumbnailService
             // await _youtubeExplodeService.GetChannel(channelId);
         }
 
-
         var file = await File.ReadAllBytesAsync(path);
         return file;
     }
 
 
-    public async Task<byte[]?> GetVideoThumbnail(string videoId)
+    public async Task<byte[]> GetVideoThumbnail(string videoId)
     {
         var path = $"data/thumbnails/videos/{videoId}.jpg";
+
+        var file = await File.ReadAllBytesAsync(path);
+        return file;
+    }
+
+    public async Task<byte[]> GetChannelBanner(string channelId)
+    {
+        var path = $"data/thumbnails/channels/{channelId}/banner.jpg";
+
+        if (!File.Exists(path))
+        {
+            await _scrapeService.DownloadChannelThumbnail(channelId);
+            // await _youtubeExplodeService.GetChannel(channelId);
+        }
 
         var file = await File.ReadAllBytesAsync(path);
         return file;

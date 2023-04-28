@@ -1,9 +1,13 @@
 ﻿using System.Diagnostics;
 using Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Models;
+using Models.DomainModels;
+using Services.QueueService;
+using Services.ScrapeService;
 
 namespace Services.TaskService;
 
@@ -12,15 +16,20 @@ public class TaskService : BackgroundService, ITaskService
     private readonly ILogger<TaskService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    private PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(1000));
-    private PeriodicTimer _cleaningTaskTimer = new(TimeSpan.FromMilliseconds(5000));
+    private PeriodicTimer _timer;
+    private PeriodicTimer _cleaningTaskTimer;
+    private readonly YoutubeHub _hub;
+    private readonly IHostApplicationLifetime _lifetime;
 
 
-    public TaskService(ILogger<TaskService> logger, IServiceScopeFactory scopeFactory)
+    public TaskService(ILogger<TaskService> logger, IServiceScopeFactory scopeFactory, YoutubeHub hub, IHostApplicationLifetime lifetime)
 
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
+        _hub = hub;
+
+        _lifetime = lifetime;
     }
 
     /// <summary>
@@ -57,7 +66,8 @@ public class TaskService : BackgroundService, ITaskService
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
-            await DoWorkAsync(stoppingToken);
+            await UpdateSubscribedChannels(stoppingToken);
+            // await DoWorkAsync(stoppingToken);
         }
     }
 
@@ -88,6 +98,61 @@ public class TaskService : BackgroundService, ITaskService
     {
         if (stoppingToken.IsCancellationRequested) return;
 
+        await _hub.SendTaskUpdate(Enums.ApplicationTask.CleanUpDownloadQueue, Enums.TaskStatus.Started);
+
         _logger.LogInformation("DT: {Date}", DateTime.Now.ToString("O"));
+    }
+
+    private async Task UpdateSubscribedChannels(CancellationToken stoppingToken)
+    {
+        if (stoppingToken.IsCancellationRequested) return;
+        _logger.LogInformation("### Updating subscribed channels ###");
+
+        using var scope = _scopeFactory.CreateScope();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var scrapeService = scope.ServiceProvider.GetRequiredService<IScrapeService>();
+        var queueService = scope.ServiceProvider.GetRequiredService<IQueueService>();
+
+        var subscribedChannels = await unitOfWork.SubscribedChannels.All().ToListAsync(stoppingToken);
+
+        foreach (var channel in subscribedChannels)
+        {
+            _logger.LogInformation("Updating channel {ChannelId}", channel.Id);
+
+            YoutubeChannel chan = await scrapeService.ScrapeChannelById(channel.Id, 64);
+            if (chan.Videos == null) continue;
+
+            foreach (YoutubeVideo video in chan.Videos)
+            {
+                var found = await unitOfWork.YoutubeVideos.All().Where(x => x.Id == video.Id)
+                    .Include(x => x.YoutubeChannel)
+                    .Include(x => x.LocalVideo)
+                    .FirstOrDefaultAsync(stoppingToken);
+
+                _logger.LogInformation(found is null ? $"Adding video {video.Title}" : $"Updating video {video.Title}");
+
+                if (found is null)
+                {
+                    var qd = await queueService.EnqueueDownload(video.Id);
+                    Console.WriteLine(qd);
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine("found is found " + found);
+                }
+            }
+        }
+
+        _logger.LogInformation("Finished updating subscribed channels. Processing queue");
+        try
+        {
+            await queueService.ProcessQueue(stoppingToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error processing queue");
+            _lifetime.StopApplication();
+        }
     }
 }

@@ -15,19 +15,18 @@ const router = createRouter({
     {
       path: '/:videoId',
       name: 'video',
-      component: () => import('../views/NewPlayerPage.vue'),
+      component: () => import('../views/OrmVideoPage.vue'),
       meta: { layout: DefaultLayout }
     },
     {
       path: '/watch',
       name: 'watch',
-      component: () => import('../views/NewPlayerPage.vue'),
-
+      component: () => import('../views/OrmVideoPage.vue')
     },
     {
       path: '/shorts/:videoId',
       name: 'shorts',
-      component: () => import('../views/NewPlayerPage.vue'),
+      component: () => import('../views/OrmVideoPage.vue')
     },
     {
       path: '/about',
@@ -71,7 +70,7 @@ const router = createRouter({
     {
       path: '/@:username',
       name: 'channel',
-      component: () => import('../views/ChannelView.vue')
+      component: () => import('../views/OrmChannel.vue')
     },
     {
       path: '/c/@:username',
@@ -90,18 +89,52 @@ const router = createRouter({
     {
       path: '/new',
       name: 'new',
-      component: () => import('../views/NewPlayerPage.vue')
+      component: () => import('../views/OrmVideoPage.vue')
     },
 
     {
       path: '/tags',
       name: 'tags',
       component: () => import('../views/TagsView.vue')
+    },
+    {
+      path: '/orm',
+      name: 'debugorm',
+      component: () => import('../views/OrmTests.vue')
+    },
+
+    {
+      path: '/ormvideo',
+      name: 'debugormvideo',
+      component: () => import('../views/OrmVideoPage.vue')
+    },
+    {
+      path: '/ormvideo/:videoId',
+      name: 'debugormvideo',
+      component: () => import('../views/OrmVideoPage.vue')
+    },
+    {
+      path: '/ormchannel/:channelId',
+      name: 'debugormchannel',
+      component: () => import('../views/OrmChannel.vue')
+    },
+    {
+      path: '/debug',
+      name: 'debugormplaylist',
+      component: () => import('../views/DebugView.vue')
     }
   ],
   scrollBehavior() {
     window.scrollTo(0, 0)
   }
+})
+
+router.beforeEach((to, from, next) => {
+  console.log("ROUTE TO:", to)
+  if (to.name === 'watch' && to.query.v?.length !== 11) {
+    console.log('INVALID VIDEO ID')
+  }
+  next()
 })
 
 export default router

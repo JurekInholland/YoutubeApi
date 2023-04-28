@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YoutubeVideo } from '@/types';
+import type YoutubeVideo  from '@/models/YoutubeVideo';
 import { formatDateAgo, formatViews, formatDuration, formatDescription, formatTitle } from '@/utils';
 
 const props = defineProps<{

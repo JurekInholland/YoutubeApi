@@ -5,5 +5,4 @@ namespace Services.TaskService;
 public interface ITaskService : IHostedService
 {
     public void ChangeInterval(TimeSpan interval);
-
 }

@@ -70,7 +70,7 @@ namespace Domain.Migrations
                             NamingFormat = "{id} - {title}s{ext}",
                             UpdateChannelsIntervalSeconds = 0L,
                             UpdateVideosIntervalSeconds = 0L,
-                            WorkInterval = 1000L
+                            WorkInterval = 10000L
                         });
                 });
 
@@ -131,18 +131,46 @@ namespace Domain.Migrations
                     b.ToTable("QueuedDownloads");
                 });
 
+            modelBuilder.Entity("Models.DomainModels.SubscribedChannel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ChannelId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastChecked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SubscriptionType")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("SubscribedChannels");
+                });
+
             modelBuilder.Entity("Models.DomainModels.YoutubeChannel", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BannerUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Handle")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Subscribers")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("SubscriberCount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
@@ -151,6 +179,9 @@ namespace Domain.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("VideoCount")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -293,6 +324,15 @@ namespace Domain.Migrations
                         .HasForeignKey("VideoId");
 
                     b.Navigation("Video");
+                });
+
+            modelBuilder.Entity("Models.DomainModels.SubscribedChannel", b =>
+                {
+                    b.HasOne("Models.DomainModels.YoutubeChannel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId");
+
+                    b.Navigation("Channel");
                 });
 
             modelBuilder.Entity("Models.DomainModels.YoutubeComment", b =>

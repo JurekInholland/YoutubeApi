@@ -3,6 +3,9 @@ import { useSignalR } from '@quangdao/vue-signalr';
 import { useYoutubeStore } from '@/stores/youtubeStore';
 import { onMounted, onBeforeUnmount } from 'vue';
 import type { DownloadProgress, LocalVideo, TaskProgress } from '@/types';
+import { TaskStatus, ApplicationTask } from '@/types';
+import YoutubeVideoRepository from '@/repositories/YoutubeVideoRepository';
+import { useRepo } from 'pinia-orm';
 const signalR = useSignalR();
 const store = useYoutubeStore();
 
@@ -12,12 +15,14 @@ const onDownloadProgress = (data: DownloadProgress) => {
 }
 
 const onTaskUpdate = (data: TaskProgress) => {
-    console.log("Task update", data)
+    console.log("Task update", ApplicationTask[data.task], TaskStatus[data.status])
+
 }
 
 const onLocalVideoUpdate = (data: LocalVideo) => {
     console.log("Local video update", data)
-    store.addLocalVideo(data);
+    // store.addLocalVideo(data);
+    useRepo(YoutubeVideoRepository).addLocalVideo(data as any);
 }
 
 onMounted(() => {

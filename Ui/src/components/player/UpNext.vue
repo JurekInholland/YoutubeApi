@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { YoutubeVideo } from '@/types';
+import type YoutubeVideo from '@/models/YoutubeVideo';
 import { formatTitle } from '@/utils';
 const props = defineProps<{
     video: YoutubeVideo
@@ -71,6 +71,7 @@ const props = defineProps<{
     background-color: rgba(28, 28, 28, .9);
     overflow: hidden;
     gap: .5rem;
+
     img {
         width: 100%;
         height: 100%;

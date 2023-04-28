@@ -47,6 +47,7 @@ public class YoutubeVideoControllerTests
         var video = new YoutubeVideo {Id = videoId};
         // _youtubeExplodeServiceMock.Setup(svc => svc.GetVideo(videoId)).ReturnsAsync(video);
 
+        await _unitOfWorkMock.YoutubeVideos.Create(video);
         // Act
         var result = await _youtubeVideoController.GetVideo(videoId);
 

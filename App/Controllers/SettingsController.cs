@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Models;
 using Models.Requests;
 using Services;
 
@@ -13,6 +12,9 @@ public class SettingsController : BaseController
 {
     private readonly ISettingsManager _settingsManager;
 
+    /// <summary>
+    ///  SettingsController constructor
+    /// </summary>
     public SettingsController(ISettingsManager settingsManager)
     {
         _settingsManager = settingsManager;

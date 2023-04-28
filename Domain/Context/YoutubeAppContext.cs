@@ -16,6 +16,9 @@ public class YoutubeAppContext : DbContext
 
     public DbSet<LocalVideo> LocalVideos { get; set; } = null!;
 
+
+    public DbSet<SubscribedChannel> SubscribedChannels { get; set; } = null!;
+
     public YoutubeAppContext(DbContextOptions<YoutubeAppContext> options) : base(options)
     {
     }
@@ -30,7 +33,7 @@ public class YoutubeAppContext : DbContext
                 NamingFormat = "{id} - {title}s{ext}",
                 MaxVideoDuration = TimeSpan.FromMinutes(60),
                 CleanUpInterval = 5000,
-                WorkInterval = 1000
+                WorkInterval = 10000
             });
         // modelBuilder.Entity<RelatedVideo>().Property(e => e.Tags)
         //     .HasConversion(
@@ -74,10 +77,10 @@ public class YoutubeAppContext : DbContext
                 c => c.ToArray()));
     }
 
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    // {
-    //     base.OnConfiguring(optionsBuilder);
-    //     if (optionsBuilder.IsConfigured) return;
-    //     optionsBuilder.UseSqlite("Data Source=data/youtube.db");
-    // }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        if (optionsBuilder.IsConfigured) return;
+        optionsBuilder.UseSqlite("Data Source=data/Application.db;Cache=Shared");
+    }
 }

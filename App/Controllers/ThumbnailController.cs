@@ -24,14 +24,13 @@ public class ThumbnailController : BaseController
     /// Get the thumbnail for a youtube channel
     /// </summary>
     [HttpGet("channel", Name = nameof(GetChannelThumbnail))]
-
     public async Task<IActionResult> GetChannelThumbnail(string channelId)
     {
         Console.WriteLine("GetChannelThumbnail");
         try
         {
-            byte[]? file = await _thumbnailService.GetChannelThumbnail(channelId);
-            return File(file!, "image/jpeg");
+            byte[] file = await _thumbnailService.GetChannelThumbnail(channelId);
+            return File(file, "image/jpeg");
         }
         catch (FileNotFoundException e)
         {
@@ -41,6 +40,27 @@ public class ThumbnailController : BaseController
         {
             _logger.LogError(e, "Error getting channel thumbnail");
             return BadRequest(e.Message);
+        }
+    }
+
+    /// <summary>
+    /// Get the banner image of a youtube channel
+    /// </summary>
+    /// <param name="channelId">Id of the youtube channel</param>
+    /// <returns>Banner image</returns>
+    [HttpGet(nameof(ChannelBanner))]
+    [ProducesResponseType(typeof(FileStreamResult), 200)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ChannelBanner(string channelId)
+    {
+        try
+        {
+            byte[] file = await _thumbnailService.GetChannelBanner(channelId);
+            return File(file, "image/jpeg");
+        }
+        catch (FileNotFoundException e)
+        {
+            return NotFound(e.Message);
         }
     }
 }

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import VideoLink from '@/components/VideoLink.vue';
 import { useYoutubeStore } from '@/stores/youtubeStore';
-import { onMounted, watch } from 'vue';
+import type { YoutubeVideo } from '@/types';
+import { formatDescription } from '@/utils';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -16,32 +18,49 @@ const id = route.params.channelId as string;
 //     debugger;
 // })
 
+const channelVideos = ref<YoutubeVideo[]>([]);
+
+
 onMounted(async () => {
     document.title = `@${username}`;
     console.log("CH ID", id)
-    await store.fetchChannelById(id);
+    // await store.fetchChannelById(id);
+    // channelVideos.value = store.channelVideos(id);
     // await store.fetchChannelByHandle(username);
 });
 </script>
 <template>
-    <h1>Channel</h1>
-    <p>{{ username }}</p>
-    <div class="container">
-        <section class="videos">
-            <!-- <VideoLink v-for="video of store.videos" :video="video" /> -->
-            <VideoLink v-for="video of store.channelVideos(id)" :video="video" />
+    <p>{{ route }}</p>
+    <!-- <div class="container" v-if="channelVideos.length > 0">
+        <div class="banner">
+            <img src="" alt="">
+        </div>
+        <h1> {{ channelVideos[0].youtubeChannel!.title }}</h1>
+        <p>{{ channelVideos[0].youtubeChannel!.handle }}</p>
+        <p>{{ channelVideos[0].youtubeChannel!.subscribers }}</p>
+        <p>{{ channelVideos[0].youtubeChannel!.videoCount }}</p>
+        <p v-html="formatDescription(channelVideos[0].youtubeChannel!.description)"></p>
+        <div class="container">
+            <section class="videos">
+                <VideoLink v-for="video of channelVideos" :video="video" />
 
-        </section>
-    </div>
+            </section>
+        </div>
+    </div> -->
 </template>
 
 <style scoped lang="scss">
+.red
+{
+    background-color: red;
+    padding: 1rem;
+}
 .container {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     padding: 1rem;
-    width: 100vw;
+    width: 100%;
 
     .videos {
         display: flex;

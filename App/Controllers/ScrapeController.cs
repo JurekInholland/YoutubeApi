@@ -29,14 +29,16 @@ public class ScrapeController : BaseController
     /// </summary>
     /// <remarks>Only the last ~40 videos are scraped</remarks>
     /// <param name="channelId">The id of the channel to scrape</param>
-    /// <response code="200">List of videos</response>
+    /// <response code="200">YoutubeChannel</response>
     [HttpGet(nameof(YoutubeChannelById))]
+    [ProducesResponseType(typeof(YoutubeChannel), 200)]
+    [ProducesResponseType(400)]
     public async Task<IActionResult> YoutubeChannelById(string channelId)
     {
         try
         {
             var yt = await _scrapeService.ScrapeChannelById(channelId);
-            Response.Headers.Add("Count", yt.Length.ToString());
+            Response.Headers.Add("Count", yt.Videos?.Count.ToString());
             return Ok(yt);
         }
 
@@ -57,7 +59,7 @@ public class ScrapeController : BaseController
         {
             var yt = await _scrapeService.ScrapeChannelByHandle(handle);
 
-            Response.Headers.Add("Count", yt.Length.ToString());
+            Response.Headers.Add("Count", yt.Videos?.Count.ToString());
             return Ok(yt);
         }
         catch (Exception e)
@@ -77,6 +79,15 @@ public class ScrapeController : BaseController
         Response.Headers.Add("Count", res.Length.ToString());
 
         return Ok(res);
+    }
+
+    [HttpGet(nameof(ScrapePlaylist))]
+    public async Task<IActionResult> ScrapePlaylist(string playlistId)
+    {
+        var plalist = await _scrapeService.ScrapePlaylist(playlistId);
+        // Response.Headers.Add("Count", res.Length.ToString());
+
+        return Ok(plalist);
     }
 
     /// <summary>
